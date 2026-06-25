@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(cd \"C:\\\\Users\\\\canur\\\\Documents\\\\Claude\\\\Projects\\\\Kith\" && sed -i \"s/\\(patient as Record<string,unknown>\\)/\\(patient as unknown as Record<string,unknown>\\)/g\" \"app/\\(dashboard\\)/session/[id]/page.tsx\")"
+    ]
+  }
+}

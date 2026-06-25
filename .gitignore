@@ -1,0 +1,36 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+/build
+*.tsbuildinfo
+next-env.d.ts
+
+# env / secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# logs / debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local tooling artifacts (do not deploy)
+cloudflared.exe
+cf.exe
+cf.log
+cloudflared.log
+*.cjs.tmp
+
+# os
+.DS_Store
+Thumbs.db

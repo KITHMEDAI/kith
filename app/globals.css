@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 264 28% 95%;
+    --foreground: 255 30% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 255 30% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 255 30% 8%;
+    --primary: 263 60% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 264 15% 92%;
+    --secondary-foreground: 255 30% 8%;
+    --muted: 264 12% 91%;
+    --muted-foreground: 255 15% 35%;
+    --accent: 263 60% 52%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 263 18% 85%;
+    --input: 263 18% 85%;
+    --ring: 263 60% 52%;
+    --radius: 0.5rem;
+
+    --sidebar-bg: 263 52% 14%;
+    --sidebar-border: 263 40% 20%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  html { font-size: 15px; }
+
+  body {
+    @apply text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "cv05" 1;
+    letter-spacing: -0.011em;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Visible purple → green diagonal gradient */
+    background: linear-gradient(135deg,
+      #c9b8ff 0%,
+      #d8ccff 18%,
+      #e8e2ff 36%,
+      #ddf5ea 55%,
+      #c2efd6 72%,
+      #aee8c8 100%
+    );
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+/* Cards get a very faint purple tint on their border */
+.border-border { border-color: hsl(263 18% 85%); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: hsl(263 20% 70% / 0.4);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(263 20% 60% / 0.5);
+}
+
+/* Recording pulse */
+@keyframes pulse-recording {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
+}
+.pulse-recording { animation: pulse-recording 1.4s ease-in-out infinite; }
+
+/* Page entrance */
+@keyframes page-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.page-enter { animation: page-enter 0.12s ease-out; }
+
+/* Waveform */
+@keyframes wave {
+  from { transform: scaleY(0.35); }
+  to   { transform: scaleY(1); }
+}

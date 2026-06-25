@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kith",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "dev", "--turbo", "-p", "8080"],
+      "port": 8080,
+      "autoPort": false
+    }
+  ]
+}
