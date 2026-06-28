@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getRealtimeToken } from '@/lib/deepgram';
-import { FREE_SESSION_CAP } from '@/lib/razorpay';
+import { getEntitlements } from '@/lib/entitlements';
 import { NextResponse } from 'next/server';
 
 // ── In-memory rate limiter ──────────────────────────────────────────────────
@@ -28,18 +28,6 @@ function checkRateLimit(therapistId: string): { allowed: boolean; retryAfterSec:
   entry.count += 1;
   return { allowed: true, retryAfterSec: 0 };
 }
-
-// ── Plan session caps ───────────────────────────────────────────────────────
-// 'free' is the universal floor — an expired trial, a cancelled subscription,
-// or a failed renewal payment all fall back here, never to a hard lockout.
-// During an ACTIVE trial, everyone gets full Pro-level access regardless of
-// their stored plan, so they experience the real product before paying.
-const PAID_SESSION_CAPS: Record<string, number> = {
-  free: FREE_SESSION_CAP,
-  starter: 30,
-  pro: -1,    // unlimited
-  clinic: -1, // legacy value on old rows — treat same as pro
-};
 
 export async function POST(request: Request) {
   try {
@@ -75,14 +63,7 @@ export async function POST(request: Request) {
     // Never a hard lockout — a doctor with an expired trial, a cancelled
     // subscription, or a failed renewal just falls back to Free-tier limits,
     // so patient care is never interrupted by a billing problem.
-    const trialActive =
-      therapist.subscription_status === 'trialing' &&
-      !!therapist.trial_ends_at &&
-      new Date(therapist.trial_ends_at) >= new Date();
-    const paidActive = therapist.subscription_status === 'active';
-
-    const effectivePlan = trialActive ? 'pro' : paidActive ? therapist.subscription_plan : 'free';
-    const cap = PAID_SESSION_CAPS[effectivePlan] ?? FREE_SESSION_CAP;
+    const { plan: effectivePlan, sessionCap: cap } = getEntitlements(therapist);
 
     // ── Monthly session cap ───────────────────────────────────────────────
     if (cap !== -1) {

@@ -22,10 +22,6 @@ export const PLAN_PRICING: Record<PaidTier, { monthly: number; annual: number }>
   pro:     { monthly: 249900, annual: 2499000 }, // ₹2,499/mo · ₹24,990/yr
 };
 
-// Free-tier session cap, used as the universal fallback (expired trial,
-// cancelled subscription, failed payment) instead of a hard lockout.
-export const FREE_SESSION_CAP = 5;
-
 export function razorpayConfigured(): boolean {
   return !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
 }

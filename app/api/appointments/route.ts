@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createMeetEvent, getTokensFromVault } from '@/lib/google-calendar';
+import { getEntitlements, upgradeMessage } from '@/lib/entitlements';
 import { addWeeks, addMonths } from 'date-fns';
 import { z } from 'zod';
 
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('id')
+    .select('id, subscription_plan, subscription_status, trial_ends_at')
     .eq('user_id', user.id)
     .single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });
@@ -78,6 +79,10 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const parsed = CreateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
+
+  if (parsed.data.modality === 'video' && !getEntitlements(therapist).onlineSessions) {
+    return NextResponse.json({ error: upgradeMessage('online sessions'), code: 'PLAN_LOCKED' }, { status: 402 });
+  }
 
   const { patient_id, scheduled_at, duration_minutes, session_type, modality, goals, notes, meeting_url, recurrence } = parsed.data;
 

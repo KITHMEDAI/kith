@@ -13,6 +13,7 @@ import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supab
 import { createRecallBot, RECALL_MOCK } from '@/lib/recall';
 import { cleanMeetUrl } from '@/lib/google-calendar';
 import { finalizeOnlineSession } from '@/lib/online-session';
+import { getEntitlements, upgradeMessage } from '@/lib/entitlements';
 
 export async function POST(req: NextRequest) {
   const supabase = createServerSupabaseClient();
@@ -20,8 +21,12 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data: therapist } = await supabase
-    .from('therapists').select('id').eq('user_id', user.id).single();
+    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
   if (!therapist) return NextResponse.json({ error: 'No therapist profile found' }, { status: 404 });
+
+  if (!getEntitlements(therapist).onlineSessions) {
+    return NextResponse.json({ error: upgradeMessage('online sessions'), code: 'PLAN_LOCKED' }, { status: 402 });
+  }
 
   const { appointmentId } = await req.json().catch(() => ({}));
   if (!appointmentId) return NextResponse.json({ error: 'appointmentId required' }, { status: 422 });

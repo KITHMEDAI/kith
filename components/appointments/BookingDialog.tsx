@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { X, Loader2, ChevronDown, Search, UserPlus, Check, AlertTriangle, Repeat, Video } from 'lucide-react';
+import { X, Loader2, ChevronDown, Search, UserPlus, Check, AlertTriangle, Repeat, Video, Lock } from 'lucide-react';
 import type { Patient } from '@/types';
 
 interface DayAppt {
@@ -34,6 +34,17 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   const [time, setTime]               = useState('10:00');
   const [duration, setDuration]       = useState('50');
   const [modality, setModality]       = useState<'in_person'|'video'|'phone'>('in_person');
+  // Whether the doctor's plan unlocks online sessions — drives the lock on the
+  // Video mode option. null while loading = assume unlocked (avoid a flash of
+  // a disabled control before the real entitlement is known).
+  const [onlineUnlocked, setOnlineUnlocked] = useState<boolean | null>(null);
+  useEffect(() => {
+    fetch('/api/me/entitlements')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setOnlineUnlocked(d ? d.onlineSessions : true))
+      .catch(() => setOnlineUnlocked(true));
+  }, []);
+  const onlineLocked = onlineUnlocked === false;
   const [sessionType, setSessionType] = useState<'individual'|'couples'|'group'|'family'>('individual');
   const [goals, setGoals]             = useState('');
   const [meetingUrl, setMeetingUrl]   = useState('');
@@ -368,14 +379,19 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
               <select value={modality} onChange={e => setModality(e.target.value as typeof modality)}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
                 <option value="in_person">In person</option>
-                <option value="video">Video</option>
+                <option value="video" disabled={onlineLocked}>Video{onlineLocked ? ' 🔒 Upgrade to unlock' : ''}</option>
                 <option value="phone">Phone</option>
               </select>
+              {onlineLocked && (
+                <a href="/settings/billing" className="mt-1 flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
+                  <Lock className="h-3 w-3" /> Online sessions need Starter or higher
+                </a>
+              )}
             </div>
           </div>}
 
           {/* Online (video) sessions — Kith auto-creates a Google Meet */}
-          {!isExisting && modality === 'video' && (
+          {!isExisting && modality === 'video' && !onlineLocked && (
             <div className="rounded-lg border border-violet-200 bg-violet-50/60 p-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-violet-700">
                 <Video className="h-3.5 w-3.5" /> Kith will create a Google Meet automatically

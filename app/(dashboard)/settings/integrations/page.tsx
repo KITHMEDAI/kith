@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
-import { Calendar, MessageSquare, Mail, CheckCircle2, XCircle, ExternalLink, Loader2, Link2, Globe, Phone } from 'lucide-react';
+import { Calendar, MessageSquare, Mail, CheckCircle2, XCircle, ExternalLink, Loader2, Link2, Globe, Phone, Lock } from 'lucide-react';
 
 const BOOKING_LABELS: Record<string, { name: string; color: string; needsUrl: boolean }> = {
   calendly:        { name: 'Calendly',           color: '#006BFF', needsUrl: true },
@@ -25,6 +25,7 @@ export default function IntegrationsPage() {
   const [newUrl, setNewUrl]                       = useState('');
   const [savingUrl, setSavingUrl]                 = useState(false);
   const [pageLoading, setPageLoading]             = useState(true);
+  const [calendarSyncUnlocked, setCalendarSyncUnlocked] = useState(true);
 
   useEffect(() => {
     async function check() {
@@ -41,6 +42,10 @@ export default function IntegrationsPage() {
       setPageLoading(false);
     }
     check();
+    fetch('/api/me/entitlements')
+      .then(r => r.ok ? r.json() : null)
+      .then(e => { if (e) setCalendarSyncUnlocked(e.calendarSync); })
+      .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function connectGoogleCalendar() {
@@ -143,12 +148,24 @@ export default function IntegrationsPage() {
                 : <span className="flex items-center gap-1 text-xs text-muted-foreground"><XCircle className="h-3.5 w-3.5"/> Not connected</span>}
             </div>
             <p className="text-sm text-muted-foreground">Import appointments from your Google Calendar into Kith. Read-only — Kith never writes to or edits your calendar.</p>
+            {!calendarConnected && !calendarSyncUnlocked && (
+              <a href="/settings/billing" className="mt-1.5 inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700">
+                <Lock className="h-3 w-3" /> Requires Starter or higher — view plans
+              </a>
+            )}
           </div>
-          <button onClick={calendarConnected ? disconnectGoogleCalendar : connectGoogleCalendar} disabled={calLoading}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shrink-0 transition-colors disabled:opacity-50 ${calendarConnected ? 'bg-muted text-muted-foreground hover:text-red-500 hover:bg-red-50' : 'bg-violet-600 text-white hover:bg-violet-700'}`}>
-            {calLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <ExternalLink className="h-3.5 w-3.5"/>}
-            {calendarConnected ? 'Disconnect' : 'Connect'}
-          </button>
+          {!calendarConnected && !calendarSyncUnlocked ? (
+            <a href="/settings/billing"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shrink-0 bg-muted text-muted-foreground hover:bg-violet-50 hover:text-violet-700 transition-colors">
+              <Lock className="h-3.5 w-3.5"/> Upgrade
+            </a>
+          ) : (
+            <button onClick={calendarConnected ? disconnectGoogleCalendar : connectGoogleCalendar} disabled={calLoading}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shrink-0 transition-colors disabled:opacity-50 ${calendarConnected ? 'bg-muted text-muted-foreground hover:text-red-500 hover:bg-red-50' : 'bg-violet-600 text-white hover:bg-violet-700'}`}>
+              {calLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin"/> : <ExternalLink className="h-3.5 w-3.5"/>}
+              {calendarConnected ? 'Disconnect' : 'Connect'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -159,7 +176,10 @@ export default function IntegrationsPage() {
             <MessageSquare className="h-5 w-5 text-[#25D366]"/>
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-foreground mb-1">WhatsApp Business (Twilio)</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-sm font-semibold text-foreground">WhatsApp Business (Twilio)</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">Pro plan</span>
+            </div>
             <p className="text-sm text-muted-foreground">Send appointment reminders and rescheduling messages via WhatsApp.</p>
             <p className="text-xs text-muted-foreground/60 mt-1">Configure TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in your .env.local file</p>
           </div>

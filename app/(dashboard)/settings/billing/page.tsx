@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
-import { CreditCard, CheckCircle2, Zap, Building2, Loader2, Gift } from 'lucide-react';
+import { CreditCard, CheckCircle2, Zap, Building2, Loader2, Gift, Sparkles } from 'lucide-react';
+import { PLAN_FEATURES } from '@/lib/entitlements';
 
 interface BillingInfo {
   therapist_id: string;
@@ -22,17 +23,10 @@ const PRICING: Record<Tier, { monthly: number; annual: number }> = {
 };
 
 const PAID_PLANS: Array<{
-  key: Tier; name: string; icon: typeof Zap; color: string; recommended?: boolean;
-  features: string[]; cap: string;
+  key: Tier; name: string; tagline: string; icon: typeof Zap; color: string; recommended?: boolean;
 }> = [
-  {
-    key: 'starter', name: 'Starter', icon: Zap, color: '#9CA3AF', cap: '30 sessions/month',
-    features: ['30 sessions/month', 'AI-assisted SOAP notes', 'Online sessions (notetaker bot)', 'Google Calendar sync'],
-  },
-  {
-    key: 'pro', name: 'Pro', icon: CheckCircle2, color: '#7c3aed', recommended: true, cap: 'Unlimited sessions',
-    features: ['Unlimited sessions', 'Everything in Starter', 'WhatsApp & SMS to patients', 'Priority support'],
-  },
+  { key: 'starter', name: 'Starter', tagline: 'For a steady solo practice', icon: Zap, color: '#7c3aed' },
+  { key: 'pro', name: 'Pro', tagline: 'For a full-time, growing practice', icon: Sparkles, color: '#7c3aed', recommended: true },
 ];
 
 export default function BillingPage() {
@@ -169,10 +163,10 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl space-y-6">
+    <div className="p-6 max-w-5xl space-y-7">
       <div>
         <h1 className="text-xl font-semibold text-foreground">Billing & Plans</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your subscription</p>
+        <p className="text-sm text-muted-foreground mt-1">Manage your subscription and see what each plan unlocks</p>
       </div>
 
       {/* Current status */}
@@ -221,39 +215,45 @@ export default function BillingPage() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      {/* Monthly / annual toggle */}
-      <div className="flex items-center justify-center gap-3">
-        <span className={`text-sm font-medium ${interval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>Monthly</span>
-        <button onClick={() => setInterval_(i => i === 'monthly' ? 'annual' : 'monthly')}
-          className={`relative h-6 w-11 rounded-full transition-colors ${interval === 'annual' ? 'bg-violet-600' : 'bg-muted'}`}>
-          <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${interval === 'annual' ? 'translate-x-5' : ''}`} />
-        </button>
-        <span className={`text-sm font-medium ${interval === 'annual' ? 'text-foreground' : 'text-muted-foreground'}`}>
-          Annual <span className="text-emerald-600 font-semibold">— 2 months free</span>
-        </span>
+      {/* Monthly / annual segmented toggle */}
+      <div className="flex justify-center">
+        <div className="inline-flex items-center rounded-full bg-muted p-1 gap-1">
+          {(['monthly', 'annual'] as const).map(opt => (
+            <button key={opt} onClick={() => setInterval_(opt)}
+              className={`relative rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                interval === opt ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              }`}>
+              {opt === 'monthly' ? 'Monthly' : 'Annual'}
+              {opt === 'annual' && (
+                <span className="ml-1.5 text-[10px] font-bold text-emerald-600">2 months free</span>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Plan cards */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Plan cards — equal height, progressive feature lists ("Everything in X, plus…") */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-stretch">
         {/* Free */}
-        <div className="rounded-xl border border-white/40 bg-white/60 backdrop-blur-md p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-lg bg-slate-100"><Gift className="h-4 w-4 text-slate-500" /></div>
-            <span className="text-sm font-bold text-foreground">Free</span>
+        <div className="rounded-2xl border border-white/40 bg-white/60 backdrop-blur-md p-6 shadow-sm flex flex-col">
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className="p-2 rounded-xl bg-slate-100"><Gift className="h-4 w-4 text-slate-500" /></div>
+            <span className="text-base font-bold text-foreground">Free</span>
           </div>
-          <div className="flex items-baseline gap-1 mb-4">
-            <span className="text-2xl font-bold text-foreground">₹0</span>
+          <p className="text-xs text-muted-foreground mb-4">For trying Kith out</p>
+          <div className="flex items-baseline gap-1 mb-5">
+            <span className="text-3xl font-bold text-foreground">₹0</span>
             <span className="text-xs text-muted-foreground">forever</span>
           </div>
-          <ul className="space-y-2 mb-5">
-            {['5 sessions/month', 'AI-assisted SOAP notes', 'In-person recording', 'Patient & booking management'].map(f => (
-              <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />{f}
+          <ul className="space-y-2.5 mb-6 flex-1">
+            {PLAN_FEATURES.free.map(f => (
+              <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none mt-0.5" />{f}
               </li>
             ))}
           </ul>
           <div className="w-full py-2.5 rounded-xl text-sm font-semibold text-center bg-muted text-muted-foreground">
-            {effectivePlan === 'free' ? 'Current plan' : 'Always available'}
+            {effectivePlan === 'free' ? '✓ Current plan' : 'Always available'}
           </div>
         </div>
 
@@ -264,26 +264,28 @@ export default function BillingPage() {
           const price = PRICING[plan.key][interval];
           return (
             <div key={plan.key}
-              className={`rounded-xl border p-5 relative ${plan.recommended ? 'border-violet-300 bg-violet-50/60' : 'border-white/40 bg-white/60'} backdrop-blur-md shadow-sm`}>
+              className={`rounded-2xl border relative flex flex-col px-6 pb-6 ${plan.recommended ? 'pt-9 border-violet-400 bg-violet-50/70 shadow-md' : 'pt-6 border-white/40 bg-white/60 shadow-sm'} backdrop-blur-md`}>
               {plan.recommended && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-violet-600 text-white text-[10px] font-bold px-3 py-1 rounded-full">MOST POPULAR</span>
+                  <span className="whitespace-nowrap bg-violet-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">MOST POPULAR</span>
                 </div>
               )}
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg" style={{ background: `${plan.color}18` }}>
-                  <Icon className="h-4 w-4" style={{ color: plan.color }} />
-                </div>
-                <span className="text-sm font-bold text-foreground">{plan.name}</span>
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="p-2 rounded-xl bg-violet-100"><Icon className="h-4 w-4 text-violet-600" /></div>
+                <span className="text-base font-bold text-foreground">{plan.name}</span>
+                {isCurrent && (
+                  <span className="ml-auto text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Current</span>
+                )}
               </div>
-              <div className="flex items-baseline gap-1 mb-4">
-                <span className="text-2xl font-bold text-foreground">₹{price.toLocaleString('en-IN')}</span>
+              <p className="text-xs text-muted-foreground mb-4">{plan.tagline}</p>
+              <div className="flex items-baseline gap-1 mb-5">
+                <span className="text-3xl font-bold text-foreground">₹{price.toLocaleString('en-IN')}</span>
                 <span className="text-xs text-muted-foreground">/{interval === 'monthly' ? 'mo' : 'yr'}</span>
               </div>
-              <ul className="space-y-2 mb-5">
-                {plan.features.map(f => (
-                  <li key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none" />{f}
+              <ul className="space-y-2.5 mb-6 flex-1">
+                {PLAN_FEATURES[plan.key].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 flex-none mt-0.5" />{f}
                   </li>
                 ))}
               </ul>
@@ -291,11 +293,11 @@ export default function BillingPage() {
                 disabled={isCurrent || busy === plan.key}
                 className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
                   isCurrent ? 'bg-muted text-muted-foreground cursor-default'
-                  : plan.recommended ? 'bg-violet-600 hover:bg-violet-700 text-white'
+                  : plan.recommended ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-sm'
                   : 'bg-slate-800 hover:bg-slate-700 text-white'
                 }`}>
                 {busy === plan.key && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {isCurrent ? 'Current plan' : 'Subscribe'}
+                {isCurrent ? '✓ Current plan' : 'Subscribe'}
               </button>
             </div>
           );
