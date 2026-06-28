@@ -7,7 +7,7 @@ import { useRealTimeTranscript } from '@/hooks/useRealTimeTranscript';
 import { formatDuration, getInitials } from '@/lib/utils';
 import {
   ArrowLeft, Mic, Square, Wifi, WifiOff, Clock,
-  Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2,
+  Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2, AlignLeft, Sparkles,
 } from 'lucide-react';
 import Nebula from '@/components/session/Nebula';
 import type { Appointment, Patient } from '@/types';
@@ -225,6 +225,10 @@ export default function LiveSessionPage() {
   const [activeTab, setActiveTab]         = useState<'transcript'|'suggestions'|'notes'>('transcript');
   const [botDispatched, setBotDispatched] = useState(false);
   const [botError, setBotError]           = useState<string | null>(null);
+  // Default view during recording is the ambient "listening" visual + live
+  // caption, not a scrolling list of bubbles. The doctor can flip to the full
+  // history any time — nothing is lost, just not the default.
+  const [showFullTranscript, setShowFullTranscript] = useState(false);
 
   // Online sessions (Teams/Meet) are recorded by a Recall bot, not the local mic.
   const isOnline = appointment?.modality === 'video';
@@ -446,6 +450,9 @@ export default function LiveSessionPage() {
 
   const soapNote = liveNotes?.soap_note as Record<string,string> | undefined;
   const keyPoints = liveNotes?.key_points as string[] | undefined;
+  // Ambient view is the default while there's something to show — the full
+  // bubble-list view is opt-in via the header toggle.
+  const ambientMode = !isOnline && !showFullTranscript && (isRecording || segments.length > 0);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col" style={{ background: '#080d14', fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -567,13 +574,22 @@ export default function LiveSessionPage() {
                 {isRecording ? 'Live transcript' : 'Transcript'}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span className="text-xs text-slate-600">{segments.length} segments</span>
+              {!isOnline && segments.length > 0 && (
+                <button onClick={() => setShowFullTranscript(s => !s)}
+                  title={showFullTranscript ? 'Show ambient view' : 'Show full transcript'}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium text-slate-400 hover:text-white hover:bg-white/8 transition-colors">
+                  {showFullTranscript ? <Sparkles className="h-3 w-3" /> : <AlignLeft className="h-3 w-3" />}
+                  {showFullTranscript ? 'Ambient view' : 'Full transcript'}
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Transcript scroll area */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+          {/* Transcript area — ambient view by default while recording, full
+              scrollable history only when toggled, online-bot status otherwise. */}
+          <div className={ambientMode ? 'flex-1 relative overflow-hidden' : 'flex-1 overflow-y-auto px-5 py-4 space-y-3'}>
             {isOnline ? (
               <div className="flex h-full items-center justify-center flex-col gap-3 px-6 text-center">
                 <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
@@ -599,40 +615,53 @@ export default function LiveSessionPage() {
                   </>
                 )}
               </div>
-            ) : (
+            ) : showFullTranscript ? (
               <>
-                {/* Nebula = "listening" visual while recording */}
-                {isRecording && <Nebula height={140} />}
-
-                {segments.length === 0 && !partialText ? (
-                  !isRecording && (
-                    <div className="flex h-full items-center justify-center flex-col gap-3">
-                      <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                        <Mic className="h-5 w-5 text-blue-500/50" />
-                      </div>
-                      <p className="text-sm text-slate-600 text-center leading-relaxed">
-                        {sessionStatus === 'new' ? 'Press Start session to begin' : 'Transcript will appear here'}
-                      </p>
-                    </div>
-                  )
-                ) : (
-                  <>
-                    {/* Raw transcript text only. Speaker identification (who is the
-                        clinician / patient) runs in the backend; labels are
-                        intentionally hidden in the UI for now to ease testing. */}
-                    {segments.map((seg, i) => (
-                      <p key={i} className="text-sm text-slate-200 leading-relaxed rounded-xl px-4 py-2.5"
-                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                        {seg.text}
-                      </p>
-                    ))}
-                    {partialText && (
-                      <p className="text-sm text-slate-500 leading-relaxed italic px-4 py-2">{partialText}</p>
-                    )}
-                  </>
+                {/* Raw transcript text only. Speaker identification (who is the
+                    clinician / patient) runs in the backend; labels are
+                    intentionally hidden in the UI for now to ease testing. */}
+                {segments.map((seg, i) => (
+                  <p key={i} className="text-sm text-slate-200 leading-relaxed rounded-xl px-4 py-2.5"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    {seg.text}
+                  </p>
+                ))}
+                {partialText && (
+                  <p className="text-sm text-slate-500 leading-relaxed italic px-4 py-2">{partialText}</p>
                 )}
                 <div ref={transcriptEndRef} />
               </>
+            ) : ambientMode ? (
+              <>
+                {/* Persistent ambient "listening" visual — brightens while active
+                    speech is coming in, calm breathing glow otherwise. Always
+                    present for the whole recording, not a passing strip. */}
+                <Nebula active={!!partialText} />
+                {/* Bottom caption — Gemini-Live style live readout of what's being captured */}
+                <div className="absolute inset-x-0 bottom-0 px-6 pb-6 pt-12 pointer-events-none"
+                  style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.5) 60%, transparent)' }}>
+                  <p key={partialText || segments[segments.length - 1]?.text || 'idle'}
+                    className="text-center text-base sm:text-lg leading-relaxed max-w-2xl mx-auto"
+                    style={{
+                      minHeight: '1.6em',
+                      color: partialText ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.55)',
+                      fontStyle: partialText ? 'normal' : 'italic',
+                      animation: 'caption-fade-in 0.35s ease-out',
+                    }}>
+                    {partialText || segments[segments.length - 1]?.text || 'Listening for speech…'}
+                  </p>
+                </div>
+                <style>{`@keyframes caption-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center flex-col gap-3">
+                <div className="h-12 w-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
+                  <Mic className="h-5 w-5 text-blue-500/50" />
+                </div>
+                <p className="text-sm text-slate-600 text-center leading-relaxed">
+                  {sessionStatus === 'new' ? 'Press Start session to begin' : 'Transcript will appear here'}
+                </p>
+              </div>
             )}
           </div>
 

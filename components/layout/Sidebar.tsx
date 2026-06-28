@@ -37,10 +37,11 @@ export default function Sidebar({ therapist }: { therapist: Therapist | null }) 
       className="fixed left-0 top-0 z-40 flex h-screen w-[22rem] flex-col"
       style={{ background: 'linear-gradient(180deg, #1e0d4e 0%, #16083a 100%)', borderRight: '1px solid #2d1760' }}
     >
-      {/* Brand */}
-      <div className="flex items-center px-5 py-[18px]" style={{ borderBottom: '1px solid #2d1760' }}>
+      {/* Brand — acts as a home link back to the dashboard */}
+      <Link href="/dashboard" className="flex items-center px-5 py-[18px] hover:opacity-80 transition-opacity"
+        style={{ borderBottom: '1px solid #2d1760' }}>
         <KithLockup markSize={30} className="text-[19px] tracking-[0.04em] text-white" />
-      </div>
+      </Link>
 
       {/* Doctor card → links to /settings/profile */}
       <Link href="/settings"
