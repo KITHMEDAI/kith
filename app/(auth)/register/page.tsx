@@ -7,6 +7,7 @@ import { AlertCircle, Check, ChevronRight, Loader2, Camera, FileSpreadsheet, X, 
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { parsePatientFile } from '@/lib/parse-patient-file';
 import KithLockup from '@/components/brand/KithLockup';
+import GoogleButton from '@/components/auth/GoogleButton';
 
 const INPUT = 'w-full rounded-xl border border-purple-200 bg-white/80 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-colors';
 const LABEL = 'block text-sm font-semibold text-slate-700 mb-1.5';
@@ -365,6 +366,12 @@ export default function RegisterPage() {
               <button onClick={next} className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 py-3.5 text-sm font-bold text-white hover:bg-violet-700 transition-colors shadow-lg shadow-violet-200">
                 Continue <ChevronRight className="h-4 w-4"/>
               </button>
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-purple-200/60" />
+                <span className="text-xs text-slate-400">or</span>
+                <div className="h-px flex-1 bg-purple-200/60" />
+              </div>
+              <GoogleButton label="Sign up with Google" />
               <p className="text-center text-sm text-slate-500">Already have an account? <Link href="/login" className="font-bold text-violet-600">Sign in</Link></p>
             </div>
           )}

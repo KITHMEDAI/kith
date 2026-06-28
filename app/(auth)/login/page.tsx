@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
+import GoogleButton from '@/components/auth/GoogleButton';
 
 export default function LoginPage() {
   const supabase = createClient();
@@ -121,6 +122,13 @@ export default function LoginPage() {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-xs text-slate-400">or</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+          <GoogleButton label="Sign in with Google" />
 
           <p className="mt-6 text-center text-sm text-slate-500">
             New to Kith?{' '}
