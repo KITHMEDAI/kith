@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getRealtimeToken } from '@/lib/deepgram';
+import { FREE_SESSION_CAP } from '@/lib/razorpay';
 import { NextResponse } from 'next/server';
 
 // ── In-memory rate limiter ──────────────────────────────────────────────────
@@ -29,10 +30,15 @@ function checkRateLimit(therapistId: string): { allowed: boolean; retryAfterSec:
 }
 
 // ── Plan session caps ───────────────────────────────────────────────────────
-const SESSION_CAPS: Record<string, number> = {
+// 'free' is the universal floor — an expired trial, a cancelled subscription,
+// or a failed renewal payment all fall back here, never to a hard lockout.
+// During an ACTIVE trial, everyone gets full Pro-level access regardless of
+// their stored plan, so they experience the real product before paying.
+const PAID_SESSION_CAPS: Record<string, number> = {
+  free: FREE_SESSION_CAP,
   starter: 30,
-  pro: -1,   // unlimited
-  clinic: -1,
+  pro: -1,    // unlimited
+  clinic: -1, // legacy value on old rows — treat same as pro
 };
 
 export async function POST(request: Request) {
@@ -65,26 +71,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // ── Subscription & trial guard ──────────────────────────────────────────
-    // DB uses 'trialing' (matches the schema CHECK), not 'trial'.
-    const isTrialExpired =
+    // ── Effective plan for THIS request ─────────────────────────────────────
+    // Never a hard lockout — a doctor with an expired trial, a cancelled
+    // subscription, or a failed renewal just falls back to Free-tier limits,
+    // so patient care is never interrupted by a billing problem.
+    const trialActive =
       therapist.subscription_status === 'trialing' &&
       !!therapist.trial_ends_at &&
-      new Date(therapist.trial_ends_at) < new Date();
+      new Date(therapist.trial_ends_at) >= new Date();
+    const paidActive = therapist.subscription_status === 'active';
 
-    if (
-      isTrialExpired ||
-      therapist.subscription_status === 'cancelled' ||
-      therapist.subscription_status === 'past_due'
-    ) {
-      return NextResponse.json(
-        { error: 'Your subscription is inactive. Please update billing to continue.' },
-        { status: 402 }
-      );
-    }
+    const effectivePlan = trialActive ? 'pro' : paidActive ? therapist.subscription_plan : 'free';
+    const cap = PAID_SESSION_CAPS[effectivePlan] ?? FREE_SESSION_CAP;
 
-    // ── Monthly session cap for Starter plan ───────────────────────────────
-    const cap = SESSION_CAPS[therapist.subscription_plan] ?? 30;
+    // ── Monthly session cap ───────────────────────────────────────────────
     if (cap !== -1) {
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       if ((count ?? 0) >= cap) {
         return NextResponse.json(
           {
-            error: `Monthly session limit reached (${cap} sessions on your ${therapist.subscription_plan} plan). Upgrade to Pro for unlimited sessions.`,
+            error: `Monthly session limit reached (${cap} sessions on your ${effectivePlan} plan). Upgrade to Pro for unlimited sessions.`,
           },
           { status: 402 }
         );

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
   ArrowLeft, Phone, Mail, MessageSquare, Calendar,
-  FileText, Brain, Activity, ChevronRight, Loader2,
+  FileText, Brain, Activity, ChevronRight, Loader2, StickyNote,
 } from 'lucide-react';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { ProcessingBanner } from '@/components/patients/ProcessingBanner';
@@ -18,6 +18,7 @@ interface SessionRow {
   session_summary: string | null;
   key_points: string[] | null;
   status: string;
+  manual_notes: string | null;
 }
 
 function initials(name: string) {
@@ -58,7 +59,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
     service.from('patients').select('*').eq('id', params.id).eq('therapist_id', therapist.id).single(),
     service
       .from('sessions')
-      .select('id, session_number, started_at, ended_at, session_summary, key_points, status')
+      .select('id, session_number, started_at, ended_at, session_summary, key_points, status, manual_notes')
       .eq('patient_id', params.id)
       .eq('therapist_id', therapist.id)
       .order('started_at', { ascending: false })
@@ -78,6 +79,9 @@ export default async function PatientProfilePage({ params }: { params: { id: str
     ? Math.floor((Date.now() - new Date(p.date_of_birth).getTime()) / (365.25 * 86400000))
     : null;
   const sess = (sessions || []) as SessionRow[];
+  // Doctor's own private notes, jotted during/after each recording — never sent
+  // to the patient, never part of the AI prompt's output, just a personal record.
+  const personalNotes = sess.filter(s => s.manual_notes && s.manual_notes.trim());
   const latestSession = sess[0];
   const isProcessing = latestSession?.status === 'processing';
   const isFailed     = latestSession?.status === 'failed' && !latestSession.session_summary;
@@ -219,6 +223,26 @@ export default async function PatientProfilePage({ params }: { params: { id: str
             <div className="rounded-xl border border-white/40 bg-white/60 backdrop-blur-md p-4 shadow-sm">
               <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">Presenting concern</p>
               <p className="text-sm text-foreground leading-relaxed">{p.presenting_concerns}</p>
+            </div>
+          )}
+
+          {/* Personal notes — doctor's own jottings from each recording, private to them */}
+          {personalNotes.length > 0 && (
+            <div className="rounded-xl border border-amber-200/60 bg-amber-50/50 backdrop-blur-md overflow-hidden shadow-sm">
+              <div className="px-4 py-3 border-b border-amber-200/50">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-700/80 flex items-center gap-1.5">
+                  <StickyNote className="h-3 w-3" /> Personal notes
+                  <span className="text-amber-600">{personalNotes.length}</span>
+                </p>
+              </div>
+              <div className="divide-y divide-amber-200/40">
+                {personalNotes.map(s => (
+                  <div key={s.id} className="px-4 py-3">
+                    <p className="text-[11px] text-amber-700/70 mb-1">{fmtDate(s.started_at)} · Session #{s.session_number ?? ''}</p>
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{s.manual_notes}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
