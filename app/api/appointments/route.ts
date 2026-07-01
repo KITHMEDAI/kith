@@ -30,6 +30,7 @@ const CreateSchema = z.object({
   notes: z.string().optional(),
   meeting_url: z.string().url().optional().nullable(),
   recurrence: RecurrenceSchema,
+  immediate: z.boolean().optional(), // true = ad-hoc "start now", skip conflict check
 });
 
 interface BusyAppt {
@@ -84,45 +85,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: upgradeMessage('online sessions'), code: 'PLAN_LOCKED' }, { status: 402 });
   }
 
-  const { patient_id, scheduled_at, duration_minutes, session_type, modality, goals, notes, meeting_url, recurrence } = parsed.data;
+  const { patient_id, scheduled_at, duration_minutes, session_type, modality, goals, notes, meeting_url, recurrence, immediate } = parsed.data;
 
   const occurrences = buildOccurrences(scheduled_at, recurrence);
-  const startMs = occurrences.map(d => d.getTime());
-  const windowStart = new Date(Math.min(...startMs) - 4 * 60 * 60 * 1000).toISOString();
-  const windowEnd = new Date(Math.max(...startMs) + 4 * 60 * 60 * 1000).toISOString();
-
-  // Pull existing (non-cancelled) appointments anywhere near the new slots so we
-  // can detect double-booking. One query covers the whole recurrence window.
-  const { data: existing } = await supabase
-    .from('appointments')
-    .select('id, scheduled_at, duration_minutes, patient:patients(display_name)')
-    .eq('therapist_id', therapist.id)
-    .neq('status', 'cancelled')
-    .gte('scheduled_at', windowStart)
-    .lte('scheduled_at', windowEnd);
-
-  const busy = (existing || []) as BusyAppt[];
-
   const toInsert: { at: Date }[] = [];
   const skipped: { scheduled_at: string; conflictsWith: string; conflictAt: string }[] = [];
 
-  for (const at of occurrences) {
-    const clash = busy.find(b =>
-      overlaps(at.getTime(), duration_minutes, new Date(b.scheduled_at).getTime(), b.duration_minutes || 50),
-    );
-    if (clash) {
-      skipped.push({ scheduled_at: at.toISOString(), conflictsWith: patientName(clash), conflictAt: clash.scheduled_at });
-    } else {
-      toInsert.push({ at });
-    }
-  }
+  // Immediate ("start now") sessions skip the conflict check — the therapist is
+  // intentionally starting an ad-hoc session and shouldn't be blocked by a
+  // stale or in-progress appointment from earlier in the day.
+  if (!immediate) {
+    const startMs = occurrences.map(d => d.getTime());
+    const windowStart = new Date(Math.min(...startMs) - 4 * 60 * 60 * 1000).toISOString();
+    const windowEnd = new Date(Math.max(...startMs) + 4 * 60 * 60 * 1000).toISOString();
 
-  // Single (non-recurring) booking that collides → hard 409 so the UI can warn.
-  if (!recurrence && toInsert.length === 0) {
-    return NextResponse.json(
-      { error: 'time_conflict', conflict: skipped[0] },
-      { status: 409 },
-    );
+    const { data: existing } = await supabase
+      .from('appointments')
+      .select('id, scheduled_at, duration_minutes, patient:patients(display_name)')
+      .eq('therapist_id', therapist.id)
+      .not('status', 'in', '["cancelled","in_session","completed"]')
+      .gte('scheduled_at', windowStart)
+      .lte('scheduled_at', windowEnd);
+
+    const busy = (existing || []) as BusyAppt[];
+
+    for (const at of occurrences) {
+      const clash = busy.find(b =>
+        overlaps(at.getTime(), duration_minutes, new Date(b.scheduled_at).getTime(), b.duration_minutes || 50),
+      );
+      if (clash) {
+        skipped.push({ scheduled_at: at.toISOString(), conflictsWith: patientName(clash), conflictAt: clash.scheduled_at });
+      } else {
+        toInsert.push({ at });
+      }
+    }
+
+    // Single (non-recurring) booking that collides → hard 409 so the UI can warn.
+    if (!recurrence && toInsert.length === 0) {
+      return NextResponse.json(
+        { error: 'time_conflict', conflict: skipped[0] },
+        { status: 409 },
+      );
+    }
+  } else {
+    occurrences.forEach(at => toInsert.push({ at }));
   }
 
   // ── Auto-create a Google Meet for online (video) sessions ──────────────────

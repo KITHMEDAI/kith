@@ -138,7 +138,7 @@ const CLINICAL_KEYTERMS = [
 const DG_WS_URL =
   'wss://api.deepgram.com/v1/listen' +
   '?model=nova-3' +
-  '&language=en' +                // English (Indian accent handled by nova-3)
+  '&language=multi' +             // auto-detects Hindi, Hinglish, Tamil, Telugu, English, mixed
   '&diarize=true' +               // speaker separation by voice characteristics
   '&smart_format=true' +          // punctuation, numbers, dates
   '&interim_results=true' +       // show words as spoken
@@ -148,8 +148,7 @@ const DG_WS_URL =
   '&filler_words=false' +         // skip "um", "uh" — cleaner transcript
   '&encoding=linear16' +
   '&sample_rate=16000' +
-  '&channels=1' +
-  CLINICAL_KEYTERMS.map(t => `&keyterm=${encodeURIComponent(t)}`).join('');
+  '&channels=1';
 
 const SPEAKER_MAP: Record<number, string> = { 0: 'A', 1: 'B', 2: 'C', 3: 'D' };
 const MAX_RECONNECT = 6;

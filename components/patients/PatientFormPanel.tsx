@@ -78,6 +78,7 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
 
   async function handleSubmit() {
     if (!f.display_name.trim()) { setError('Name is required'); return; }
+    if (!f.phone.trim()) { setError('Phone number is required'); return; }
     setLoading(true); setError('');
     const clean = (v: string) => (v.trim() ? v.trim() : null);
     const payload: Record<string, unknown> = {
@@ -121,20 +122,24 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="fixed right-0 top-0 h-full w-[460px] z-50 flex flex-col"
-        style={{
-          background: 'linear-gradient(180deg, #1a0f3e 0%, #120a2e 100%)',
-          borderLeft: '1px solid rgba(139,92,246,0.2)',
-          boxShadow: '-20px 0 60px rgba(0,0,0,0.4)',
-          animation: 'slideInRight 0.22s ease-out',
-        }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
+        onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <style>{`@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
+        <div
+          className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl"
+          style={{
+            background: 'linear-gradient(180deg, #1a0f3e 0%, #120a2e 100%)',
+            border: '1px solid rgba(139,92,246,0.25)',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+            animation: 'fadeInUp 0.2s ease-out',
+          }}
+        >
+        <style>{`@keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }`}</style>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: '1px solid rgba(139,92,246,0.15)' }}>
+        <div className="flex items-center justify-between px-6 py-5 flex-none" style={{ borderBottom: '1px solid rgba(139,92,246,0.15)' }}>
           <div>
             <h2 className="text-[15px] font-semibold text-white">{editing ? 'Edit patient' : 'Add patient'}</h2>
             <p className="text-[12px] text-purple-300/60 mt-0.5">{editing ? 'Update this patient record' : 'Register a new patient record'}</p>
@@ -178,7 +183,7 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
           {/* Contact */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={LABEL}>Phone</label>
+              <label className={LABEL}>Phone <span className="text-red-400">*</span></label>
               <input type="tel" value={f.phone} onChange={e => set('phone', e.target.value)} placeholder="+91 98765 43210" className={FIELD} style={FIELD_STYLE} />
             </div>
             <div>
@@ -186,7 +191,7 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
               <input type="tel" value={f.whatsapp_number} onChange={e => set('whatsapp_number', e.target.value)} placeholder="If different" className={FIELD} style={FIELD_STYLE} />
             </div>
             <div className="col-span-2">
-              <label className={LABEL}>Email</label>
+              <label className={LABEL}>Email <span className="text-purple-300/40">(optional)</span></label>
               <input type="email" value={f.email} onChange={e => set('email', e.target.value)} placeholder="patient@email.com" className={FIELD} style={FIELD_STYLE} />
             </div>
           </div>
@@ -285,11 +290,12 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-5 flex gap-3" style={{ borderTop: '1px solid rgba(139,92,246,0.15)' }}>
+        <div className="px-6 py-5 flex gap-3 flex-none" style={{ borderTop: '1px solid rgba(139,92,246,0.15)' }}>
           <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-purple-500/20 py-2.5 text-[13px] font-medium text-purple-300/70 hover:text-white hover:border-purple-400/40 transition-colors">Cancel</button>
           <button onClick={handleSubmit} disabled={loading} className="flex-1 rounded-lg bg-violet-600 py-2.5 text-[13px] font-medium text-white hover:bg-violet-500 disabled:opacity-60 flex items-center justify-center gap-2 transition-colors">
             {loading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…</> : (editing ? 'Save changes' : 'Add patient')}
           </button>
+        </div>
         </div>
       </div>
     </>

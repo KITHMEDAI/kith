@@ -23,6 +23,7 @@ export default function StartSessionButton({ patientId }: { patientId: string })
           duration_minutes: 50,
           modality: 'in_person',
           session_type: 'individual',
+          immediate: true,
         }),
       });
       const data = await res.json();
