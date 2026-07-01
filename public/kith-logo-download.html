@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head><title>Kith Logo Export</title></head>
+<body>
+<canvas id='c' width='512' height='512'></canvas>
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+
+function rr(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+// background
+ctx.fillStyle='#1e0d4e'; rr(0,0,512,512,80); ctx.fill();
+
+const g=ctx.createLinearGradient(0,0,512,512);
+g.addColorStop(0,'#c4b5fd'); g.addColorStop(1,'#7c3aed');
+
+// K stem
+ctx.fillStyle=g; rr(82,72,46,200,20); ctx.fill();
+
+// K lower arm
+ctx.strokeStyle=g; ctx.lineWidth=44; ctx.lineCap='round';
+ctx.beginPath(); ctx.moveTo(122,185); ctx.lineTo(248,270); ctx.stroke();
+
+// K upper arm (mic) rotated 45deg
+ctx.save();
+ctx.translate(168,110); ctx.rotate(Math.PI/4); ctx.translate(-168,-110);
+ctx.fillStyle=g; rr(148,46,48,118,24); ctx.fill();
+ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=6;
+[[158,78,188,78],[158,100,188,100],[158,122,188,122]].forEach(([x1,y1,x2,y2])=>{
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+});
+ctx.restore();
+
+// auto download
+const a=document.createElement('a');
+a.download='kith-logo.png';
+a.href=c.toDataURL('image/png');
+document.body.appendChild(a); a.click();
+document.body.innerHTML='<p style=font-family:sans-serif;padding:20px>✅ kith-logo.png downloaded! You can close this tab.</p>';
+</script>
+</body></html>

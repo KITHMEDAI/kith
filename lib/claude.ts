@@ -144,7 +144,7 @@ Return ONLY valid JSON:
     "areas_of_concern": ["short points, ≤ 12 words — cite actual risk signals, avoidance, regression"],
     "narrative": "1 short sentence on trajectory toward goals"
   },
-  "ai_suggestions": ["3-4 points, ACTION-FIRST verb, ≤ 14 words each, tied to what was observed this session. If patient is doing well, say so — e.g. 'All progressing well — maintain current plan'. Never judge the patient or their choices."],
+  "ai_suggestions": ["2-4 clinically neutral observations tied to THIS session. ACTION-FIRST verb, ≤ 14 words each. If patient is progressing well with no concerns, return a single entry like 'Session trajectory positive — no clinical action required' or a medically appropriate all-clear. Never judge the patient or their choices."],
   "prescription_notes": {
     "medication_relevant": false,
     "note": null,
@@ -153,19 +153,19 @@ Return ONLY valid JSON:
   "resource_suggestions": {
     "books": [
       {
-        "title": "REAL published book title — e.g. 'Feeling Good' by David Burns, 'The Mindfulness and Acceptance Workbook for Anxiety' by Forsyth & Eifert, 'Mind Over Mood' by Greenberger & Padesky, 'The DBT Skills Workbook' by McKay et al., 'Get Out of Your Mind and Into Your Life' by Hayes, 'The Body Keeps the Score' by van der Kolk. Only suggest if genuinely relevant to this patient's presentation.",
+        "title": "Only include if a specific book directly addresses what emerged in THIS session. Real published titles only — e.g. 'Feeling Good' (Burns), 'Mind Over Mood' (Greenberger & Padesky), 'The Body Keeps the Score' (van der Kolk), 'Get Out of Your Mind and Into Your Life' (Hayes), 'The DBT Skills Workbook' (McKay et al.), 'When Panic Attacks' (Burns), 'Overcoming Unwanted Intrusive Thoughts' (Sally Winston). If no book is clearly relevant, omit this array entirely.",
         "author": "Real author name",
-        "reason": "≤ 12 words: specific chapter or skill that fits THIS session's theme"
+        "reason": "≤ 12 words: specific chapter or skill that fits this session's theme"
       }
     ],
     "exercises": [
       {
-        "name": "MANDATORY — always provide at least 1-2 exercises. Use evidence-based techniques: progressive muscle relaxation, 4-7-8 breathing, body scan, 5-4-3-2-1 grounding, behavioural activation scheduling, thought record (ABC), worry postponement, values clarification, TIPP (DBT), opposite action, safe-place visualisation. Match to patient's current state and diagnosis. If patient is doing well, assign a maintenance/consolidation exercise.",
-        "description": "Clear step-by-step in ≤ 15 words — specific enough for patient to do alone",
-        "frequency": "Specific: e.g. '10 min every morning' not just 'daily'"
+        "name": "Only include if an exercise is clinically indicated by what happened in this session — e.g. patient reported high anxiety → breathing/grounding; avoidance pattern → behavioural activation; rumination → thought record. Evidence-based: 4-7-8 breathing, PMR, 5-4-3-2-1 grounding, body scan, thought record (ABC), worry postponement, TIPP (DBT), behavioural activation scheduling, safe-place visualisation, opposite action. If patient is doing well and no specific exercise is indicated, omit this array entirely — do NOT invent a task just to fill the field.",
+        "description": "Step-by-step in ≤ 15 words, specific enough for the patient to do independently",
+        "frequency": "Specific timing — e.g. '10 min each morning' not just 'daily'"
       }
     ],
-    "apps": [{"name": "", "platform": "iOS/Android", "reason": "≤ 10 words — only include if genuinely helpful, else omit"}]
+    "apps": [{"name": "", "platform": "iOS/Android", "reason": "≤ 10 words — only if genuinely helpful, else omit entirely"}]
   },
   "risk_flags": {
     "level": "low|moderate|high|critical",
@@ -186,8 +186,8 @@ STRICT RULES:
 - Use ${initials} always, never full name.
 - risk_flags.level = high/critical if ANY SI, self-harm urges, harm to others, or psychotic symptoms present.
 - prescription_notes: you are NOT a prescriber — only flag medication themes for psychiatrist review.
-- resource_suggestions.exercises: ALWAYS include at least 1 exercise — this field is NEVER empty. If patient is doing well, assign a consolidation or maintenance exercise. No exceptions.
-- resource_suggestions.books: only REAL published books with correct title and author. Never invent a title.
+- resource_suggestions.exercises: ONLY include when clinically indicated by session content. If patient is stable/improving and no specific exercise is needed, OMIT the array entirely. Do not invent tasks to fill space.
+- resource_suggestions.books: only REAL published books, only when directly relevant. Omit if nothing fits precisely.
 - resource_suggestions.apps: omit entirely if nothing is genuinely helpful — do not pad with generic apps.
 - ai_suggestions: never judge patient behaviour or choices. State observations clinically and neutrally. If things are going well, say so directly.
 - Return ONLY JSON, no markdown fences.`;

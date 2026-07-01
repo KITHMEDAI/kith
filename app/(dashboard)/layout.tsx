@@ -41,7 +41,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const supabase = createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data } = await supabase.from('therapists').select('*').eq('user_id', user.id).single();
+      const { data } = await supabase.from('therapists')
+        .select('id,user_id,display_name,designation,avatar_url,subscription_plan,subscription_status,trial_ends_at,onboarding_completed')
+        .eq('user_id', user.id).single();
       therapist = data as Therapist | null;
     } else {
       therapist = null;

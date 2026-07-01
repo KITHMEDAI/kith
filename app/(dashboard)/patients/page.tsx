@@ -15,9 +15,9 @@ export default async function PatientsPage() {
   const service = createServiceRoleClient();
   const { data: patients } = await service
     .from('patients')
-    .select('*')
+    .select('id,display_name,nickname,date_of_birth,gender,phone,email,diagnosis,therapy_modality,status,risk_level,session_count,last_session_at,consent_recording,consent_ai_notes,therapist_id,created_at')
     .eq('therapist_id', therapist.id)
     .order('display_name');
 
-  return <PatientListClient patients={(patients as Patient[]) || []} />;
+  return <PatientListClient patients={(patients as unknown as Patient[]) || []} />;
 }

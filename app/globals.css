@@ -91,12 +91,30 @@
 }
 .pulse-recording { animation: pulse-recording 1.4s ease-in-out infinite; }
 
-/* Page entrance */
+/* Page entrance — GPU-composited (opacity+transform only, no layout) */
 @keyframes page-enter {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.page-enter { animation: page-enter 0.12s ease-out; }
+.page-enter {
+  animation: page-enter 0.18s cubic-bezier(0.22,1,0.36,1) both;
+  will-change: opacity, transform;
+}
+
+/* Instant nav feedback — active link bg transitions */
+a, button { -webkit-tap-highlight-color: transparent; }
+
+/* Sidebar link transitions — GPU only */
+aside a, aside button {
+  transition: background-color 80ms ease, color 80ms ease;
+  will-change: auto;
+}
+
+/* Smooth tab switches */
+.tab-transition {
+  transition: opacity 120ms ease, transform 120ms cubic-bezier(0.22,1,0.36,1);
+  will-change: opacity, transform;
+}
 
 /* Waveform */
 @keyframes wave {
