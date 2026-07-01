@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, Gift, Zap, Sparkles } from 'lucide-react';
+import { CheckCircle2, Gift, Zap, Sparkles, Loader2 } from 'lucide-react';
 import { PLAN_FEATURES } from '@/lib/entitlements';
 
 const PLANS = [
@@ -14,6 +14,23 @@ const PLANS = [
 export default function PricingToggle() {
   const [tab, setTab] = useState<'individual' | 'clinic'>('individual');
   const [showClinicModal, setShowClinicModal] = useState(false);
+  const [waitlistEmail, setWaitlistEmail] = useState('');
+  const [waitlistState, setWaitlistState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+
+  async function joinWaitlist() {
+    if (!waitlistEmail.trim()) return;
+    setWaitlistState('loading');
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: waitlistEmail.trim(), type: 'clinic' }),
+      });
+      setWaitlistState(res.ok ? 'done' : 'error');
+    } catch {
+      setWaitlistState('error');
+    }
+  }
 
   return (
     <>
@@ -46,13 +63,33 @@ export default function PricingToggle() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Clinic plans coming soon</h3>
             <p className="text-sm text-purple-200/60 mb-6 leading-relaxed">
-              Multi-seat clinic accounts, shared patient records, and admin dashboards are on the roadmap. Be the first to know.
+              Multi-seat clinic accounts, shared patient records, and admin dashboards are on the roadmap. Drop your email and we'll tell you first.
             </p>
-            <a href="mailto:hello@kith.space?subject=Clinic plan interest"
-              className="block w-full rounded-xl py-3 text-sm font-semibold text-white mb-3"
-              style={{ background: 'rgba(139,92,246,0.7)', border: '1px solid rgba(167,139,250,0.4)' }}>
-              Notify me when it's ready
-            </a>
+            {waitlistState === 'done' ? (
+              <div className="rounded-xl py-3 px-4 mb-3 text-sm font-semibold text-emerald-300 text-center"
+                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                ✓ You're on the list — we'll reach out when it's ready
+              </div>
+            ) : (
+              <div className="space-y-2 mb-3">
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={waitlistEmail}
+                  onChange={e => setWaitlistEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && joinWaitlist()}
+                  className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder:text-purple-300/40 outline-none focus:ring-2 focus:ring-violet-500"
+                  style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}
+                />
+                <button onClick={joinWaitlist} disabled={waitlistState === 'loading'}
+                  className="w-full rounded-xl py-3 text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity disabled:opacity-60"
+                  style={{ background: 'rgba(139,92,246,0.7)', border: '1px solid rgba(167,139,250,0.4)' }}>
+                  {waitlistState === 'loading' && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Notify me when it's ready
+                </button>
+                {waitlistState === 'error' && <p className="text-xs text-red-400 text-center">Something went wrong — try again</p>}
+              </div>
+            )}
             <button onClick={() => { setShowClinicModal(false); setTab('individual'); }}
               className="text-xs text-purple-300/50 hover:text-purple-200 transition-colors">
               Back to individual plans
