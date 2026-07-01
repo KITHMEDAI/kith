@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { X, Loader2, Plus } from 'lucide-react';
 import type { Patient } from '@/types';
+import PhoneInput from '@/components/ui/PhoneInput';
 
 // therapy_modality is free TEXT (no DB CHECK), so these are just shortcuts.
 const DIAGNOSIS_OPTIONS = [
@@ -181,16 +182,16 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
           </div>
 
           {/* Contact */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <div>
               <label className={LABEL}>Phone <span className="text-red-400">*</span></label>
-              <input type="tel" value={f.phone} onChange={e => set('phone', e.target.value)} placeholder="+91 98765 43210" className={FIELD} style={FIELD_STYLE} />
+              <PhoneInput dark value={f.phone} onChange={v => set('phone', v)} placeholder="98765 43210" />
             </div>
             <div>
-              <label className={LABEL}>WhatsApp</label>
-              <input type="tel" value={f.whatsapp_number} onChange={e => set('whatsapp_number', e.target.value)} placeholder="If different" className={FIELD} style={FIELD_STYLE} />
+              <label className={LABEL}>WhatsApp <span className="text-purple-300/40">(if different)</span></label>
+              <PhoneInput dark value={f.whatsapp_number} onChange={v => set('whatsapp_number', v)} placeholder="98765 43210" />
             </div>
-            <div className="col-span-2">
+            <div>
               <label className={LABEL}>Email <span className="text-purple-300/40">(optional)</span></label>
               <input type="email" value={f.email} onChange={e => set('email', e.target.value)} placeholder="patient@email.com" className={FIELD} style={FIELD_STYLE} />
             </div>
@@ -262,14 +263,14 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
           </div>
 
           {/* Emergency contact */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
             <div>
-              <label className={LABEL}>Emergency contact</label>
+              <label className={LABEL}>Emergency contact name</label>
               <input value={f.emergency_contact_name} onChange={e => set('emergency_contact_name', e.target.value)} placeholder="Name" className={FIELD} style={FIELD_STYLE} />
             </div>
             <div>
-              <label className={LABEL}>&nbsp;</label>
-              <input type="tel" value={f.emergency_contact_phone} onChange={e => set('emergency_contact_phone', e.target.value)} placeholder="Phone" className={FIELD} style={FIELD_STYLE} />
+              <label className={LABEL}>Emergency contact phone</label>
+              <PhoneInput dark value={f.emergency_contact_phone} onChange={v => set('emergency_contact_phone', v)} placeholder="98765 43210" />
             </div>
           </div>
 

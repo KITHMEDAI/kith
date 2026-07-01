@@ -3,7 +3,8 @@
 import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, Check, ChevronRight, Loader2, Camera, FileSpreadsheet, X, ChevronDown, MapPin, Calendar, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Check, ChevronRight, ChevronDown, Loader2, Camera, FileSpreadsheet, X, MapPin, Calendar, ShieldCheck } from 'lucide-react';
+import PhoneInput from '@/components/ui/PhoneInput';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { parsePatientFile } from '@/lib/parse-patient-file';
 import KithLockup from '@/components/brand/KithLockup';
@@ -18,57 +19,9 @@ const DEGREES = [
   'M.Sc. (Psychology)', 'M.A. (Psychology)', 'M.S.W.', 'D.P.M.', 'MBBS', 'Other',
 ];
 
-const COUNTRY_CODES = [
-  { code: '+91', flag: '🇮🇳', name: 'India' },
-  { code: '+1',  flag: '🇺🇸', name: 'USA/Canada' },
-  { code: '+44', flag: '🇬🇧', name: 'UK' },
-  { code: '+61', flag: '🇦🇺', name: 'Australia' },
-  { code: '+971',flag: '🇦🇪', name: 'UAE' },
-  { code: '+65', flag: '🇸🇬', name: 'Singapore' },
-  { code: '+49', flag: '🇩🇪', name: 'Germany' },
-  { code: '+33', flag: '🇫🇷', name: 'France' },
-  { code: '+81', flag: '🇯🇵', name: 'Japan' },
-];
 
 const NAME_PREFIXES = ['Dr.', 'Prof.', 'Mr.', 'Ms.', 'Mrs.'];
 
-function PhoneInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [code, setCode] = useState('+91');
-  const [open, setOpen] = useState(false);
-  const number = value.startsWith('+') ? value.replace(/^\+\d+\s*/, '') : value;
-
-  const update = (c: string, n: string) => onChange(`${c} ${n}`.trim());
-
-  return (
-    <div className="flex gap-2 relative">
-      {/* Country code dropdown */}
-      <div className="relative">
-        <button type="button" onClick={() => setOpen(o => !o)}
-          className="flex items-center gap-1.5 rounded-xl border border-purple-200 bg-white/80 px-3 py-3 text-sm text-slate-900 whitespace-nowrap hover:bg-white transition-colors">
-          <span>{COUNTRY_CODES.find(c => c.code === code)?.flag}</span>
-          <span className="font-medium">{code}</span>
-          <ChevronDown className="h-3.5 w-3.5 text-slate-400"/>
-        </button>
-        {open && (
-          <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-purple-100 rounded-xl shadow-xl overflow-hidden w-44">
-            {COUNTRY_CODES.map(c => (
-              <button key={c.code} type="button"
-                onClick={() => { setCode(c.code); update(c.code, number); setOpen(false); }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-violet-50 transition-colors ${code === c.code ? 'bg-violet-50 text-violet-700 font-semibold' : 'text-slate-700'}`}>
-                <span>{c.flag}</span>
-                <span>{c.code}</span>
-                <span className="text-slate-400 text-xs truncate">{c.name}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      <input type="tel" placeholder="98765 43210" value={number}
-        onChange={e => update(code, e.target.value)}
-        className={INPUT + ' flex-1'} />
-    </div>
-  );
-}
 
 // ── Location autocomplete (OpenStreetMap Nominatim — free, no API key) ────────
 interface NominatimResult { display_name: string; address: { city?: string; town?: string; state?: string; country?: string } }
