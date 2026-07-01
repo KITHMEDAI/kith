@@ -144,16 +144,28 @@ Return ONLY valid JSON:
     "areas_of_concern": ["short points, ≤ 12 words — cite actual risk signals, avoidance, regression"],
     "narrative": "1 short sentence on trajectory toward goals"
   },
-  "ai_suggestions": ["3-4 points, ACTION-FIRST verb, ≤ 14 words each, tied to what was observed this session"],
+  "ai_suggestions": ["3-4 points, ACTION-FIRST verb, ≤ 14 words each, tied to what was observed this session. If patient is doing well, say so — e.g. 'All progressing well — maintain current plan'. Never judge the patient or their choices."],
   "prescription_notes": {
     "medication_relevant": false,
     "note": null,
     "refer_to_psychiatrist": false
   },
   "resource_suggestions": {
-    "books": [{"title": "", "author": "", "reason": "≤ 12 words: why it fits THIS patient now"}],
-    "exercises": [{"name": "", "description": "≤ 12 words, specific to current state", "frequency": "e.g. daily 10 min"}],
-    "apps": [{"name": "", "platform": "iOS/Android", "reason": "≤ 10 words"}]
+    "books": [
+      {
+        "title": "REAL published book title — e.g. 'Feeling Good' by David Burns, 'The Mindfulness and Acceptance Workbook for Anxiety' by Forsyth & Eifert, 'Mind Over Mood' by Greenberger & Padesky, 'The DBT Skills Workbook' by McKay et al., 'Get Out of Your Mind and Into Your Life' by Hayes, 'The Body Keeps the Score' by van der Kolk. Only suggest if genuinely relevant to this patient's presentation.",
+        "author": "Real author name",
+        "reason": "≤ 12 words: specific chapter or skill that fits THIS session's theme"
+      }
+    ],
+    "exercises": [
+      {
+        "name": "MANDATORY — always provide at least 1-2 exercises. Use evidence-based techniques: progressive muscle relaxation, 4-7-8 breathing, body scan, 5-4-3-2-1 grounding, behavioural activation scheduling, thought record (ABC), worry postponement, values clarification, TIPP (DBT), opposite action, safe-place visualisation. Match to patient's current state and diagnosis. If patient is doing well, assign a maintenance/consolidation exercise.",
+        "description": "Clear step-by-step in ≤ 15 words — specific enough for patient to do alone",
+        "frequency": "Specific: e.g. '10 min every morning' not just 'daily'"
+      }
+    ],
+    "apps": [{"name": "", "platform": "iOS/Android", "reason": "≤ 10 words — only include if genuinely helpful, else omit"}]
   },
   "risk_flags": {
     "level": "low|moderate|high|critical",
@@ -174,7 +186,10 @@ STRICT RULES:
 - Use ${initials} always, never full name.
 - risk_flags.level = high/critical if ANY SI, self-harm urges, harm to others, or psychotic symptoms present.
 - prescription_notes: you are NOT a prescriber — only flag medication themes for psychiatrist review.
-- resource_suggestions: only genuinely relevant items; omit any category where nothing fits.
+- resource_suggestions.exercises: ALWAYS include at least 1 exercise — this field is NEVER empty. If patient is doing well, assign a consolidation or maintenance exercise. No exceptions.
+- resource_suggestions.books: only REAL published books with correct title and author. Never invent a title.
+- resource_suggestions.apps: omit entirely if nothing is genuinely helpful — do not pad with generic apps.
+- ai_suggestions: never judge patient behaviour or choices. State observations clinically and neutrally. If things are going well, say so directly.
 - Return ONLY JSON, no markdown fences.`;
 
   const res = await client.messages.create({

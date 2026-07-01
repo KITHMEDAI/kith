@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Loader2, Plus } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { X, Loader2, Plus, ChevronDown } from 'lucide-react';
 import type { Patient } from '@/types';
 import PhoneInput from '@/components/ui/PhoneInput';
 
@@ -26,6 +26,47 @@ const FREQUENCIES = [
   { label: 'Monthly', value: 'monthly' },
   { label: 'As needed', value: 'as_needed' },
 ];
+
+function DarkSelect({ value, onChange, options, placeholder = 'Select…' }: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { label: string; value: string }[];
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const label = options.find(o => o.value === value)?.label ?? placeholder;
+
+  useEffect(() => {
+    function close(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between rounded-lg border border-purple-500/20 px-3 py-2.5 text-[13px] text-left transition-colors hover:border-purple-400/40 focus:outline-none focus:ring-2 focus:ring-violet-500"
+        style={{ background: 'rgba(255,255,255,0.07)', color: value ? '#fff' : 'rgba(167,139,250,0.4)' }}>
+        <span>{label}</span>
+        <ChevronDown className="h-3.5 w-3.5 text-purple-300/50 flex-none" />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1 z-[60] rounded-xl overflow-hidden shadow-2xl"
+          style={{ background: '#1a0f3e', border: '1px solid rgba(139,92,246,0.35)' }}>
+          {options.map(o => (
+            <button key={o.value} type="button"
+              onClick={() => { onChange(o.value); setOpen(false); }}
+              className="w-full text-left px-3 py-2.5 text-[13px] transition-colors hover:bg-white/10"
+              style={{ color: o.value === value ? '#c4b5fd' : 'rgba(255,255,255,0.75)', background: o.value === value ? 'rgba(139,92,246,0.2)' : 'transparent' }}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 type AnyPatient = Patient & Record<string, unknown>;
 
@@ -215,17 +256,19 @@ export default function PatientFormPanel({ patient, onClose, onSaved }: Props) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={LABEL}>Therapy modality</label>
-              <select value={f.therapy_modality} onChange={e => set('therapy_modality', e.target.value)} className={FIELD} style={FIELD_STYLE}>
-                <option value="">Select…</option>
-                {MODALITY_OPTIONS.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
+              <DarkSelect
+                value={f.therapy_modality}
+                onChange={v => set('therapy_modality', v)}
+                options={MODALITY_OPTIONS.map(m => ({ label: m, value: m }))}
+              />
             </div>
             <div>
               <label className={LABEL}>Session frequency</label>
-              <select value={f.session_frequency} onChange={e => set('session_frequency', e.target.value)} className={FIELD} style={FIELD_STYLE}>
-                <option value="">Select…</option>
-                {FREQUENCIES.map(fr => <option key={fr.value} value={fr.value}>{fr.label}</option>)}
-              </select>
+              <DarkSelect
+                value={f.session_frequency}
+                onChange={v => set('session_frequency', v)}
+                options={FREQUENCIES.map(fr => ({ label: fr.label, value: fr.value }))}
+              />
             </div>
           </div>
 
