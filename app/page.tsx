@@ -7,6 +7,7 @@ import {
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import KithLockup from '@/components/brand/KithLockup';
 import { PLAN_FEATURES } from '@/lib/entitlements';
+import DemoShowcase from '@/components/home/DemoShowcase';
 
 const DARK_GRADIENT = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
 
@@ -78,6 +79,49 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute inset-0 opacity-60">
           <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full" style={{ background: 'radial-gradient(circle, #8b5cf6, transparent 70%)', filter: 'blur(70px)' }} />
           <div className="absolute -bottom-24 right-0 h-80 w-80 rounded-full" style={{ background: 'radial-gradient(circle, #10b981, transparent 70%)', filter: 'blur(80px)' }} />
+        </div>
+      </div>
+
+      {/* ── Live Demo Showcase ── */}
+      <div style={{ background: 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)' }}>
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-purple-200 mb-5 inline-block"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                See it in action
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
+                From patient list<br />to signed note<br />
+                <span className="text-violet-400">in under 2 minutes</span>
+              </h2>
+              <p className="text-purple-200/80 text-sm leading-relaxed mb-6">
+                Pick a patient, start the session, and talk normally. Kith listens in the background and writes a clinically precise SOAP note the moment you end the session.
+              </p>
+              <div className="space-y-3">
+                {[
+                  { n: '1', t: 'Select patient & start session' },
+                  { n: '2', t: 'Talk — Kith transcribes live' },
+                  { n: '3', t: 'SOAP note auto-generated' },
+                  { n: '4', t: 'Review, edit, approve in seconds' },
+                ].map(s => (
+                  <div key={s.n} className="flex items-center gap-3">
+                    <div className="h-6 w-6 rounded-full bg-violet-500/30 border border-violet-400/40 flex items-center justify-center text-[11px] font-bold text-violet-300 flex-none">
+                      {s.n}
+                    </div>
+                    <p className="text-sm text-purple-200/80">{s.t}</p>
+                  </div>
+                ))}
+              </div>
+              <Link href="/register"
+                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-violet-500 px-5 py-3 text-sm font-bold text-white hover:bg-violet-400 transition-colors shadow-lg">
+                Try it free <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="flex justify-center">
+              <DemoShowcase />
+            </div>
+          </div>
         </div>
       </div>
 
