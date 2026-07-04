@@ -5,14 +5,17 @@ import Link from 'next/link';
 import { CheckCircle2, Gift, Zap, Sparkles, Loader2 } from 'lucide-react';
 import { PLAN_FEATURES } from '@/lib/entitlements';
 
+// USD display pricing — actually charged as the INR equivalent via Razorpay
+// (see lib/razorpay.ts PLAN_PRICING). Annual = 10x monthly (2 months free).
 const PLANS = [
-  { name: 'Free', price: '₹0', sub: 'Free forever', icon: Gift, features: PLAN_FEATURES.free, highlight: false },
-  { name: 'Starter', price: '₹999', sub: 'Per month', icon: Zap, features: PLAN_FEATURES.starter, highlight: false },
-  { name: 'Pro', price: '₹2,499', sub: 'Per month', icon: Sparkles, features: PLAN_FEATURES.pro, highlight: true },
+  { name: 'Free', icon: Gift, features: PLAN_FEATURES.free, highlight: false, monthly: 0, annual: 0 },
+  { name: 'Pro', icon: Zap, features: PLAN_FEATURES.pro, highlight: false, monthly: 20, annual: 200 },
+  { name: 'Ultra', icon: Sparkles, features: PLAN_FEATURES.ultra, highlight: true, monthly: 50, annual: 500 },
 ];
 
 export default function PricingToggle() {
   const [tab, setTab] = useState<'individual' | 'clinic'>('individual');
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
   const [showClinicModal, setShowClinicModal] = useState(false);
   const [waitlistEmail, setWaitlistEmail] = useState('');
   const [waitlistState, setWaitlistState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
@@ -98,6 +101,20 @@ export default function PricingToggle() {
         </div>
       )}
 
+      {/* Monthly / annual toggle */}
+      <div className="flex justify-center mb-6">
+        <div className="flex rounded-full p-1" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {(['monthly', 'annual'] as const).map(opt => (
+            <button key={opt} onClick={() => setBilling(opt)}
+              className="rounded-full px-4 py-1.5 text-xs font-semibold transition-all"
+              style={{ background: billing === opt ? 'rgba(255,255,255,0.12)' : 'transparent', color: billing === opt ? '#fff' : 'rgba(255,255,255,0.4)' }}>
+              {opt === 'monthly' ? 'Monthly' : 'Annual'}
+              {opt === 'annual' && <span className="ml-1.5 text-[10px] font-bold text-emerald-400">2 months free</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Plan cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {PLANS.map(p => (
@@ -113,10 +130,10 @@ export default function PricingToggle() {
             )}
             <p.icon className="h-6 w-6 mb-3" style={{ color: p.highlight ? '#c4b5fd' : 'rgba(255,255,255,0.4)' }} strokeWidth={1.5} />
             <p className="text-base font-bold text-white">{p.name}</p>
-            <p className="text-xs text-purple-300/50 mb-3">{p.sub}</p>
+            <p className="text-xs text-purple-300/50 mb-3">{p.name === 'Free' ? 'Free forever' : billing === 'monthly' ? 'Per month' : 'Per year'}</p>
             <div className="mb-4">
-              <span className="text-3xl font-bold text-white">{p.price}</span>
-              {p.name !== 'Free' && <span className="text-sm text-purple-300/40 ml-1">/mo</span>}
+              <span className="text-3xl font-bold text-white">${billing === 'monthly' ? p.monthly : p.annual}</span>
+              {p.name !== 'Free' && <span className="text-sm text-purple-300/40 ml-1">/{billing === 'monthly' ? 'mo' : 'yr'}</span>}
             </div>
             <Link href="/register"
               className="w-full rounded-xl py-2.5 text-sm font-semibold text-center mb-4 block transition-all"

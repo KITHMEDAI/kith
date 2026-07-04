@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   const notes = (subscription.notes || {}) as Record<string, string>;
   const tier = notes.tier as PaidTier | undefined;
   const interval = notes.interval as BillingInterval | undefined;
-  if (notes.user_id !== user.id || (tier !== 'starter' && tier !== 'pro') || (interval !== 'monthly' && interval !== 'annual')) {
+  if (notes.user_id !== user.id || (tier !== 'pro' && tier !== 'ultra') || (interval !== 'monthly' && interval !== 'annual')) {
     return NextResponse.json({ error: 'Subscription does not match this account' }, { status: 400 });
   }
 

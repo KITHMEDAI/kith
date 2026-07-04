@@ -27,10 +27,10 @@ export async function POST(req: NextRequest) {
 
   const razorpay = getRazorpayClient();
   const combos: Array<{ tier: PaidTier; interval: BillingInterval }> = [
-    { tier: 'starter', interval: 'monthly' },
-    { tier: 'starter', interval: 'annual' },
     { tier: 'pro', interval: 'monthly' },
     { tier: 'pro', interval: 'annual' },
+    { tier: 'ultra', interval: 'monthly' },
+    { tier: 'ultra', interval: 'annual' },
   ];
 
   const results: Record<string, { plan_id: string; env_var: string }> = {};
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         period: interval === 'monthly' ? 'monthly' : 'yearly',
         interval: 1,
         item: {
-          name: `Kith ${tier === 'pro' ? 'Pro' : 'Starter'} (${interval})`,
+          name: `Kith ${tier === 'ultra' ? 'Ultra' : 'Pro'} (${interval})`,
           amount,
           currency: 'INR',
           description: `Kith clinical workspace — ${tier} plan, billed ${interval}`,

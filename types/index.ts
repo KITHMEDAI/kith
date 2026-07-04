@@ -2,7 +2,7 @@
 // Kith — TypeScript Interfaces (production)
 // ============================================
 
-export type SubscriptionPlan = 'starter' | 'pro' | 'clinic';
+export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'clinic';
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'cancelled';
 export type RiskLevel = 'low' | 'moderate' | 'high' | 'critical';
 export type AppointmentStatus = 'scheduled' | 'confirmed' | 'in_session' | 'completed' | 'cancelled' | 'no_show' | 'rescheduled';

@@ -12,14 +12,17 @@
  */
 import Razorpay from 'razorpay';
 
-export type PaidTier = 'starter' | 'pro';
+export type PaidTier = 'pro' | 'ultra';
 export type BillingInterval = 'monthly' | 'annual';
 
-// ₹ amounts in paise. Annual = 10× monthly (2 months free) — a standard,
-// low-effort lever that improves cash flow and cuts churn.
+// Priced/marketed in USD ($20/mo Pro, $50/mo Ultra) but CHARGED in INR — this
+// account settles INR only (no Razorpay international-payments approval yet).
+// INR amounts below are the ~USD equivalent at ₹85/$, rounded to charm
+// pricing. Annual = 10× monthly (2 months free), matching the marketed price.
+// ₹ amounts in paise.
 export const PLAN_PRICING: Record<PaidTier, { monthly: number; annual: number }> = {
-  starter: { monthly: 99900, annual: 999000 },   // ₹999/mo · ₹9,990/yr
-  pro:     { monthly: 249900, annual: 2499000 }, // ₹2,499/mo · ₹24,990/yr
+  pro:   { monthly: 169900, annual: 1699000 },  // ₹1,699/mo · ₹16,990/yr (~$20/mo · $200/yr)
+  ultra: { monthly: 424900, annual: 4249000 },  // ₹4,249/mo · ₹42,490/yr (~$50/mo · $500/yr)
 };
 
 export function razorpayConfigured(): boolean {

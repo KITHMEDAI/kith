@@ -13,7 +13,7 @@
  * Razorpay SDK ends up bundled into the browser.
  */
 
-export type PlanKey = 'free' | 'starter' | 'pro' | 'clinic';
+export type PlanKey = 'free' | 'pro' | 'ultra' | 'clinic';
 
 // Free-tier session cap, used as the universal fallback (expired trial,
 // cancelled subscription, failed payment) instead of a hard lockout.
@@ -23,6 +23,7 @@ export interface Entitlements {
   plan: PlanKey;              // EFFECTIVE plan for this request (accounts for an active trial)
   storedPlan: PlanKey;        // the plan they're actually paying for (or 'free')
   sessionCap: number;         // -1 = unlimited
+  sessionDurationCapMinutes: number; // hard per-session length limit for this plan
   onlineSessions: boolean;    // video modality + automatic notetaker bot
   calendarSync: boolean;      // Google Calendar connect + auto Meet creation
   patientMessaging: boolean;  // WhatsApp / SMS to patients
@@ -36,11 +37,31 @@ interface BillingFields {
   trial_ends_at: string | null;
 }
 
+// Session-count caps are sized around real per-session cost (Deepgram/Recall
+// transcription + Claude note-gen runs ~$0.40-0.50 per 50-min session) so each
+// tier keeps a heavy margin even at typical usage, not just on paper:
+//  - Free: loss-leader, capped hard (~$2.50/mo max cost) to bound CAC.
+//  - Pro: 60/mo covers a genuinely busy solo practice (~3/weekday) with room
+//    to spare — most paying users won't get near it.
+//  - Ultra: uncapped session count (true "unlimited" is credible for a human
+//    running real 1:1 sessions — throughput is bounded by their own calendar),
+//    but per-session duration is still capped as an anti-abuse ceiling.
 const SESSION_CAPS: Record<PlanKey, number> = {
   free: FREE_SESSION_CAP,
-  starter: 30,
-  pro: -1,
+  pro: 60,
+  ultra: -1,
   clinic: -1,
+};
+
+// Per-session hard duration limit (minutes) — enforced client-side by
+// auto-ending the recording when reached. Free's 50-min cap matches a
+// standard therapy hour; paid tiers get room for intakes/extended sessions
+// without leaving duration completely unbounded.
+export const SESSION_DURATION_CAPS: Record<PlanKey, number> = {
+  free: 50,
+  pro: 90,
+  ultra: 120,
+  clinic: 120,
 };
 
 export function getEntitlements(t: BillingFields): Entitlements {
@@ -49,18 +70,20 @@ export function getEntitlements(t: BillingFields): Entitlements {
   const paidActive = t.subscription_status === 'active';
   const storedPlan = (t.subscription_plan as PlanKey) || 'free';
 
-  // An active trial tastes the full Pro experience; otherwise you get exactly
-  // what you're paying for, and anything else (expired trial, cancelled,
-  // past_due, no subscription at all) falls back to Free — never a lockout.
-  const plan: PlanKey = isTrialing ? 'pro' : paidActive ? storedPlan : 'free';
+  // An active trial tastes the full Ultra experience; otherwise you get
+  // exactly what you're paying for, and anything else (expired trial,
+  // cancelled, past_due, no subscription at all) falls back to Free — never a
+  // lockout.
+  const plan: PlanKey = isTrialing ? 'ultra' : paidActive ? storedPlan : 'free';
 
   return {
     plan,
     storedPlan,
     sessionCap: SESSION_CAPS[plan] ?? FREE_SESSION_CAP,
+    sessionDurationCapMinutes: SESSION_DURATION_CAPS[plan] ?? SESSION_DURATION_CAPS.free,
     onlineSessions: plan !== 'free',
     calendarSync: plan !== 'free',
-    patientMessaging: plan === 'pro' || plan === 'clinic',
+    patientMessaging: plan === 'ultra' || plan === 'clinic',
     isTrialing,
     trialDaysLeft: trialEndsAt ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000)) : null,
   };
@@ -70,12 +93,12 @@ export function getEntitlements(t: BillingFields): Entitlements {
 // prompt so the wording a doctor sees when blocked always matches what the
 // plan card promised.
 export const PLAN_FEATURES: Record<PlanKey, string[]> = {
-  free: ['5 sessions/month', 'AI-assisted SOAP notes', 'In-person recording', 'Patient & booking management'],
-  starter: ['30 sessions/month', 'Everything in Free', 'Online sessions (auto notetaker bot)', 'Google Calendar sync + auto-created Meet links'],
-  pro: ['Unlimited sessions', 'Everything in Starter', 'WhatsApp & SMS to patients', 'Priority support'],
-  clinic: ['Everything in Pro', 'Multiple therapist seats', 'Admin dashboard', 'White-label option'],
+  free: ['5 sessions/month · 50 min each', 'AI-assisted SOAP notes', 'In-person recording', 'Patient & booking management'],
+  pro: ['60 sessions/month · 90 min each', 'Everything in Free', 'Online sessions (auto notetaker bot)', 'Google Calendar sync + auto-created Meet links'],
+  ultra: ['Unlimited sessions · 120 min each', 'Everything in Pro', 'WhatsApp & SMS to patients', 'Priority support'],
+  clinic: ['Everything in Ultra', 'Multiple therapist seats', 'Admin dashboard', 'White-label option'],
 };
 
 export function upgradeMessage(feature: 'online sessions' | 'Google Calendar sync' | 'patient messaging'): string {
-  return `Upgrade to Starter or Pro to unlock ${feature}.`;
+  return `Upgrade to Pro or Ultra to unlock ${feature}.`;
 }

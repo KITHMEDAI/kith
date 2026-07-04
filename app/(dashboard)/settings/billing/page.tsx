@@ -3,30 +3,38 @@
 import { useEffect, useState } from 'react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { CreditCard, CheckCircle2, Zap, Building2, Loader2, Gift, Sparkles } from 'lucide-react';
-import { PLAN_FEATURES } from '@/lib/entitlements';
+import { PLAN_FEATURES, SESSION_DURATION_CAPS } from '@/lib/entitlements';
 
 interface BillingInfo {
   therapist_id: string;
-  subscription_plan: 'free' | 'starter' | 'pro' | 'clinic';
+  subscription_plan: 'free' | 'pro' | 'ultra' | 'clinic';
   subscription_status: string;
   billing_interval: 'monthly' | 'annual';
   trial_ends_at: string | null;
   sessions_this_month: number;
 }
 
-type Tier = 'starter' | 'pro';
+type Tier = 'pro' | 'ultra';
 type Interval = 'monthly' | 'annual';
 
+// USD display pricing — actually charged as the INR equivalent via Razorpay
+// (see lib/razorpay.ts PLAN_PRICING). Annual = 10x monthly (2 months free).
 const PRICING: Record<Tier, { monthly: number; annual: number }> = {
-  starter: { monthly: 999, annual: 9990 },
-  pro: { monthly: 2499, annual: 24990 },
+  pro: { monthly: 20, annual: 200 },
+  ultra: { monthly: 50, annual: 500 },
+};
+
+const SESSION_CAP_DISPLAY: Record<'free' | Tier, number | null> = {
+  free: 5,
+  pro: 60,
+  ultra: null, // unlimited
 };
 
 const PAID_PLANS: Array<{
   key: Tier; name: string; tagline: string; icon: typeof Zap; color: string; recommended?: boolean;
 }> = [
-  { key: 'starter', name: 'Starter', tagline: 'For a steady solo practice', icon: Zap, color: '#7c3aed' },
-  { key: 'pro', name: 'Pro', tagline: 'For a full-time, growing practice', icon: Sparkles, color: '#7c3aed', recommended: true },
+  { key: 'pro', name: 'Pro', tagline: 'For a steady solo practice', icon: Zap, color: '#7c3aed' },
+  { key: 'ultra', name: 'Ultra', tagline: 'For a full-time, growing practice', icon: Sparkles, color: '#7c3aed', recommended: true },
 ];
 
 export default function BillingPage() {
@@ -88,7 +96,7 @@ export default function BillingPage() {
     : null;
   const isTrialing = info?.subscription_status === 'trialing' && (trialDaysLeft ?? 0) > 0;
   const isActivePaid = info?.subscription_status === 'active';
-  const effectivePlan = isTrialing ? 'pro' : (info?.subscription_plan ?? 'free');
+  const effectivePlan = isTrialing ? 'ultra' : (info?.subscription_plan ?? 'free');
 
   async function handleSubscribe(tier: Tier) {
     if (!razorpayLoaded) { setError('Payment system still loading — try again in a moment.'); return; }
@@ -106,7 +114,7 @@ export default function BillingPage() {
         key: data.key,
         subscription_id: data.subscription_id,
         name: 'Kith Clinical Workspace',
-        description: `${tier === 'pro' ? 'Pro' : 'Starter'} plan — billed ${interval}`,
+        description: `${tier === 'ultra' ? 'Ultra' : 'Pro'} plan — billed ${interval}`,
         theme: { color: '#7c3aed' },
         prefill: data.prefill || {},
         handler: async (response: { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string }) => {
@@ -175,7 +183,7 @@ export default function BillingPage() {
         <div className="flex-1">
           <p className="text-sm font-semibold text-foreground capitalize">
             {effectivePlan} Plan
-            {isTrialing && <span className="ml-2 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Trial — full Pro access</span>}
+            {isTrialing && <span className="ml-2 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Trial — full Ultra access</span>}
             {info?.subscription_status === 'past_due' && <span className="ml-2 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Payment failed</span>}
             {info?.subscription_status === 'cancelled' && <span className="ml-2 text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Cancelled</span>}
           </p>
@@ -195,21 +203,24 @@ export default function BillingPage() {
         )}
       </div>
 
-      {/* Usage bar — shown whenever the effective plan is capped */}
-      {effectivePlan !== 'pro' && (
+      {/* Usage bar — hidden once the effective plan is uncapped (Ultra/Clinic) */}
+      {SESSION_CAP_DISPLAY[effectivePlan as 'free' | Tier] != null && (
         <div className="rounded-xl border border-white/40 bg-white/60 backdrop-blur-md p-5 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-foreground">Sessions this month</p>
             <p className="text-sm font-semibold text-foreground">
-              {info?.sessions_this_month} / {effectivePlan === 'starter' ? 30 : 5}
+              {info?.sessions_this_month} / {SESSION_CAP_DISPLAY[effectivePlan as 'free' | Tier]}
             </p>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full rounded-full bg-violet-500 transition-all"
-              style={{ width: `${Math.min(100, (info.sessions_this_month / (effectivePlan === 'starter' ? 30 : 5)) * 100)}%` }}
+              style={{ width: `${Math.min(100, (info.sessions_this_month / (SESSION_CAP_DISPLAY[effectivePlan as 'free' | Tier] ?? 1)) * 100)}%` }}
             />
           </div>
+          <p className="text-[11px] text-muted-foreground mt-2">
+            Max {SESSION_DURATION_CAPS[effectivePlan]} min per session on this plan
+          </p>
         </div>
       )}
 
@@ -242,7 +253,7 @@ export default function BillingPage() {
           </div>
           <p className="text-xs text-muted-foreground mb-4">For trying Kith out</p>
           <div className="flex items-baseline gap-1 mb-5">
-            <span className="text-3xl font-bold text-foreground">₹0</span>
+            <span className="text-3xl font-bold text-foreground">$0</span>
             <span className="text-xs text-muted-foreground">forever</span>
           </div>
           <ul className="space-y-2.5 mb-6 flex-1">
@@ -257,7 +268,7 @@ export default function BillingPage() {
           </div>
         </div>
 
-        {/* Starter / Pro */}
+        {/* Pro / Ultra */}
         {PAID_PLANS.map(plan => {
           const isCurrent = isActivePaid && info?.subscription_plan === plan.key;
           const Icon = plan.icon;
@@ -279,7 +290,7 @@ export default function BillingPage() {
               </div>
               <p className="text-xs text-muted-foreground mb-4">{plan.tagline}</p>
               <div className="flex items-baseline gap-1 mb-5">
-                <span className="text-3xl font-bold text-foreground">₹{price.toLocaleString('en-IN')}</span>
+                <span className="text-3xl font-bold text-foreground">${price}</span>
                 <span className="text-xs text-muted-foreground">/{interval === 'monthly' ? 'mo' : 'yr'}</span>
               </div>
               <ul className="space-y-2.5 mb-6 flex-1">
@@ -318,7 +329,7 @@ export default function BillingPage() {
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        Payments via Razorpay (INR) · UPI Autopay or card e-mandate · Cancel anytime, no lock-in
+        Prices in USD, charged as the INR equivalent via Razorpay · UPI Autopay or card e-mandate · Cancel anytime, no lock-in
       </p>
     </div>
   );

@@ -384,7 +384,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
               </select>
               {onlineLocked && (
                 <a href="/settings/billing" className="mt-1 flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
-                  <Lock className="h-3 w-3" /> Online sessions need Starter or higher
+                  <Lock className="h-3 w-3" /> Online sessions need Pro or higher
                 </a>
               )}
             </div>

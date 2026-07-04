@@ -150,7 +150,7 @@ export default function IntegrationsPage() {
             <p className="text-sm text-muted-foreground">Import appointments from your Google Calendar into Kith. Read-only — Kith never writes to or edits your calendar.</p>
             {!calendarConnected && !calendarSyncUnlocked && (
               <a href="/settings/billing" className="mt-1.5 inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700">
-                <Lock className="h-3 w-3" /> Requires Starter or higher — view plans
+                <Lock className="h-3 w-3" /> Requires Pro or higher — view plans
               </a>
             )}
           </div>

@@ -6,7 +6,7 @@
  * Plan must already exist in Razorpay (see /api/billing/admin/setup-plans,
  * a one-time operator step run after real keys are configured).
  *
- * Body: { tier: 'starter' | 'pro', interval: 'monthly' | 'annual' }
+ * Body: { tier: 'pro' | 'ultra', interval: 'monthly' | 'annual' }
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { tier, interval } = await req.json().catch(() => ({}));
-  if (tier !== 'starter' && tier !== 'pro') {
+  if (tier !== 'pro' && tier !== 'ultra') {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 422 });
   }
   if (interval !== 'monthly' && interval !== 'annual') {

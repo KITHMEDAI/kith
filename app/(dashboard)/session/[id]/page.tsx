@@ -229,9 +229,18 @@ export default function LiveSessionPage() {
   // caption, not a scrolling list of bubbles. The doctor can flip to the full
   // history any time — nothing is lost, just not the default.
   const [showFullTranscript, setShowFullTranscript] = useState(false);
+  const [durationCapMinutes, setDurationCapMinutes] = useState<number | null>(null);
+  const autoEndedRef = useRef(false);
 
   // Online sessions (Teams/Meet) are recorded by a Recall bot, not the local mic.
   const isOnline = appointment?.modality === 'video';
+
+  useEffect(() => {
+    fetch('/api/me/entitlements')
+      .then(r => r.json())
+      .then(d => { if (typeof d.sessionDurationCapMinutes === 'number') setDurationCapMinutes(d.sessionDurationCapMinutes); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -266,6 +275,23 @@ export default function LiveSessionPage() {
     }
     return () => { if (durationRef.current) clearInterval(durationRef.current); };
   }, [isConnected]);
+
+  // Elapsed-time tracker covering BOTH modalities (the in-person `duration`
+  // timer above only ticks while the local mic is connected — online sessions
+  // never call connect(), so they need their own clock keyed off bot dispatch)
+  // so the per-session duration cap (plan-dependent) can be enforced either way.
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    const active = isOnline ? botDispatched && sessionStatus !== 'ended' : isConnected;
+    if (active) {
+      if (!elapsedRef.current) elapsedRef.current = setInterval(() => setElapsedSec(s => s + 1), 1000);
+    } else {
+      if (elapsedRef.current) { clearInterval(elapsedRef.current); elapsedRef.current = null; }
+      setElapsedSec(0);
+    }
+    return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
+  }, [isOnline, botDispatched, sessionStatus, isConnected]);
 
   // ── Live speaker identification ─────────────────────────────────────────────
   // Runs after every 10 new segments while recording. Uses Claude Haiku to map
@@ -448,6 +474,17 @@ export default function LiveSessionPage() {
     }
   };
 
+  // Auto-end once the plan's per-session duration cap is hit — fires once
+  // (guarded by the ref) regardless of modality.
+  useEffect(() => {
+    if (!durationCapMinutes || autoEndedRef.current) return;
+    if (sessionStatus !== 'active' && sessionStatus !== 'paused') return;
+    if (elapsedSec >= durationCapMinutes * 60) {
+      autoEndedRef.current = true;
+      handleEnd();
+    }
+  }, [elapsedSec, durationCapMinutes, sessionStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const soapNote = liveNotes?.soap_note as Record<string,string> | undefined;
   const keyPoints = liveNotes?.key_points as string[] | undefined;
   // Ambient view is the default while there's something to show — the full
@@ -502,6 +539,13 @@ export default function LiveSessionPage() {
               <span className="h-2 w-2 rounded-full bg-red-500" style={{ animation: 'pulse-rec 1.2s ease-in-out infinite' }} />
               {formatDuration(duration)}
             </div>
+          )}
+          {/* Plan duration-cap warning — last 5 min */}
+          {durationCapMinutes && (sessionStatus === 'active' || sessionStatus === 'paused') &&
+            elapsedSec >= (durationCapMinutes - 5) * 60 && elapsedSec < durationCapMinutes * 60 && (
+            <span className="text-xs font-medium text-amber-400">
+              Ends in {Math.max(0, durationCapMinutes * 60 - elapsedSec) / 60 | 0}m — plan limit {durationCapMinutes} min
+            </span>
           )}
 
           {/* Action buttons */}
