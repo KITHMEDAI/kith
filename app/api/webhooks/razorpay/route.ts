@@ -20,7 +20,11 @@ export async function POST(req: NextRequest) {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET || '';
 
   const expectedSig = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
-  if (!secret || expectedSig !== signature) {
+  const expectedBuf = Buffer.from(expectedSig, 'hex');
+  const givenBuf = Buffer.from(signature, 'hex');
+  const signatureValid =
+    !!secret && expectedBuf.length === givenBuf.length && crypto.timingSafeEqual(expectedBuf, givenBuf);
+  if (!signatureValid) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
