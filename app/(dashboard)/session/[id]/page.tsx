@@ -182,6 +182,20 @@ function RecurringModal({ patient, onClose, onBooked }: {
   );
 }
 
+// Extra Deepgram keyterms specific to THIS patient — their own diagnosis
+// labels plus named medications from free-text `medications` (filtering out
+// dosage numbers/units, which aren't real vocabulary). Boosts recognition of
+// drug names that aren't in the static clinical keyterm list, on top of it.
+function patientKeyterms(patient: Patient | null): string[] {
+  if (!patient) return [];
+  const diagnosisTerms = patient.diagnosis || [];
+  const medTerms = (patient.medications || '')
+    .split(/[,\n]/)
+    .flatMap(part => part.trim().split(/\s+/))
+    .filter(w => w.length > 3 && !/^\d+$/.test(w) && !/^\d+(mg|ml|mcg|g)$/i.test(w));
+  return [...diagnosisTerms, ...medTerms];
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 const LIVE_UPDATE_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -219,6 +233,7 @@ export default function LiveSessionPage() {
   const [identifying, setIdentifying]    = useState(false);
   const lastIdentifiedCount              = useRef(0);
   const [showEndModal, setShowEndModal]   = useState(false);
+  const [upgradeModal, setUpgradeModal]   = useState<string | null>(null); // holds the message when shown
   const [isEnding, setIsEnding]           = useState(false);
   const [endError, setEndError]           = useState<string | null>(null);
   // showRecurring removed — session ends go directly to patient profile
@@ -367,10 +382,11 @@ export default function LiveSessionPage() {
     try {
       const res  = await fetch('/api/sessions/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ appointmentId: params.id, patientId: patient.id }) });
       const data = await res.json();
+      if (res.status === 402) { setUpgradeModal(data.error || 'Upgrade your plan to continue.'); return; }
       if (!res.ok) throw new Error(data.error);
       setSessionId(data.session.id);
       setSessionStatus('active');
-      await connect(data.token);
+      await connect(data.token, patientKeyterms(patient));
     } catch (err) { alert(err instanceof Error ? err.message : 'Failed to start'); }
   };
 
@@ -384,6 +400,7 @@ export default function LiveSessionPage() {
         body: JSON.stringify({ appointmentId: params.id }),
       });
       const data = await res.json();
+      if (res.status === 402) { setUpgradeModal(data.error || 'Upgrade your plan to continue.'); return; }
       if (!res.ok) throw new Error(data.error || 'Failed to send notetaker');
       setSessionId(data.session.id);
       setSessionStatus('active');
@@ -427,7 +444,7 @@ export default function LiveSessionPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setSessionStatus('active');
-      await connect(data.token);
+      await connect(data.token, patientKeyterms(patient));
     } catch (err) { alert(err instanceof Error ? err.message : 'Failed to resume'); }
   };
 
@@ -605,10 +622,12 @@ export default function LiveSessionPage() {
       </div>
 
       {/* ── Body ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-1 min-h-0">
+      {/* Side-by-side on desktop; stacked (transcript above AI panel) on mobile,
+          where a fixed 50/50 split would be too cramped to use. */}
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-visible">
 
         {/* LEFT — Live transcript ─────────────────────────────────────────── */}
-        <div className="flex flex-col" style={{ width: '50%', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex flex-col w-full md:w-1/2 min-h-[50vh] md:min-h-0" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
 
           {/* Transcript header */}
           <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -728,7 +747,7 @@ export default function LiveSessionPage() {
         </div>
 
         {/* RIGHT — AI panel ───────────────────────────────────────────────── */}
-        <div className="flex flex-col" style={{ width: '50%' }}>
+        <div className="flex flex-col w-full md:w-1/2 min-h-[50vh] md:min-h-0">
 
           {/* Tab bar */}
           <div className="flex" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
@@ -954,6 +973,35 @@ export default function LiveSessionPage() {
                 style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)' }}>
                 End & generate notes
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Upgrade required (plan cap / feature lock hit) ───────────────────── */}
+      {upgradeModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm mx-4 rounded-2xl p-6 space-y-5 text-center"
+            style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)' }}>
+              <Sparkles className="h-5 w-5 text-violet-400" />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-base font-semibold text-white">Upgrade to keep going</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{upgradeModal}</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setUpgradeModal(null)}
+                className="flex-1 rounded-xl py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                Not now
+              </button>
+              <a href="/settings/billing"
+                className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white text-center"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)' }}>
+                View plans
+              </a>
             </div>
           </div>
         </div>

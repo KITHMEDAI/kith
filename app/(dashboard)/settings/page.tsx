@@ -5,6 +5,7 @@ import {
   Save, Loader2, Upload, Mail, Phone,
   Calendar, Clock, Users, Shield,
   CheckCircle, TrendingUp, Edit3, ExternalLink, BadgeCheck, X as XIcon, MapPin,
+  Sparkles, ArrowUpRight,
 } from 'lucide-react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 
@@ -22,6 +23,47 @@ interface Profile {
   bio: string;
   timezone: string;
   avatar_url: string | null;
+  subscription_plan?: 'free' | 'pro' | 'ultra' | 'clinic';
+  subscription_status?: string;
+}
+
+const PLAN_LABEL: Record<string, string> = { free: 'Free', pro: 'Pro', ultra: 'Ultra', clinic: 'Clinic' };
+
+// Compact plan card — the only always-visible upgrade path outside the
+// dedicated billing page; feature-gated screens (booking, integrations,
+// session cap) each also link to /settings/billing at the point of friction.
+function PlanCard({ plan, status }: { plan?: string; status?: string }) {
+  const isTrialing = status === 'trialing';
+  const effective = isTrialing ? 'ultra' : (plan || 'free');
+  const isFree = effective === 'free';
+  return (
+    <div className="rounded-2xl p-5 flex items-center justify-between gap-4"
+      style={{
+        background: isFree ? '#0f172a' : 'linear-gradient(135deg,#2a1454,#0f172a)',
+        border: isFree ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(139,92,246,0.35)',
+      }}>
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl"
+          style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)' }}>
+          <Sparkles className="h-5 w-5 text-violet-400" />
+        </div>
+        <div>
+          <p className="text-[14px] font-semibold text-white">
+            {PLAN_LABEL[effective] || 'Free'} plan
+            {isTrialing && <span className="ml-2 text-[11px] font-medium text-amber-400">Trial active</span>}
+          </p>
+          <p className="text-[12px] text-slate-400 mt-0.5">
+            {isFree ? 'Upgrade for online sessions, more capacity, and patient messaging' : 'Manage billing, usage, and plan changes'}
+          </p>
+        </div>
+      </div>
+      <a href="/settings/billing"
+        className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-semibold text-white transition-all hover:scale-[1.02] shrink-0"
+        style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', boxShadow: '0 0 20px rgba(124,58,237,0.25)' }}>
+        {isFree ? 'Upgrade plan' : 'Manage plan'} <ArrowUpRight className="h-3.5 w-3.5" />
+      </a>
+    </div>
+  );
 }
 
 interface Stats {
@@ -407,6 +449,9 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* ── Plan & billing ─────────────────────────────────────────────────── */}
+      <PlanCard plan={profile.subscription_plan} status={profile.subscription_status} />
 
       {/* ── Google Calendar ────────────────────────────────────────────────── */}
       <GoogleCalendarCard />

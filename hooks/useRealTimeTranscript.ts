@@ -114,7 +114,6 @@ registerProcessor('pcm-processor', PcmProcessor);
 //
 // Key params for single-mic two-speaker setup:
 //   diarize=true           — voice characteristic separation (pitch, timbre)
-//   diarize_version=3      — latest diarization model
 //   utterance_end_ms=1500  — 1.5s silence = end of utterance (better turn detection)
 //   no_delay=true          — stream words as they're recognised, don't buffer
 //   punctuate=true         — via smart_format; keeps output readable
@@ -135,20 +134,34 @@ const CLINICAL_KEYTERMS = [
   'cognitive restructuring', 'mindfulness', 'grounding',
 ];
 
-const DG_WS_URL =
-  'wss://api.deepgram.com/v1/listen' +
-  '?model=nova-3' +
-  '&language=multi' +             // auto-detects Hindi, Hinglish, Tamil, Telugu, English, mixed
-  '&diarize=true' +               // speaker separation by voice characteristics
-  '&smart_format=true' +          // punctuation, numbers, dates
-  '&interim_results=true' +       // show words as spoken
-  '&utterance_end_ms=1500' +      // 1.5 s silence = new speaker turn
-  '&vad_events=true' +            // voice-activity events
-  '&no_delay=true' +              // don't buffer — stream immediately
-  '&filler_words=false' +         // skip "um", "uh" — cleaner transcript
-  '&encoding=linear16' +
-  '&sample_rate=16000' +
-  '&channels=1';
+// Keyterm Prompting (nova-3 only, works in both mono- and multilingual mode)
+// boosts recognition of specific vocabulary that's otherwise easy to mishear.
+// Deepgram caps this at 500 tokens total across all keyterms — the static
+// clinical list below is ~40 terms; per-patient terms (their own diagnosis +
+// named medications) are added on top per session, well within budget.
+function buildKeytermParams(extra: string[] = []): string {
+  const terms = Array.from(new Set([...CLINICAL_KEYTERMS, ...extra].map(t => t.trim()).filter(Boolean)));
+  return terms.map(t => `&keyterm=${encodeURIComponent(t)}`).join('');
+}
+
+function buildWsUrl(extraKeyterms: string[] = []): string {
+  return (
+    'wss://api.deepgram.com/v1/listen' +
+    '?model=nova-3' +
+    '&language=multi' +             // auto-detects Hindi, Hinglish, Tamil, Telugu, English, mixed
+    '&diarize=true' +               // speaker separation by voice characteristics
+    '&smart_format=true' +          // punctuation, numbers, dates
+    '&interim_results=true' +       // show words as spoken
+    '&utterance_end_ms=1500' +      // 1.5 s silence = new speaker turn
+    '&vad_events=true' +            // voice-activity events
+    '&no_delay=true' +              // don't buffer — stream immediately
+    '&filler_words=false' +         // skip "um", "uh" — cleaner transcript
+    '&encoding=linear16' +
+    '&sample_rate=16000' +
+    '&channels=1' +
+    buildKeytermParams(extraKeyterms)
+  );
+}
 
 const SPEAKER_MAP: Record<number, string> = { 0: 'A', 1: 'B', 2: 'C', 3: 'D' };
 const MAX_RECONNECT = 6;
@@ -160,6 +173,7 @@ export function useRealTimeTranscript() {
   const workletRef     = useRef<AudioWorkletNode | null>(null);
   const streamRef      = useRef<MediaStream | null>(null);
   const tokenRef       = useRef<string>('');
+  const keytermsRef    = useRef<string[]>([]);
   const reconnectRef   = useRef(0);
   const intentionalRef = useRef(false);
   const pendingRef     = useRef<{ speaker: string; words: string[]; start_ms: number } | null>(null);
@@ -313,11 +327,11 @@ export function useRealTimeTranscript() {
   }, []);
 
   // ── Open WebSocket ───────────────────────────────────────────────────────────
-  const openWebSocket = useCallback((token: string) => {
+  const openWebSocket = useCallback((token: string, extraKeyterms: string[] = []) => {
     setConnectionStatus(reconnectRef.current > 0 ? 'reconnecting' : 'connecting');
 
     // Deepgram browser auth: token passed as WebSocket subprotocol
-    const ws = new WebSocket(DG_WS_URL, ['token', token]);
+    const ws = new WebSocket(buildWsUrl(extraKeyterms), ['token', token]);
     ws.binaryType = 'arraybuffer';
 
     ws.onopen = async () => {
@@ -337,7 +351,7 @@ export function useRealTimeTranscript() {
         reconnectRef.current += 1;
         setConnectionStatus('reconnecting');
         console.warn(`[Kith] WS closed (${e.code}) — retry in ${delay}ms`);
-        setTimeout(() => openWebSocket(tokenRef.current), delay);
+        setTimeout(() => openWebSocket(tokenRef.current, keytermsRef.current), delay);
       } else {
         setConnectionStatus('failed');
         console.error('[Kith] WS reconnect exhausted after', MAX_RECONNECT, 'attempts');
@@ -349,11 +363,12 @@ export function useRealTimeTranscript() {
     wsRef.current = ws;
   }, [startMic, handleMessage]);
 
-  const connect = useCallback(async (token: string) => {
+  const connect = useCallback(async (token: string, extraKeyterms: string[] = []) => {
     intentionalRef.current = false;
     reconnectRef.current   = 0;
     tokenRef.current       = token;
-    openWebSocket(token);
+    keytermsRef.current    = extraKeyterms;
+    openWebSocket(token, extraKeyterms);
   }, [openWebSocket]);
 
   const disconnect = useCallback(() => {

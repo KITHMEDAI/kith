@@ -129,6 +129,24 @@ export async function refreshTokenIfNeeded(tokens: {
 
 // ── High-level helpers used by API routes ──────────────────────────────────
 
+// Lists the calendars on the connected Google account, so the doctor can pick
+// a dedicated clinic/work calendar to sync from instead of always pulling
+// everything off "primary" (personal engagements included). Uses the same
+// calendar.readonly scope already granted — no re-consent needed.
+export async function listCalendars(
+  tokens: { access_token: string; refresh_token: string; expiry_date: number },
+) {
+  const refreshedTokens = await refreshTokenIfNeeded(tokens);
+  const calendar = getCalendarClient(refreshedTokens);
+  const response = await calendar.calendarList.list({ minAccessRole: 'reader' });
+  const calendars = (response.data.items || []).map(c => ({
+    id: c.id!,
+    summary: c.summary || c.id!,
+    primary: !!c.primary,
+  }));
+  return { calendars, refreshedTokens };
+}
+
 export async function syncCalendarAppointments(
   tokens: { access_token: string; refresh_token: string; expiry_date: number },
   calendarId: string = 'primary'

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { Calendar, MessageSquare, Mail, CheckCircle2, XCircle, ExternalLink, Loader2, Link2, Globe, Phone, Lock } from 'lucide-react';
+import LockedFeatureButton from '@/components/upgrade/LockedFeatureButton';
 
 const BOOKING_LABELS: Record<string, { name: string; color: string; needsUrl: boolean }> = {
   calendly:        { name: 'Calendly',           color: '#006BFF', needsUrl: true },
@@ -26,6 +27,10 @@ export default function IntegrationsPage() {
   const [savingUrl, setSavingUrl]                 = useState(false);
   const [pageLoading, setPageLoading]             = useState(true);
   const [calendarSyncUnlocked, setCalendarSyncUnlocked] = useState(true);
+  const [calendars, setCalendars]                 = useState<{ id: string; summary: string; primary: boolean }[]>([]);
+  const [selectedCalendarId, setSelectedCalendarId] = useState('primary');
+  const [calendarsLoading, setCalendarsLoading]   = useState(false);
+  const [savingCalendar, setSavingCalendar]       = useState(false);
 
   useEffect(() => {
     async function check() {
@@ -47,6 +52,29 @@ export default function IntegrationsPage() {
       .then(e => { if (e) setCalendarSyncUnlocked(e.calendarSync); })
       .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!calendarConnected) return;
+    setCalendarsLoading(true);
+    fetch('/api/google-calendar/list')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) { setCalendars(d.calendars || []); setSelectedCalendarId(d.selected || 'primary'); }
+      })
+      .catch(() => {})
+      .finally(() => setCalendarsLoading(false));
+  }, [calendarConnected]);
+
+  async function saveCalendarChoice(calendarId: string) {
+    setSelectedCalendarId(calendarId);
+    setSavingCalendar(true);
+    await fetch('/api/google-calendar/list', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ calendarId }),
+    }).catch(() => {});
+    setSavingCalendar(false);
+  }
 
   async function connectGoogleCalendar() {
     setCalLoading(true);
@@ -148,10 +176,33 @@ export default function IntegrationsPage() {
                 : <span className="flex items-center gap-1 text-xs text-muted-foreground"><XCircle className="h-3.5 w-3.5"/> Not connected</span>}
             </div>
             <p className="text-sm text-muted-foreground">Import appointments from your Google Calendar into Kith. Read-only — Kith never writes to or edits your calendar.</p>
+            {calendarConnected && (
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Sync appointments from</label>
+                {calendarsLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin"/> Loading your calendars…</div>
+                ) : (
+                  <>
+                    <select value={selectedCalendarId} onChange={e => saveCalendarChoice(e.target.value)}
+                      disabled={savingCalendar}
+                      className="w-full max-w-sm rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-60">
+                      {calendars.map(c => (
+                        <option key={c.id} value={c.id}>{c.summary}{c.primary ? ' (primary / personal)' : ''}</option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      Pick a dedicated clinic/work calendar if you have one — syncing from your primary calendar imports personal events too.
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
             {!calendarConnected && !calendarSyncUnlocked && (
-              <a href="/settings/billing" className="mt-1.5 inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700">
-                <Lock className="h-3 w-3" /> Requires Pro or higher — view plans
-              </a>
+              <LockedFeatureButton requiredPlan="pro" featureLabel="Google Calendar sync + auto-created Meet links" className="mt-1.5">
+                <span className="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-700">
+                  <Lock className="h-3 w-3" /> Requires Pro or higher — view plans
+                </span>
+              </LockedFeatureButton>
             )}
           </div>
           {!calendarConnected && !calendarSyncUnlocked ? (

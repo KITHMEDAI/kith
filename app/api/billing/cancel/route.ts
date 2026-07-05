@@ -7,7 +7,7 @@
  * back to the Free tier. Never a hard, immediate lockout.
  */
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getRazorpayClient, razorpayConfigured } from '@/lib/razorpay';
 
 export async function POST() {
@@ -27,6 +27,7 @@ export async function POST() {
     }
   }
 
-  await supabase.from('therapists').update({ subscription_status: 'cancelled' }).eq('id', therapist.id);
+  // Service-role write — see 008_protect_billing_columns.sql.
+  await createServiceRoleClient().from('therapists').update({ subscription_status: 'cancelled' }).eq('id', therapist.id);
   return NextResponse.json({ ok: true });
 }

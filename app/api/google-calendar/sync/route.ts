@@ -57,7 +57,7 @@ export async function POST() {
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('id, google_calendar_vault_secret_id')
+    .select('id, google_calendar_vault_secret_id, google_calendar_id')
     .eq('user_id', user.id)
     .single();
 
@@ -74,7 +74,7 @@ export async function POST() {
 
   let events, refreshedTokens;
   try {
-    ({ events, refreshedTokens } = await syncCalendarAppointments(tokens));
+    ({ events, refreshedTokens } = await syncCalendarAppointments(tokens, therapist.google_calendar_id || 'primary'));
   } catch (err) {
     console.error('[google-calendar/sync]', err);
     return NextResponse.json({ error: 'Could not reach Google Calendar — please reconnect and try again.' }, { status: 502 });

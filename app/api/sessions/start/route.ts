@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getRealtimeToken } from '@/lib/deepgram';
 import { getEntitlements } from '@/lib/entitlements';
 import { NextResponse } from 'next/server';
@@ -104,7 +104,12 @@ export async function POST(request: Request) {
     }
 
     // ── Create session record ───────────────────────────────────────────────
-    const { data: session, error: sessionError } = await supabase
+    // Service-role insert: `sessions` RLS only grants SELECT to authenticated
+    // users (009_lock_down_sessions_table.sql) — otherwise a doctor could
+    // insert session rows directly via the client SDK, bypassing the cap
+    // check above entirely.
+    const service = createServiceRoleClient();
+    const { data: session, error: sessionError } = await service
       .from('sessions')
       .insert({
         therapist_id: therapist.id,
@@ -118,7 +123,7 @@ export async function POST(request: Request) {
 
     // ── Update appointment to in_session ────────────────────────────────────
     if (appointmentId) {
-      await supabase
+      await service
         .from('appointments')
         .update({ status: 'in_session', session_id: session.id })
         .eq('id', appointmentId);

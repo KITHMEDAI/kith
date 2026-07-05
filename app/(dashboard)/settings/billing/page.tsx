@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { CreditCard, CheckCircle2, Zap, Building2, Loader2, Gift, Sparkles } from 'lucide-react';
 import { PLAN_FEATURES, SESSION_DURATION_CAPS } from '@/lib/entitlements';
@@ -38,7 +39,17 @@ const PAID_PLANS: Array<{
 ];
 
 export default function BillingPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-6 w-6 animate-spin text-violet-500" /></div>}>
+      <BillingPageInner />
+    </Suspense>
+  );
+}
+
+function BillingPageInner() {
   const supabase = createClientSupabaseClient();
+  const searchParams = useSearchParams();
+  const highlight = searchParams.get('highlight'); // 'pro' | 'ultra' — from a contextual "Enable X" upgrade link
   const [info, setInfo] = useState<BillingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [interval, setInterval_] = useState<Interval>('monthly');
@@ -90,6 +101,13 @@ export default function BillingPage() {
   }
 
   useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scroll the specific plan into view when arriving from a contextual
+  // "Enable Pro/Ultra" upgrade link elsewhere in the app.
+  useEffect(() => {
+    if (!highlight || loading) return;
+    document.getElementById(`plan-${highlight}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlight, loading]);
 
   const trialDaysLeft = info?.trial_ends_at
     ? Math.max(0, Math.ceil((new Date(info.trial_ends_at).getTime() - Date.now()) / 86400000))
@@ -271,11 +289,13 @@ export default function BillingPage() {
         {/* Pro / Ultra */}
         {PAID_PLANS.map(plan => {
           const isCurrent = isActivePaid && info?.subscription_plan === plan.key;
+          const isHighlighted = highlight === plan.key;
           const Icon = plan.icon;
           const price = PRICING[plan.key][interval];
           return (
-            <div key={plan.key}
-              className={`rounded-2xl border relative flex flex-col px-6 pb-6 ${plan.recommended ? 'pt-9 border-violet-400 bg-violet-50/70 shadow-md' : 'pt-6 border-white/40 bg-white/60 shadow-sm'} backdrop-blur-md`}>
+            <div key={plan.key} id={`plan-${plan.key}`}
+              className={`rounded-2xl border relative flex flex-col px-6 pb-6 transition-shadow ${plan.recommended ? 'pt-9 border-violet-400 bg-violet-50/70 shadow-md' : 'pt-6 border-white/40 bg-white/60 shadow-sm'} backdrop-blur-md`}
+              style={isHighlighted ? { boxShadow: '0 0 0 3px rgba(124,58,237,0.6), 0 20px 40px rgba(124,58,237,0.25)' } : undefined}>
               {plan.recommended && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="whitespace-nowrap bg-violet-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm">MOST POPULAR</span>

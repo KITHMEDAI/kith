@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Loader2, ChevronDown, Search, UserPlus, Check, AlertTriangle, Repeat, Video, Lock } from 'lucide-react';
 import type { Patient } from '@/types';
+import LockedFeatureButton from '@/components/upgrade/LockedFeatureButton';
 
 interface DayAppt {
   id: string;
@@ -383,9 +384,11 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                 <option value="phone">Phone</option>
               </select>
               {onlineLocked && (
-                <a href="/settings/billing" className="mt-1 flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
-                  <Lock className="h-3 w-3" /> Online sessions need Pro or higher
-                </a>
+                <LockedFeatureButton requiredPlan="pro" featureLabel="Online sessions with automatic notetaker bot" className="mt-1">
+                  <span className="flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
+                    <Lock className="h-3 w-3" /> Online sessions need Pro or higher
+                  </span>
+                </LockedFeatureButton>
               )}
             </div>
           </div>}

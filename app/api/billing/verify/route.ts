@@ -7,7 +7,7 @@
  * hmac(order_id + '|' + payment_id).
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getRazorpayClient, razorpayConfigured, type PaidTier, type BillingInterval } from '@/lib/razorpay';
 import crypto from 'crypto';
 
@@ -53,7 +53,10 @@ export async function POST(req: NextRequest) {
   const { data: therapist } = await supabase.from('therapists').select('id').eq('user_id', user.id).single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });
 
-  await supabase
+  // Service-role write: a BEFORE UPDATE trigger (008_protect_billing_columns.sql)
+  // reverts billing columns on any update that isn't made as service_role, to
+  // stop a doctor from setting their own subscription_plan via the client SDK.
+  await createServiceRoleClient()
     .from('therapists')
     .update({
       subscription_plan: tier,

@@ -11,6 +11,7 @@ import {
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { parsePatientFile } from '@/lib/parse-patient-file';
 import KithLockup from '@/components/brand/KithLockup';
+import { PLAN_FEATURES } from '@/lib/entitlements';
 
 interface Therapist {
   id: string;
@@ -23,7 +24,7 @@ interface Therapist {
   onboarding_completed: boolean;
 }
 
-type StepId = 'welcome' | 'profile' | 'calendar' | 'records' | 'done';
+type StepId = 'welcome' | 'profile' | 'calendar' | 'records' | 'plan' | 'done';
 
 interface Step { id: StepId; label: string; optional?: boolean }
 
@@ -32,8 +33,15 @@ const STEPS: Step[] = [
   { id: 'profile',  label: 'Your practice' },
   { id: 'calendar', label: 'Google Calendar', optional: true },
   { id: 'records',  label: 'Import patients',  optional: true },
+  { id: 'plan',     label: 'Choose your plan' },
   { id: 'done',     label: 'All set!' },
 ];
+
+type PlanKey = 'free' | 'pro' | 'ultra';
+// USD display pricing — actually charged as the INR equivalent via Razorpay
+// (see lib/razorpay.ts PLAN_PRICING). Monthly only here — annual stays a
+// billing-page-only decision, kept simple during onboarding.
+const PLAN_PRICE: Record<PlanKey, number> = { free: 0, pro: 20, ultra: 50 };
 
 const DESIGNATIONS = [
   'Clinical Psychologist', 'Counselling Psychologist', 'Psychiatrist',
@@ -78,6 +86,20 @@ export default function OnboardingPage() {
   const [finishing, setFinishing] = useState(false);
   const [finishError, setFinishError] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+
+  // Plan step state
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey>('free');
+  const [subscribing, setSubscribing] = useState(false);
+  const [planError, setPlanError] = useState('');
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => setRazorpayLoaded(true);
+    document.body.appendChild(script);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -241,6 +263,50 @@ export default function OnboardingPage() {
       setUploadError(e instanceof Error ? e.message : 'Could not read that file.');
     } finally {
       setUploading(false);
+    }
+  };
+
+  // ── Plan selection ───────────────────────────────────────────────────────
+  const choosePlan = async (plan: PlanKey) => {
+    setSelectedPlan(plan);
+    if (plan === 'free') { nextStep(); return; }
+
+    if (!razorpayLoaded) { setPlanError('Payment system still loading — try again in a moment.'); return; }
+    setSubscribing(true);
+    setPlanError('');
+    try {
+      const res = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier: plan, interval: 'monthly' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Could not start checkout');
+
+      const options = {
+        key: data.key,
+        subscription_id: data.subscription_id,
+        name: 'Kith Clinical Workspace',
+        description: `${plan === 'ultra' ? 'Ultra' : 'Pro'} plan — billed monthly`,
+        theme: { color: '#7c3aed' },
+        prefill: data.prefill || {},
+        handler: async (response: { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string }) => {
+          const verify = await fetch('/api/billing/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...response, tier: plan, interval: 'monthly' }),
+          });
+          setSubscribing(false);
+          if (verify.ok) nextStep();
+          else setPlanError('Payment received but verification failed — contact support, we’ll sort it out.');
+        },
+        modal: { ondismiss: () => setSubscribing(false) },
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new (window as any).Razorpay(options).open();
+    } catch (e) {
+      setPlanError(e instanceof Error ? e.message : 'Checkout failed');
+      setSubscribing(false);
     }
   };
 
@@ -482,7 +548,7 @@ export default function OnboardingPage() {
                     <BadgeCheck className="h-6 w-6 text-emerald-500 flex-none"/>
                     <div>
                       <p className="text-sm font-bold text-emerald-700">Google Calendar connected</p>
-                      <p className="text-xs text-emerald-600">Two-way sync is active — you&apos;re all set.</p>
+                      <p className="text-xs text-emerald-600">Read-only import is active — your events flow in automatically.</p>
                     </div>
                   </div>
                 )}
@@ -497,7 +563,7 @@ export default function OnboardingPage() {
 
                 {/* Benefits card */}
                 <div className="rounded-2xl border border-violet-100 bg-white/70 backdrop-blur-sm p-4 space-y-2.5">
-                  {['Appointments auto-appear in your Google Calendar', 'Session reminders sent automatically', 'Rescheduling syncs in real-time', 'Patient names anonymised for privacy'].map(item => (
+                  {['Existing calendar events import as Kith appointments', 'No manual entry or spreadsheets needed', 'Read-only — Kith never creates, edits, or deletes anything on your calendar'].map(item => (
                     <div key={item} className="flex items-center gap-2.5 text-sm text-slate-600">
                       <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-100">
                         <Check className="h-3 w-3 text-emerald-600"/>
@@ -641,6 +707,52 @@ export default function OnboardingPage() {
             </div>
           )}
 
+          {/* ─ Plan selection ─ */}
+          {currentStep === 'plan' && (
+            <div className="flex flex-col flex-1">
+              <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-violet-50 mb-5">
+                <Sparkles className="h-7 w-7 text-violet-500"/>
+              </div>
+              <h1 className="text-2xl font-bold text-slate-900">Choose your plan</h1>
+              <p className="mt-1 mb-5 text-slate-500 text-sm">
+                Start free, or unlock more from day one — cancel anytime, no lock-in.
+              </p>
+
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {(['free', 'pro', 'ultra'] as PlanKey[]).map(plan => (
+                  <div key={plan}
+                    className={`rounded-2xl border p-4 flex flex-col ${plan === 'ultra' ? 'border-violet-400 bg-violet-50/70 shadow-md' : 'border-slate-200 bg-white/70'}`}>
+                    <p className="text-sm font-bold text-slate-900 capitalize">{plan}</p>
+                    <p className="text-2xl font-bold text-slate-900 mt-1">${PLAN_PRICE[plan]}<span className="text-xs font-normal text-slate-400">{plan !== 'free' ? '/mo' : ''}</span></p>
+                    <ul className="space-y-1.5 mt-3 mb-4 flex-1">
+                      {PLAN_FEATURES[plan].map(f => (
+                        <li key={f} className="text-[11px] text-slate-500 leading-snug flex gap-1.5">
+                          <Check className="h-3 w-3 text-emerald-500 flex-none mt-0.5"/>{f}
+                        </li>
+                      ))}
+                    </ul>
+                    <button onClick={() => choosePlan(plan)} disabled={subscribing}
+                      className={`w-full py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-60 ${
+                        plan === 'ultra' ? 'bg-violet-600 text-white hover:bg-violet-700'
+                        : plan === 'free' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-slate-800 text-white hover:bg-slate-700'
+                      }`}>
+                      {subscribing && selectedPlan === plan ? <Loader2 className="h-3.5 w-3.5 animate-spin inline"/> : plan === 'free' ? 'Continue free' : `Subscribe to ${plan === 'ultra' ? 'Ultra' : 'Pro'}`}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {planError && (
+                <p className="mt-3 text-xs text-red-600">{planError}</p>
+              )}
+
+              <p className="mt-4 text-center text-[11px] text-slate-400">
+                You can change your plan anytime from Settings.
+              </p>
+            </div>
+          )}
+
           {/* ─ Done ─ */}
           {currentStep === 'done' && (
             <div className="flex flex-col flex-1">
@@ -657,8 +769,9 @@ export default function OnboardingPage() {
                   { done: true,                    text: 'Clinical profile created',    sub: therapist.display_name },
                   { done: true,                    text: 'AI note generation ready',    sub: 'SOAP notes + summaries' },
                   { done: completed.has('profile'), text: 'Practice details saved',     sub: therapist.clinic_name || 'Profile complete' },
-                  { done: completed.has('calendar'), text: 'Google Calendar',           sub: calConnected ? 'Two-way sync active' : 'Connect anytime in Settings → Integrations' },
+                  { done: completed.has('calendar'), text: 'Google Calendar',           sub: calConnected ? 'Read-only import active' : 'Connect anytime in Settings → Integrations' },
                   { done: completed.has('records'),  text: 'Patient records',           sub: completed.has('records') ? 'Import configured' : 'Add patients from the Patients tab' },
+                  { done: completed.has('plan'),     text: 'Plan selected',              sub: `${selectedPlan[0].toUpperCase()}${selectedPlan.slice(1)}${selectedPlan === 'free' ? ' — upgrade anytime' : ''}` },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3 text-sm">
                     <span className={`flex-none font-bold mt-0.5 ${item.done ? 'text-emerald-500' : 'text-slate-300'}`}>

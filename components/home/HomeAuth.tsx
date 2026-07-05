@@ -26,7 +26,7 @@ export default function HomeAuth() {
       </p>
 
       <p className="text-center text-xs text-purple-300/30">
-        14-day Pro trial · Free plan forever · No card required
+        14-day Ultra trial · Free plan forever · No card required
       </p>
     </div>
   );

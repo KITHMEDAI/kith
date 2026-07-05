@@ -50,13 +50,19 @@ export async function POST(req: NextRequest) {
   const soap = s.soap_note || {};
   const sessionDate = new Date(s.started_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
+  // Escape first (this is AI-/transcript-derived text going straight into an
+  // HTML string), THEN apply **term** -> <strong> so the AI's highlighted
+  // focus word actually renders bold instead of showing literal asterisks.
+  const escapeHtml = (str: string) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const boldify = (str: string) => escapeHtml(str).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
   // Notes come back as short points joined by ' • '. Render multi-point fields
   // as a bullet list; single points stay as a plain line.
   const body = (text?: string) => {
     if (!text) return '';
     const parts = text.split(/\s*•\s*|\n/).map(p => p.replace(/^\s*[-*]\s*/, '').trim()).filter(Boolean);
-    if (parts.length <= 1) return `<div class="section-body">${text}</div>`;
-    return `<ul class="key-points">${parts.map(p => `<li>${p}</li>`).join('')}</ul>`;
+    if (parts.length <= 1) return `<div class="section-body">${boldify(text)}</div>`;
+    return `<ul class="key-points">${parts.map(p => `<li>${boldify(p)}</li>`).join('')}</ul>`;
   };
 
   // Generate clean HTML and use the browser's print-to-PDF
@@ -108,7 +114,7 @@ export async function POST(req: NextRequest) {
   <div class="section">
     <div class="section-title">Key Points</div>
     <ul class="key-points">
-      ${s.key_points.map(p => `<li>${p}</li>`).join('')}
+      ${s.key_points.map(p => `<li>${boldify(p)}</li>`).join('')}
     </ul>
   </div>` : ''}
 
