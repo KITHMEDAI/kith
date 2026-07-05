@@ -5,10 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Couples/family display names ("Rina & Dev Sharma") include connector words
+// like "&" — filter to actual letters so initials read as "RD", not "R&".
 export function getInitials(name: string): string {
   return name
     .split(' ')
     .map((n) => n[0])
+    .filter((c) => /[a-zA-Z]/.test(c))
     .join('')
     .toUpperCase()
     .slice(0, 2);

@@ -111,7 +111,8 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled }:
           <div className="space-y-2">
             <Label>Notify patient via</Label>
             <div className="flex gap-2 flex-wrap">
-              {[{ id: 'email', label: 'Email', icon: Mail }, { id: 'sms', label: 'SMS', icon: MessageSquare }, { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare }].map(ch => (
+              {/* SMS deprioritized for now — see MessagePatientButton.tsx comment. */}
+              {[{ id: 'email', label: 'Email', icon: Mail }, { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare }].map(ch => (
                 <button key={ch.id} type="button" onClick={() => toggleChannel(ch.id)}
                   className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${channels.includes(ch.id) ? 'bg-teal-50 border-teal-300 text-teal-700' : 'bg-muted border-border text-muted-foreground hover:bg-muted/80'}`}>
                   <ch.icon className="h-3.5 w-3.5" />{ch.label}

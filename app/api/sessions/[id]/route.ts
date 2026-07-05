@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { getEntitlements } from '@/lib/entitlements';
 
 export async function GET(
   req: NextRequest,
@@ -11,7 +12,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data: therapist } = await supabase
-    .from('therapists').select('id').eq('user_id', user.id).single();
+    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });
 
   // Use service role to fetch — bypasses any RLS edge-cases
@@ -23,7 +24,7 @@ export async function GET(
       soap_note, key_points, session_summary, ai_suggestions,
       homework_assigned, next_session_plan,
       manual_notes, resource_suggestions, therapist_id,
-      patient:patients(display_name, diagnosis, date_of_birth)
+      patient:patients(id, display_name, diagnosis, date_of_birth, phone, whatsapp_number)
     `)
     .eq('id', params.id)
     .single();
@@ -37,7 +38,7 @@ export async function GET(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  return NextResponse.json({ session });
+  return NextResponse.json({ session, canMessagePatient: getEntitlements(therapist).patientMessaging });
 }
 
 export async function PATCH(

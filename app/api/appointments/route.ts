@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createMeetEvent, getTokensFromVault } from '@/lib/google-calendar';
 import { getEntitlements, upgradeMessage } from '@/lib/entitlements';
+import { sendNotification } from '@/lib/notify';
 import { addWeeks, addMonths } from 'date-fns';
 import { z } from 'zod';
 
@@ -181,6 +182,40 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase.from('appointments').insert(rows).select('id');
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     createdIds = (data || []).map(d => d.id);
+
+    // Auto-notify the patient with the session time + join link, right away —
+    // an online session is useless to them if they never get the link. Not
+    // gated behind the Ultra messaging entitlement: this is core to the
+    // "online sessions" feature Pro+ already unlocks, not the separate
+    // ad-hoc patient-messaging upsell.
+    if (modality === 'video' && resolvedMeetingUrl && createdIds.length > 0) {
+      try {
+        const [{ data: pt }, { data: therapistInfo }] = await Promise.all([
+          supabase.from('patients').select('display_name, phone, whatsapp_number, email').eq('id', patient_id).single(),
+          supabase.from('therapists').select('display_name').eq('id', therapist.id).single(),
+        ]);
+        if (pt) {
+          const firstTime = toInsert[0].at.toLocaleString('en-IN', {
+            weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true,
+          });
+          const recurringNote = recurrence ? ` (repeats ${recurrence.frequency})` : '';
+          const message = `Hi ${pt.display_name}, your online session with ${therapistInfo?.display_name || 'your therapist'} is booked for ${firstTime}${recurringNote}. Join here: ${resolvedMeetingUrl}`;
+          await sendNotification({
+            to: {
+              email: pt.email || undefined,
+              phone: pt.phone || undefined,
+              whatsapp: pt.whatsapp_number || pt.phone || undefined,
+            },
+            subject: 'Your online session — Kith',
+            message,
+            // SMS deprioritized for now — see MessagePatientButton.tsx comment.
+            channels: ['email', 'whatsapp'],
+          });
+        }
+      } catch (err) {
+        console.error('[appointments] booking notification failed:', err);
+      }
+    }
   }
 
   return NextResponse.json(

@@ -8,6 +8,9 @@ import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supab
 import { ProcessingBanner } from '@/components/patients/ProcessingBanner';
 import StartSessionButton from '@/components/patients/StartSessionButton';
 import EditPatientButton from '@/components/patients/EditPatientButton';
+import MessagePatientButton from '@/components/patients/MessagePatientButton';
+import { getInitials } from '@/lib/utils';
+import { getEntitlements } from '@/lib/entitlements';
 import type { Patient } from '@/types';
 
 interface SessionRow {
@@ -19,10 +22,6 @@ interface SessionRow {
   key_points: string[] | null;
   status: string;
   manual_notes: string | null;
-}
-
-function initials(name: string) {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
 function avatarBg(name: string) {
@@ -49,8 +48,9 @@ export default async function PatientProfilePage({ params }: { params: { id: str
 
   // Get therapist ID for ownership verification
   const { data: therapist } = await supabase
-    .from('therapists').select('id').eq('user_id', user.id).single();
+    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
   if (!therapist) redirect('/login');
+  const canMessagePatients = getEntitlements(therapist).patientMessaging;
 
   // Use service role for all data queries — no RLS surprises
   const service = createServiceRoleClient();
@@ -97,7 +97,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div className={`h-11 w-11 rounded-xl ${avatarBg(p.display_name)} flex items-center justify-center text-sm font-bold text-white`}>
-            {initials(p.display_name)}
+            {getInitials(p.display_name)}
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground">{p.display_name}</h1>
@@ -196,6 +196,15 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                   </div>
                 )}
               </div>
+              {(p.phone || p.whatsapp_number) && (
+                <MessagePatientButton
+                  patientId={p.id}
+                  patientName={p.display_name}
+                  hasPhone={!!p.phone}
+                  hasWhatsapp={!!(p.whatsapp_number || p.phone)}
+                  entitled={canMessagePatients}
+                />
+              )}
             </div>
           )}
 

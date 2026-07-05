@@ -1,0 +1,46 @@
+'use client';
+
+import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+
+interface Props {
+  requiredPlan: 'pro' | 'ultra';
+  featureLabel: string; // e.g. "WhatsApp & SMS messaging to patients"
+  children: React.ReactNode; // the visible locked trigger (icon + label)
+  className?: string;
+}
+
+const PLAN_NAME: Record<Props['requiredPlan'], string> = { pro: 'Pro', ultra: 'Ultra' };
+const PLAN_PRICE: Record<Props['requiredPlan'], string> = { pro: '$20/mo', ultra: '$50/mo' };
+
+// Shared "locked feature" affordance — shows an inline upgrade card naming the
+// SPECIFIC plan and price that unlocks this exact feature, on hover (desktop)
+// or click (touch devices), rather than a generic link to the billing page.
+export default function LockedFeatureButton({ requiredPlan, featureLabel, children, className }: Props) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="relative inline-block" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <button type="button" onClick={() => setShow(s => !s)} className={className}>
+        {children}
+      </button>
+      {show && (
+        <div className="absolute z-50 top-full mt-2 left-0 w-72 rounded-xl p-4 shadow-xl text-left"
+          style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.35)' }}>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Sparkles className="h-4 w-4 text-violet-400 flex-none" />
+            <p className="text-sm font-semibold text-white">Requires {PLAN_NAME[requiredPlan]}</p>
+          </div>
+          <p className="text-xs text-slate-400 mb-3 leading-relaxed">
+            {featureLabel} is available on the {PLAN_NAME[requiredPlan]} plan ({PLAN_PRICE[requiredPlan]}).
+          </p>
+          <a href={`/settings/billing?highlight=${requiredPlan}`}
+            className="block text-center rounded-lg py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)' }}>
+            Enable {PLAN_NAME[requiredPlan]}
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}

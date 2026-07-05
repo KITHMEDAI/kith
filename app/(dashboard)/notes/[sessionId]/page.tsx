@@ -7,6 +7,7 @@ import {
   AlertTriangle, Lightbulb, BookOpen, Dumbbell, Smartphone,
   Film, User, Calendar, Clock, RefreshCw,
 } from 'lucide-react';
+import SendToPatientAction from '@/components/patients/SendToPatientAction';
 
 interface SOAPNote {
   subjective?: string;
@@ -34,7 +35,23 @@ interface SessionDetail {
     exercises?: { name: string; description: string; frequency: string }[];
     apps?: { name: string; platform: string; reason: string }[];
   } | null;
-  patient: { display_name: string; diagnosis: string[]; date_of_birth: string | null } | null;
+  patient: { id: string; display_name: string; diagnosis: string[]; date_of_birth: string | null; phone: string | null; whatsapp_number: string | null } | null;
+}
+
+// The AI wraps the single most clinically load-bearing word/phrase per bullet
+// in **term** — this renders those as bold instead of showing literal
+// asterisks, so the focus word actually pops when scanning.
+function Highlighted({ text }: { text: string }) {
+  const parts = text.split(/\*\*(.+?)\*\*/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        i % 2 === 1
+          ? <strong key={i} className="font-semibold text-white">{part}</strong>
+          : <span key={i}>{part}</span>
+      )}
+    </>
+  );
 }
 
 // Renders clinician text that may be a set of "- " bullet lines as a scannable
@@ -43,14 +60,14 @@ function ClinicalText({ text, dot = 'bg-teal-400' }: { text: string; dot?: strin
   // Points come back joined by ' • ' (or occasionally newlines); split on either.
   const lines = text.split(/\s*•\s*|\n/).map(l => l.replace(/^\s*[-*]\s*/, '').trim()).filter(Boolean);
   if (lines.length <= 1) {
-    return <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{text}</p>;
+    return <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap"><Highlighted text={text} /></p>;
   }
   return (
     <ul className="space-y-2">
       {lines.map((l, i) => (
         <li key={i} className="flex items-start gap-2.5 text-sm text-gray-200 leading-snug">
           <span className={`w-1.5 h-1.5 rounded-full ${dot} mt-1.5 shrink-0`} />
-          {l}
+          <Highlighted text={l} />
         </li>
       ))}
     </ul>
@@ -70,6 +87,7 @@ export default function NoteDetailPage() {
   const [copied, setCopied] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [activeTab, setActiveTab] = useState<'soap' | 'resources' | 'plan'>('soap');
+  const [canMessagePatient, setCanMessagePatient] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadSession = useCallback(async () => {
@@ -84,6 +102,7 @@ export default function NoteDetailPage() {
       const data: SessionDetail = json.session;
       setSession(data);
       setEditedSOAP(data.soap_note || {});
+      setCanMessagePatient(!!json.canMessagePatient);
       setFetchError(null);
       setLoading(false);
 
@@ -308,7 +327,7 @@ export default function NoteDetailPage() {
               {session.key_points.map((pt, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 shrink-0" />
-                  {pt}
+                  <Highlighted text={pt} />
                 </li>
               ))}
             </ul>
@@ -377,14 +396,25 @@ export default function NoteDetailPage() {
             {/* AI suggestions */}
             {session.ai_suggestions?.length ? (
               <div className="bg-[#1a2332] border border-white/8 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-300 mb-1 flex items-center gap-2">
                   <Lightbulb className="w-4 h-4 text-amber-400" /> AI Clinical Suggestions
                 </h3>
+                <p className="text-[11px] text-gray-500 mb-3">These are notes for you — only send one to the patient if clinically appropriate.</p>
                 <ul className="space-y-2">
                   {session.ai_suggestions.map((s, i) => (
-                    <li key={i} className="text-sm text-gray-300 flex items-start gap-2">
+                    <li key={i} className="text-sm text-gray-300 flex items-start gap-2 flex-wrap">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-                      {s}
+                      <span className="flex-1 min-w-0"><Highlighted text={s} /></span>
+                      {session.patient && (
+                        <SendToPatientAction
+                          text={s}
+                          patientId={session.patient.id}
+                          patientName={session.patient.display_name}
+                          hasPhone={!!session.patient.phone}
+                          hasWhatsapp={!!(session.patient.whatsapp_number || session.patient.phone)}
+                          entitled={canMessagePatient}
+                        />
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -475,7 +505,19 @@ export default function NoteDetailPage() {
           <div className="space-y-4">
             {session.homework_assigned && (
               <div className="bg-[#1a2332] border border-white/8 rounded-xl p-5">
-                <h3 className="text-sm font-semibold text-gray-300 mb-2">Homework Assigned</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-gray-300">Homework Assigned</h3>
+                  {session.patient && (
+                    <SendToPatientAction
+                      text={session.homework_assigned}
+                      patientId={session.patient.id}
+                      patientName={session.patient.display_name}
+                      hasPhone={!!session.patient.phone}
+                      hasWhatsapp={!!(session.patient.whatsapp_number || session.patient.phone)}
+                      entitled={canMessagePatient}
+                    />
+                  )}
+                </div>
                 <ClinicalText text={session.homework_assigned} />
               </div>
             )}

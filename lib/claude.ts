@@ -26,6 +26,32 @@ function anthropic() {
 const HAIKU  = 'claude-haiku-4-5-20251001';   // Layer 1 — transcript repair + compression
 const SONNET = 'claude-sonnet-4-6';            // Layer 2 — final clinical synthesis
 
+// ─── Public: plain-English rewrite for sending clinical text to a patient ─────
+// Homework/suggestions are written for a clinician (jargon, ' • ' bullets,
+// **bold** markup) — never send that verbatim to a patient. This rewrites a
+// single fragment as a short, warm, second-person message a non-clinician can
+// understand, changing nothing about the actual content/instructions.
+export async function toPlainEnglish(text: string, patientFirstName?: string): Promise<string> {
+  if (USE_MOCK) return text.replace(/\s*•\s*/g, '. ').replace(/\*\*(.+?)\*\*/g, '$1');
+
+  const client = anthropic();
+  if (!client) return text.replace(/\s*•\s*/g, '. ').replace(/\*\*(.+?)\*\*/g, '$1');
+
+  const res = await client.messages.create({
+    model: HAIKU,
+    max_tokens: 300,
+    messages: [{
+      role: 'user',
+      content: `Rewrite this clinical note fragment as a short, warm message sent directly to the patient${patientFirstName ? ` (${patientFirstName})` : ''}. Plain English only — no clinical jargon, no bullet markup ('•'), no markdown/asterisks. Second person ("you"). 1-4 short sentences. Do NOT add any instruction, detail, or encouragement that isn't already in the original — only rephrase what's there. Return ONLY the rewritten message, nothing else.
+
+ORIGINAL: ${text}`,
+    }],
+  });
+
+  const out = res.content[0]?.type === 'text' ? res.content[0].text.trim() : text;
+  return out || text;
+}
+
 // ─── Stage 1: Haiku transcript compression ────────────────────────────────────
 async function compressTranscript(
   client: any,
@@ -144,7 +170,7 @@ Return ONLY valid JSON:
     "areas_of_concern": ["short points, ≤ 12 words — cite actual risk signals, avoidance, regression"],
     "narrative": "1 short sentence on trajectory toward goals"
   },
-  "ai_suggestions": ["2-4 clinically neutral observations tied to THIS session. ACTION-FIRST verb, ≤ 14 words each. If patient is progressing well with no concerns, return a single entry like 'Session trajectory positive — no clinical action required' or a medically appropriate all-clear. Never judge the patient or their choices."],
+  "ai_suggestions": ["0-3 observations — ONLY ones you are genuinely confident are clinically useful and specific to what happened THIS session. If nothing in the brief clearly warrants a suggestion, or you're not confident, return an EMPTY array. NEVER pad with a generic or filler entry (e.g. 'continue monitoring', 'session trajectory positive') just to have something to show. ACTION-FIRST verb, ≤ 14 words each. Never judge the patient or their choices."],
   "prescription_notes": {
     "medication_relevant": false,
     "note": null,
@@ -172,7 +198,7 @@ Return ONLY valid JSON:
     "indicators": [],
     "action_required": false,
     "recommended_action": null,
-    "safety_plan_needed": false
+    "safety_plan_needed": "true if a safety plan is clinically indicated for this presentation — SET THIS TRUE even if the brief says one was already built/discussed in-session (that means it IS needed and IS documented, not that the need has passed). Only false when risk is low and no safety plan came up at all."
   },
   "homework_assigned": "1-2 short points separated by ' • ', measurable. e.g. 'Thought record: 1 negative thought/day Mon-Fri'",
   "next_session_plan": "1-2 short points separated by ' • ', specific focus for next session",
@@ -181,6 +207,8 @@ Return ONLY valid JSON:
 
 STRICT RULES:
 - BREVITY IS MANDATORY. Short bullets only — no paragraphs, no filler words, no hedging.
+- NEVER write a vague/templated line ("patient reports some concerns", "continue monitoring progress"). If the brief has no specific detail for a field, write the shortest TRUE statement instead (e.g. "No new subjective concerns reported") — never invent specifics to sound complete.
+- HIGHLIGHTING (MANDATORY, no exceptions): every single point across soap_note, key_points, homework_assigned, and next_session_plan MUST wrap the one most clinically load-bearing word or short phrase in **double asterisks** — e.g. "Rumination re: **supervisor conflict** • Mood self-rated **4/10**". Before returning, check EACH point individually — if a point has zero ** markers, go back and add one. Exactly one per point, never more than one, never a generic connector word.
 - NEVER put a literal newline character inside any JSON string — it breaks parsing. Keep every value on ONE line; separate points with ' • '.
 - SOAP / homework / next_session_plan: multiple short points joined by ' • ' on a single line.
 - Use ${initials} always, never full name.
@@ -403,12 +431,13 @@ ${recent}
 
 Return ONLY valid JSON — no markdown:
 {
-  "key_points": ["3-4 specific real-time observations about the PATIENT's state — name what was just said or observed, e.g. 'Patient shifted to past tense when describing relationship — possible dissociation'"],
+  "key_points": ["0-4 specific real-time observations about the PATIENT's state — ONLY include one if grounded in something actually said/observed in the dialogue above. Name what was just said, e.g. 'Patient shifted to past tense when describing relationship — possible dissociation'. If the dialogue so far doesn't clearly support a real observation, return an empty array rather than guessing."],
   "risk_level": "low|moderate|high|critical",
-  "suggested_questions": ["2-3 follow-up questions the clinician should ask NEXT — grounded in the last few exchanges, not generic. E.g. 'You mentioned feeling 'stuck' — can you say more about what that feels like in your body right now?'"],
-  "treatment_suggestions": ["1-2 in-session technique suggestions based on what's emerging — e.g. 'Consider grounding exercise — patient's affect escalating', 'Good moment for Socratic questioning on the 'I always fail' statement'"],
-  "mindfulness_suggestions": ["1-2 concrete exercises suited to patient's current emotional state — be specific, e.g. '4-7-8 breathing for the anxiety spike' not just 'breathing exercise'"]
-}`,
+  "suggested_questions": ["0-3 follow-up questions the clinician should ask NEXT — ONLY if grounded in the last few exchanges. E.g. 'You mentioned feeling 'stuck' — can you say more about what that feels like in your body right now?'. If nothing specific to follow up on yet, return an empty array — never a generic question."],
+  "treatment_suggestions": ["0-2 in-session technique suggestions — ONLY if something concrete is emerging that clearly calls for one, e.g. 'Consider grounding exercise — patient's affect escalating'. Empty array if not confident."],
+  "mindfulness_suggestions": ["0-2 concrete exercises suited to patient's CURRENT emotional state — be specific, e.g. '4-7-8 breathing for the anxiety spike' not just 'breathing exercise'. Empty array if nothing specific fits yet."]
+}
+Never pad any array to "have something to show" — an empty array is the correct answer when you're not confident.`,
     }],
   });
 
