@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
   //    Derive the base URL from the actual request origin first so the trigger always
   //    hits the same server/port it's running on (env is only a fallback).
   const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
-  const internalSecret = process.env.INTERNAL_API_SECRET || 'kith-internal-dev';
+  const internalSecret = process.env.INTERNAL_API_SECRET || '';
 
   // Don't await — let it run independently
   fetch(`${baseUrl}/api/sessions/process-notes`, {

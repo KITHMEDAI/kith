@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import type { TranscriptSegment } from '@/types';
 
 export const maxDuration = 30;
@@ -12,6 +13,10 @@ export type SpeakerInfo = {
 export type SpeakerMap = Record<string, SpeakerInfo>;
 
 export async function POST(req: NextRequest) {
+  const supabase = createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const body = await req.json().catch(() => ({}));
   const segments: TranscriptSegment[] = body.segments || [];
   const patientName: string = body.patientName || '';

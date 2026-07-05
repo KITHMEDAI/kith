@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { exchangeCodeForTokens, storeTokensInVault } from '@/lib/google-calendar';
 
 export async function GET(req: NextRequest) {
@@ -23,6 +23,21 @@ export async function GET(req: NextRequest) {
   // Can't store tokens yet — send to onboarding where they are logged in
   if (!therapistId || therapistId === 'pending') {
     return NextResponse.redirect(`${base}/onboarding?info=connect_calendar`);
+  }
+
+  // SECURITY: `state` is just a URL query param round-tripped through Google —
+  // fully attacker-forgeable (anyone can GET this endpoint directly with any
+  // therapistId in `state`). Require the actual logged-in session to match
+  // the therapist named in state before writing anything, so an attacker
+  // can't hijack another therapist's calendar-connection slot with their own
+  // OAuth code just by crafting the URL.
+  const authClient = createServerSupabaseClient();
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) return NextResponse.redirect(failRedirect);
+  const { data: sessionTherapist } = await authClient
+    .from('therapists').select('id').eq('user_id', user.id).single();
+  if (!sessionTherapist || sessionTherapist.id !== therapistId) {
+    return NextResponse.redirect(failRedirect);
   }
 
   try {

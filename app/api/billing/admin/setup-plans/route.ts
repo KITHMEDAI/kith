@@ -18,8 +18,10 @@ import { getRazorpayClient, razorpayConfigured, PLAN_PRICING, planEnvVarName, ty
 
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-internal-secret');
-  const expected = process.env.INTERNAL_API_SECRET || 'kith-internal-dev';
-  if (secret !== expected) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const expected = process.env.INTERNAL_API_SECRET;
+  // Fail closed if the secret isn't configured — no hardcoded fallback that
+  // would otherwise become a guessable shared backdoor.
+  if (!expected || secret !== expected) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   if (!razorpayConfigured()) {
     return NextResponse.json({ error: 'RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET not set yet' }, { status: 503 });

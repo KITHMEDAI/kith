@@ -38,7 +38,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   await service.from('sessions').update({ status: 'processing' }).eq('id', params.id);
 
   const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
-  const internalSecret = process.env.INTERNAL_API_SECRET || 'kith-internal-dev';
+  const internalSecret = process.env.INTERNAL_API_SECRET || '';
 
   fetch(`${baseUrl}/api/sessions/process-notes`, {
     method: 'POST',

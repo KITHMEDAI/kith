@@ -24,8 +24,29 @@ export async function POST(req: NextRequest) {
     .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
   if (!therapist) return NextResponse.json({ error: 'No therapist profile found' }, { status: 404 });
 
-  if (!getEntitlements(therapist).onlineSessions) {
+  const entitlements = getEntitlements(therapist);
+  if (!entitlements.onlineSessions) {
     return NextResponse.json({ error: upgradeMessage('online sessions'), code: 'PLAN_LOCKED' }, { status: 402 });
+  }
+
+  // Same monthly session cap as /api/sessions/start — online (bot) sessions
+  // must count against it too, or a Pro-tier user could get effectively
+  // unlimited sessions by always booking video instead of in-person.
+  if (entitlements.sessionCap !== -1) {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    const { count } = await supabase
+      .from('sessions')
+      .select('id', { count: 'exact', head: true })
+      .eq('therapist_id', therapist.id)
+      .gte('started_at', startOfMonth.toISOString());
+    if ((count ?? 0) >= entitlements.sessionCap) {
+      return NextResponse.json(
+        { error: `Monthly session limit reached (${entitlements.sessionCap} sessions on your ${entitlements.plan} plan). Upgrade for unlimited sessions.`, code: 'PLAN_LOCKED' },
+        { status: 402 },
+      );
+    }
   }
 
   const { appointmentId } = await req.json().catch(() => ({}));

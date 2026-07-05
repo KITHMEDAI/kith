@@ -58,7 +58,7 @@ export async function finalizeOnlineSession(sessionId: string, botId: string | n
 
   // Fire-and-forget the existing note pipeline (same as /api/sessions/end).
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
-  const internalSecret = process.env.INTERNAL_API_SECRET || 'kith-internal-dev';
+  const internalSecret = process.env.INTERNAL_API_SECRET || '';
   fetch(`${baseUrl}/api/sessions/process-notes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },

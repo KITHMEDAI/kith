@@ -18,8 +18,10 @@ export const maxDuration = 300;
 export async function POST(req: NextRequest) {
   // Internal auth — not a user-facing endpoint
   const secret = req.headers.get('x-internal-secret');
-  const expected = process.env.INTERNAL_API_SECRET || 'kith-internal-dev';
-  if (secret !== expected) {
+  const expected = process.env.INTERNAL_API_SECRET;
+  // Fail closed if the secret isn't configured — no hardcoded fallback that
+  // would otherwise become a guessable shared backdoor.
+  if (!expected || secret !== expected) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
