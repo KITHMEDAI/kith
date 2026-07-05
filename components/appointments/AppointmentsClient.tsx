@@ -245,7 +245,7 @@ export default function AppointmentsClient({ appointments: initial, patients, th
                               {p?.display_name || 'Unknown'}
                             </p>
                             <p className="text-xs text-muted-foreground/80 truncate">
-                              {p?.diagnosis?.[0]} · {appt.duration_minutes} min · {appt.modality?.replace('_',' ')}
+                              {p?.diagnosis?.[0]} · {appt.duration_minutes} min · {appt.modality === 'video' ? 'online' : appt.modality?.replace('_',' ')}
                             </p>
                           </div>
                         </div>

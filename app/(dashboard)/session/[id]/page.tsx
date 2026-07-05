@@ -7,7 +7,7 @@ import { useRealTimeTranscript } from '@/hooks/useRealTimeTranscript';
 import { formatDuration, getInitials } from '@/lib/utils';
 import {
   ArrowLeft, Mic, Square, Wifi, WifiOff, Clock,
-  Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2, AlignLeft, Sparkles,
+  Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2, AlignLeft, Sparkles, Pause,
 } from 'lucide-react';
 import Nebula from '@/components/session/Nebula';
 import type { Appointment, Patient } from '@/types';
@@ -280,10 +280,12 @@ export default function LiveSessionPage() {
     load();
   }, [params.id]); // eslint-disable-line
 
-  // Duration timer — starts when connected, stops when disconnected
+  // Duration timer — starts when connected, stops when disconnected. Doesn't
+  // reset on every (re)connect: a doctor-initiated pause/resume (or a page
+  // reload mid-session) should keep counting from where it left off, not zero
+  // out the visible clock. Only a genuinely new session resets it (handleStart).
   useEffect(() => {
     if (isConnected) {
-      setDuration(0);
       durationRef.current = setInterval(() => setDuration(d => d + 1), 1000);
     } else {
       if (durationRef.current) { clearInterval(durationRef.current); durationRef.current = null; }
@@ -295,6 +297,9 @@ export default function LiveSessionPage() {
   // timer above only ticks while the local mic is connected — online sessions
   // never call connect(), so they need their own clock keyed off bot dispatch)
   // so the per-session duration cap (plan-dependent) can be enforced either way.
+  // Doesn't reset while merely paused — a break shouldn't refund the doctor a
+  // fresh cap on resume, it should just stop adding to the total. Only a
+  // genuinely new session resets it (handleStart/handleStartOnline).
   const [elapsedSec, setElapsedSec] = useState(0);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
@@ -303,7 +308,6 @@ export default function LiveSessionPage() {
       if (!elapsedRef.current) elapsedRef.current = setInterval(() => setElapsedSec(s => s + 1), 1000);
     } else {
       if (elapsedRef.current) { clearInterval(elapsedRef.current); elapsedRef.current = null; }
-      setElapsedSec(0);
     }
     return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
   }, [isOnline, botDispatched, sessionStatus, isConnected]);
@@ -386,6 +390,8 @@ export default function LiveSessionPage() {
       if (!res.ok) throw new Error(data.error);
       setSessionId(data.session.id);
       setSessionStatus('active');
+      setDuration(0);
+      setElapsedSec(0);
       await connect(data.token, patientKeyterms(patient));
     } catch (err) { alert(err instanceof Error ? err.message : 'Failed to start'); }
   };
@@ -404,6 +410,7 @@ export default function LiveSessionPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to send notetaker');
       setSessionId(data.session.id);
       setSessionStatus('active');
+      setElapsedSec(0);
       setBotDispatched(true);
     } catch (err) {
       setBotError(err instanceof Error ? err.message : 'Failed to send notetaker');
@@ -436,6 +443,15 @@ export default function LiveSessionPage() {
     }, 1000);
     return () => clearTimeout(t);
   }, [manualNotes, sessionId]);
+
+  // In-person only — stops the mic/WebSocket without ending the session, so a
+  // doctor can step out for a break. Both timers above stop counting the
+  // instant this fires (paused minutes aren't billed against the plan's
+  // per-session cap) and pick back up exactly where they left off on Resume.
+  const handlePause = () => {
+    disconnect();
+    setSessionStatus('paused');
+  };
 
   const handleResume = async () => {
     if (!patient || !sessionId) return;
@@ -538,6 +554,13 @@ export default function LiveSessionPage() {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Paused — doctor-initiated break, not a dropped connection */}
+          {sessionStatus === 'paused' && !isOnline && (
+            <div className="flex items-center gap-2 font-mono text-sm font-medium text-amber-400">
+              <Pause className="h-3.5 w-3.5" /> Paused · {formatDuration(duration)}
+            </div>
+          )}
+
           {/* Connection status */}
           {isRecording && (
             <span className={`flex items-center gap-1.5 text-xs font-medium ${
@@ -605,18 +628,32 @@ export default function LiveSessionPage() {
             </button>
           )}
           {sessionStatus === 'paused' && !isRecording && !isOnline && (
-            <button onClick={handleResume}
-              className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-slate-200"
-              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-              <Mic className="h-4 w-4" /> Resume
-            </button>
+            <>
+              <button onClick={handleResume}
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-slate-200"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <Mic className="h-4 w-4" /> Resume
+              </button>
+              <button onClick={() => setShowEndModal(true)}
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
+                style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
+                <Square className="h-3.5 w-3.5" /> End session
+              </button>
+            </>
           )}
           {isRecording && (
-            <button onClick={() => setShowEndModal(true)}
-              className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
-              style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
-              <Square className="h-3.5 w-3.5" /> End session
-            </button>
+            <>
+              <button onClick={handlePause}
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-slate-200"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                <Pause className="h-3.5 w-3.5" /> Pause
+              </button>
+              <button onClick={() => setShowEndModal(true)}
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold"
+                style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
+                <Square className="h-3.5 w-3.5" /> End session
+              </button>
+            </>
           )}
         </div>
       </div>

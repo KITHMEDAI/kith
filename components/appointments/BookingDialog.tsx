@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Loader2, ChevronDown, Search, UserPlus, Check, AlertTriangle, Repeat, Video, Lock } from 'lucide-react';
 import type { Patient } from '@/types';
 import LockedFeatureButton from '@/components/upgrade/LockedFeatureButton';
+import PhoneInput from '@/components/ui/PhoneInput';
 
 interface DayAppt {
   id: string;
@@ -34,18 +35,23 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   const [date, setDate]               = useState('');
   const [time, setTime]               = useState('10:00');
   const [duration, setDuration]       = useState('50');
-  const [modality, setModality]       = useState<'in_person'|'video'|'phone'>('in_person');
+  const [modality, setModality]       = useState<'in_person'|'video'>('in_person');
   // Whether the doctor's plan unlocks online sessions — drives the lock on the
   // Video mode option. null while loading = assume unlocked (avoid a flash of
   // a disabled control before the real entitlement is known).
   const [onlineUnlocked, setOnlineUnlocked] = useState<boolean | null>(null);
+  const [groupTypesUnlocked, setGroupTypesUnlocked] = useState<boolean | null>(null);
   useEffect(() => {
     fetch('/api/me/entitlements')
       .then(r => r.ok ? r.json() : null)
-      .then(d => setOnlineUnlocked(d ? d.onlineSessions : true))
-      .catch(() => setOnlineUnlocked(true));
+      .then(d => {
+        setOnlineUnlocked(d ? d.onlineSessions : true);
+        setGroupTypesUnlocked(d ? d.groupSessionTypes : true);
+      })
+      .catch(() => { setOnlineUnlocked(true); setGroupTypesUnlocked(true); });
   }, []);
   const onlineLocked = onlineUnlocked === false;
+  const groupTypesLocked = groupTypesUnlocked === false;
   const [sessionType, setSessionType] = useState<'individual'|'couples'|'group'|'family'>('individual');
   const [goals, setGoals]             = useState('');
   const [meetingUrl, setMeetingUrl]   = useState('');
@@ -238,10 +244,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                           onChange={e => { setNewName(e.target.value); setAddErr(''); }}
                           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPatient(); } }}
                           className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
-                        <input type="tel" placeholder="Phone (optional)" value={newPhone}
-                          onChange={e => setNewPhone(e.target.value)}
-                          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPatient(); } }}
-                          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                        <PhoneInput value={newPhone} onChange={setNewPhone} placeholder="Phone (optional)" />
                         {addErr && <p className="text-xs text-red-500">{addErr}</p>}
                         <div className="flex gap-2">
                           <button type="button" onClick={() => { setAdding(false); setAddErr(''); }}
@@ -380,11 +383,10 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
               <select value={modality} onChange={e => setModality(e.target.value as typeof modality)}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
                 <option value="in_person">In person</option>
-                <option value="video" disabled={onlineLocked}>Video{onlineLocked ? ' 🔒 Upgrade to unlock' : ''}</option>
-                <option value="phone">Phone</option>
+                <option value="video" disabled={onlineLocked}>Online{onlineLocked ? ' 🔒 Upgrade to unlock' : ''}</option>
               </select>
               {onlineLocked && (
-                <LockedFeatureButton requiredPlan="pro" featureLabel="Online sessions with automatic notetaker bot" className="mt-1">
+                <LockedFeatureButton requiredPlan="pro" featureLabel="Online sessions" className="mt-1">
                   <span className="flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
                     <Lock className="h-3 w-3" /> Online sessions need Pro or higher
                   </span>
@@ -415,15 +417,27 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">Session type</label>
                 <div className="flex gap-2">
-                  {(['individual','couples','group','family'] as const).map(t => (
-                    <button key={t} type="button" onClick={() => setSessionType(t)}
-                      className={`flex-1 rounded-lg border py-1.5 text-xs font-medium capitalize transition-colors ${
-                        sessionType === t ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-input text-muted-foreground hover:border-slate-300'
-                      }`}>
-                      {t}
-                    </button>
-                  ))}
+                  {(['individual','couples','group','family'] as const).map(t => {
+                    const locked = t !== 'individual' && groupTypesLocked;
+                    return (
+                      <button key={t} type="button" disabled={locked}
+                        onClick={() => setSessionType(t)}
+                        className={`flex-1 rounded-lg border py-1.5 text-xs font-medium capitalize transition-colors ${
+                          locked ? 'border-input text-muted-foreground/50 cursor-not-allowed'
+                          : sessionType === t ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-input text-muted-foreground hover:border-slate-300'
+                        }`}>
+                        {t}{locked ? ' 🔒' : ''}
+                      </button>
+                    );
+                  })}
                 </div>
+                {groupTypesLocked && (
+                  <LockedFeatureButton requiredPlan="pro" featureLabel="Couples, family & group session types" className="mt-1">
+                    <span className="flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
+                      <Lock className="h-3 w-3" /> Couples, family & group need Pro or higher
+                    </span>
+                  </LockedFeatureButton>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">

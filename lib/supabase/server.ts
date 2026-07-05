@@ -7,6 +7,14 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholde
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
 
+// Next.js's App Router extends global fetch() to cache GET requests by
+// default. supabase-js's REST calls are plain fetches with no cache option
+// set, so without this override Next silently caches PostgREST responses —
+// a page can keep serving the data that existed on its FIRST ever request
+// (e.g. "0 patients") forever after, even though the underlying rows changed.
+// Force every Supabase call to bypass that cache.
+const noStoreFetch: typeof fetch = (input, init) => fetch(input, { ...init, cache: 'no-store' });
+
 export function createServerSupabaseClient() {
   const cookieStore = cookies();
 
@@ -28,6 +36,7 @@ export function createServerSupabaseClient() {
           }
         },
       },
+      global: { fetch: noStoreFetch },
     }
   );
 }
@@ -41,6 +50,7 @@ export function createServiceRoleClient() {
         getAll() { return []; },
         setAll() {},
       },
+      global: { fetch: noStoreFetch },
     }
   );
 }

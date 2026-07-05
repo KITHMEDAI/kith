@@ -24,7 +24,7 @@ export default function SendToPatientAction({ text, patientId, patientName, hasP
 
   if (!entitled) {
     return (
-      <LockedFeatureButton requiredPlan="ultra" featureLabel="WhatsApp & SMS messaging to patients" className="ml-2 inline-block">
+      <LockedFeatureButton requiredPlan="ultra" featureLabel="WhatsApp messaging to patients" className="ml-2 inline-block">
         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
           <Send className="h-3 w-3" /> Send to patient 🔒
         </span>

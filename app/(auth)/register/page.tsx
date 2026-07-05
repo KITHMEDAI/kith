@@ -282,7 +282,7 @@ export default function RegisterPage() {
           })}
         </div>
         <div>
-          <p className="text-xs text-purple-600/50">14-day free trial · No credit card</p>
+          <p className="text-xs text-purple-600/50">Free plan forever · No credit card</p>
           <p className="text-xs text-purple-700/30 mt-1">HIPAA & DPDP compliant</p>
         </div>
       </div>

@@ -26,7 +26,7 @@ const CreateSchema = z.object({
   scheduled_at: z.string().datetime(),
   duration_minutes: z.number().int().min(15).max(240).default(50),
   session_type: z.enum(['individual', 'couples', 'group', 'family']).default('individual'),
-  modality: z.enum(['in_person', 'video', 'phone']).default('in_person'),
+  modality: z.enum(['in_person', 'video']).default('in_person'),
   goals: z.string().optional(),
   notes: z.string().optional(),
   meeting_url: z.string().url().optional().nullable(),
@@ -82,8 +82,12 @@ export async function POST(req: NextRequest) {
   const parsed = CreateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 422 });
 
-  if (parsed.data.modality === 'video' && !getEntitlements(therapist).onlineSessions) {
+  const entitlements = getEntitlements(therapist);
+  if (parsed.data.modality === 'video' && !entitlements.onlineSessions) {
     return NextResponse.json({ error: upgradeMessage('online sessions'), code: 'PLAN_LOCKED' }, { status: 402 });
+  }
+  if (parsed.data.session_type !== 'individual' && !entitlements.groupSessionTypes) {
+    return NextResponse.json({ error: 'Upgrade to Pro or Ultra to unlock couples, family, and group session types.', code: 'PLAN_LOCKED' }, { status: 402 });
   }
 
   const { patient_id, scheduled_at, duration_minutes, session_type, modality, goals, notes, meeting_url, recurrence, immediate } = parsed.data;

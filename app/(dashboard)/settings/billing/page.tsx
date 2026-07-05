@@ -109,12 +109,8 @@ function BillingPageInner() {
     document.getElementById(`plan-${highlight}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [highlight, loading]);
 
-  const trialDaysLeft = info?.trial_ends_at
-    ? Math.max(0, Math.ceil((new Date(info.trial_ends_at).getTime() - Date.now()) / 86400000))
-    : null;
-  const isTrialing = info?.subscription_status === 'trialing' && (trialDaysLeft ?? 0) > 0;
   const isActivePaid = info?.subscription_status === 'active';
-  const effectivePlan = isTrialing ? 'ultra' : (info?.subscription_plan ?? 'free');
+  const effectivePlan = isActivePaid ? (info?.subscription_plan ?? 'free') : 'free';
 
   async function handleSubscribe(tier: Tier) {
     if (!razorpayLoaded) { setError('Payment system still loading — try again in a moment.'); return; }
@@ -201,16 +197,13 @@ function BillingPageInner() {
         <div className="flex-1">
           <p className="text-sm font-semibold text-foreground capitalize">
             {effectivePlan} Plan
-            {isTrialing && <span className="ml-2 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Trial — full Ultra access</span>}
             {info?.subscription_status === 'past_due' && <span className="ml-2 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Payment failed</span>}
             {info?.subscription_status === 'cancelled' && <span className="ml-2 text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Cancelled</span>}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {isTrialing
-              ? `${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} left — after this you move to the Free plan unless you subscribe`
-              : isActivePaid
-                ? `Billed ${info?.billing_interval}`
-                : 'No active subscription — capped at the Free plan limits'}
+            {isActivePaid
+              ? `Billed ${info?.billing_interval}`
+              : 'No active subscription — capped at the Free plan limits'}
           </p>
         </div>
         {isActivePaid && (

@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { data: therapist } = await supabase
-    .from('therapists').select('id, display_name, email, phone').eq('user_id', user.id).single();
+    .from('therapists').select('id, display_name, email').eq('user_id', user.id).single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });
 
   const razorpay = getRazorpayClient();
@@ -59,6 +59,6 @@ export async function POST(req: NextRequest) {
     key: process.env.RAZORPAY_KEY_ID,
     tier,
     interval,
-    prefill: { name: therapist.display_name, email: therapist.email, contact: therapist.phone },
+    prefill: { name: therapist.display_name, email: therapist.email },
   });
 }

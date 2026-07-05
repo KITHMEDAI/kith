@@ -20,15 +20,14 @@ export type PlanKey = 'free' | 'pro' | 'ultra' | 'clinic';
 export const FREE_SESSION_CAP = 5;
 
 export interface Entitlements {
-  plan: PlanKey;              // EFFECTIVE plan for this request (accounts for an active trial)
+  plan: PlanKey;              // EFFECTIVE plan for this request
   storedPlan: PlanKey;        // the plan they're actually paying for (or 'free')
   sessionCap: number;         // -1 = unlimited
   sessionDurationCapMinutes: number; // hard per-session length limit for this plan
   onlineSessions: boolean;    // video modality + automatic notetaker bot
   calendarSync: boolean;      // Google Calendar connect + auto Meet creation
   patientMessaging: boolean;  // WhatsApp / SMS to patients
-  isTrialing: boolean;
-  trialDaysLeft: number | null;
+  groupSessionTypes: boolean; // couples / family / group session types (Free = individual only)
 }
 
 interface BillingFields {
@@ -65,16 +64,13 @@ export const SESSION_DURATION_CAPS: Record<PlanKey, number> = {
 };
 
 export function getEntitlements(t: BillingFields): Entitlements {
-  const trialEndsAt = t.trial_ends_at ? new Date(t.trial_ends_at) : null;
-  const isTrialing = t.subscription_status === 'trialing' && !!trialEndsAt && trialEndsAt >= new Date();
   const paidActive = t.subscription_status === 'active';
   const storedPlan = (t.subscription_plan as PlanKey) || 'free';
 
-  // An active trial tastes the full Ultra experience; otherwise you get
-  // exactly what you're paying for, and anything else (expired trial,
-  // cancelled, past_due, no subscription at all) falls back to Free — never a
-  // lockout.
-  const plan: PlanKey = isTrialing ? 'ultra' : paidActive ? storedPlan : 'free';
+  // No taste-of-Ultra trial — you get exactly what you're paying for, and
+  // anything else (no subscription, cancelled, past_due) falls back to Free,
+  // never a lockout.
+  const plan: PlanKey = paidActive ? storedPlan : 'free';
 
   return {
     plan,
@@ -84,8 +80,7 @@ export function getEntitlements(t: BillingFields): Entitlements {
     onlineSessions: plan !== 'free',
     calendarSync: plan !== 'free',
     patientMessaging: plan === 'ultra' || plan === 'clinic',
-    isTrialing,
-    trialDaysLeft: trialEndsAt ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / 86400000)) : null,
+    groupSessionTypes: plan !== 'free',
   };
 }
 
@@ -93,9 +88,25 @@ export function getEntitlements(t: BillingFields): Entitlements {
 // prompt so the wording a doctor sees when blocked always matches what the
 // plan card promised.
 export const PLAN_FEATURES: Record<PlanKey, string[]> = {
-  free: ['5 sessions/month · 50 min each', 'AI-assisted SOAP notes', 'In-person recording', 'Patient & booking management'],
-  pro: ['60 sessions/month · 90 min each', 'Everything in Free', 'Online sessions (auto notetaker bot)', 'Google Calendar sync + auto-created Meet links'],
-  ultra: ['Unlimited sessions · 120 min each', 'Everything in Pro', 'WhatsApp & SMS to patients', 'Priority support'],
+  free: [
+    '5 sessions a month, 50 minutes each',
+    'AI-written clinical notes after every session',
+    'In-person session recording',
+    'Manage patients & appointments in one place',
+  ],
+  pro: [
+    '60 sessions a month, 90 minutes each',
+    'Online sessions available — Kith joins the call and records it for you',
+    'Your calendar synced automatically, with a meeting link created for every session',
+    'AI-written clinical notes after every session',
+  ],
+  ultra: [
+    'Unlimited sessions, 120 minutes each',
+    'Online sessions available — Kith joins the call and records it for you',
+    'Your calendar synced automatically, with a meeting link created for every session',
+    'Message patients directly on WhatsApp',
+    'Priority support — first in line when you need help',
+  ],
   clinic: ['Everything in Ultra', 'Multiple therapist seats', 'Admin dashboard', 'White-label option'],
 };
 

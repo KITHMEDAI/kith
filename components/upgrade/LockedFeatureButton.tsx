@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 
 interface Props {
@@ -14,13 +14,24 @@ const PLAN_NAME: Record<Props['requiredPlan'], string> = { pro: 'Pro', ultra: 'U
 const PLAN_PRICE: Record<Props['requiredPlan'], string> = { pro: '$20/mo', ultra: '$50/mo' };
 
 // Shared "locked feature" affordance — shows an inline upgrade card naming the
-// SPECIFIC plan and price that unlocks this exact feature, on hover (desktop)
-// or click (touch devices), rather than a generic link to the billing page.
+// SPECIFIC plan and price that unlocks this exact feature. Click-to-open,
+// click-outside-to-close (not hover): a hover popover here has a dead zone
+// between the trigger and the card below it, so moving the mouse down to
+// actually click "Enable X" closes the popover first. Click keeps it open
+// until the doctor either clicks the upgrade link or clicks away.
 export default function LockedFeatureButton({ requiredPlan, featureLabel, children, className }: Props) {
   const [show, setShow] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!show) return;
+    function close(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setShow(false); }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [show]);
 
   return (
-    <div className="relative inline-block" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+    <div className="relative inline-block" ref={ref}>
       <button type="button" onClick={() => setShow(s => !s)} className={className}>
         {children}
       </button>

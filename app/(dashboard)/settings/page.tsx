@@ -33,8 +33,7 @@ const PLAN_LABEL: Record<string, string> = { free: 'Free', pro: 'Pro', ultra: 'U
 // dedicated billing page; feature-gated screens (booking, integrations,
 // session cap) each also link to /settings/billing at the point of friction.
 function PlanCard({ plan, status }: { plan?: string; status?: string }) {
-  const isTrialing = status === 'trialing';
-  const effective = isTrialing ? 'ultra' : (plan || 'free');
+  const effective = status === 'active' ? (plan || 'free') : 'free';
   const isFree = effective === 'free';
   return (
     <div className="rounded-2xl p-5 flex items-center justify-between gap-4"
@@ -50,7 +49,6 @@ function PlanCard({ plan, status }: { plan?: string; status?: string }) {
         <div>
           <p className="text-[14px] font-semibold text-white">
             {PLAN_LABEL[effective] || 'Free'} plan
-            {isTrialing && <span className="ml-2 text-[11px] font-medium text-amber-400">Trial active</span>}
           </p>
           <p className="text-[12px] text-slate-400 mt-0.5">
             {isFree ? 'Upgrade for online sessions, more capacity, and patient messaging' : 'Manage billing, usage, and plan changes'}

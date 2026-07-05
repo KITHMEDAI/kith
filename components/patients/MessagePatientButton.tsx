@@ -33,7 +33,7 @@ export default function MessagePatientButton({
 
   if (!entitled) {
     return (
-      <LockedFeatureButton requiredPlan="ultra" featureLabel="WhatsApp & SMS messaging to patients" className={className}>
+      <LockedFeatureButton requiredPlan="ultra" featureLabel="WhatsApp messaging to patients" className={className}>
         <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
           <MessageSquare className="h-3.5 w-3.5" /> {lockedLabel || triggerLabel} 🔒
         </span>
