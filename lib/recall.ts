@@ -89,8 +89,19 @@ export async function stopRecallBot(botId: string): Promise<void> {
 }
 
 // ── Fetch + normalise the finished transcript ─────────────────────────────────
-export async function getRecallTranscript(botId: string): Promise<TranscriptSegment[]> {
-  if (RECALL_MOCK) return mockTranscript();
+export interface RecallTranscriptResult {
+  segments: TranscriptSegment[];
+  // False means the bot never actually recorded anything — most commonly it
+  // sat in the meeting platform's waiting room and was never admitted, so it
+  // left with zero recordings. That's a PERMANENT state (no later webhook
+  // will ever bring a transcript), distinct from "recorded fine, transcript
+  // file just isn't ready yet" — callers need to tell these apart so a
+  // never-admitted bot fails the session instead of waiting forever.
+  hadRecording: boolean;
+}
+
+export async function getRecallTranscript(botId: string): Promise<RecallTranscriptResult> {
+  if (RECALL_MOCK) return { segments: mockTranscript(), hadRecording: true };
 
   // 1. Get the bot — its recording carries a short-lived transcript download URL.
   const botRes = await fetch(`${BASE}/bot/${botId}/`, {
@@ -99,14 +110,17 @@ export async function getRecallTranscript(botId: string): Promise<TranscriptSegm
   if (!botRes.ok) throw new Error(`Recall getBot failed (${botRes.status})`);
   const bot = await botRes.json();
 
+  const recordings = (bot as { recordings?: unknown[] })?.recordings;
+  const hadRecording = Array.isArray(recordings) && recordings.length > 0;
+
   const url = transcriptDownloadUrl(bot);
-  if (!url) return [];
+  if (!url) return { segments: [], hadRecording };
 
   // 2. The download URL is a presigned link (no auth header).
   const tRes = await fetch(url);
   if (!tRes.ok) throw new Error(`Recall transcript download failed (${tRes.status})`);
   const raw = await tRes.json();
-  return normaliseTranscript(raw);
+  return { segments: normaliseTranscript(raw), hadRecording };
 }
 
 // recordings[].media_shortcuts.transcript.data.download_url

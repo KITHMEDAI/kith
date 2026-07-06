@@ -15,16 +15,22 @@ interface Props {
    *  a transcript — that's usually much longer than the in-person estimate,
    *  and unrelated to how long the actual session was. */
   isOnline?: boolean;
+  /** Whether the failed session actually has a saved transcript. False means
+   *  nothing was ever recorded (most commonly an online bot that sat in the
+   *  meeting's waiting room and was never admitted) — "Retry" can't help
+   *  since there's nothing to regenerate notes from. */
+  initialHasTranscript?: boolean;
 }
 
 /**
  * Shows on the patient profile after a session ends.
  * Polls /api/sessions/status every 4 s until notes are ready, then reloads.
  */
-export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline }: Props) {
+export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline, initialHasTranscript }: Props) {
   const [status, setStatus] = useState<BannerStatus>(initialStatus);
   const [retrying, setRetrying] = useState(false);
   const [elapsedSec, setElapsedSec] = useState(0);
+  const [hasTranscript, setHasTranscript] = useState(initialHasTranscript ?? true);
 
   useEffect(() => {
     if (status !== 'processing') return;
@@ -48,12 +54,13 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
     try {
       const res = await fetch(`/api/patients/${patientId}/latest-session-status`);
       if (!res.ok) return;
-      const { sessionStatus } = await res.json();
+      const { sessionStatus, hasTranscript: ht } = await res.json();
 
       if (sessionStatus === 'completed') {
         setStatus('done');
         window.location.reload();
       } else if (sessionStatus === 'failed') {
+        setHasTranscript(!!ht);
         setStatus('failed');
       }
       // keep polling if still 'processing'
@@ -76,18 +83,33 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
         style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
         <AlertTriangle className="h-4 w-4 text-red-400 flex-none" />
         <div className="flex-1">
-          <span className="font-medium text-red-300">Note generation failed.</span>
-          <span className="ml-2 text-red-400/70 text-xs">The session transcript was saved — you can regenerate the notes.</span>
+          {hasTranscript ? (
+            <>
+              <span className="font-medium text-red-300">Note generation failed.</span>
+              <span className="ml-2 text-red-400/70 text-xs">The session transcript was saved — you can regenerate the notes.</span>
+            </>
+          ) : (
+            <>
+              <span className="font-medium text-red-300">Nothing was recorded for this session.</span>
+              <span className="ml-2 text-red-400/70 text-xs">
+                {isOnline
+                  ? 'Kith Notetaker likely wasn’t admitted into the call — check the meeting’s waiting room next time and let it in.'
+                  : 'The microphone recording never started or was empty — there’s no transcript to generate notes from.'}
+              </span>
+            </>
+          )}
         </div>
-        <button
-          onClick={retry}
-          disabled={retrying}
-          className="flex-none flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60 transition-colors"
-          style={{ background: 'rgba(239,68,68,0.85)' }}
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${retrying ? 'animate-spin' : ''}`} />
-          {retrying ? 'Retrying…' : 'Retry'}
-        </button>
+        {hasTranscript && (
+          <button
+            onClick={retry}
+            disabled={retrying}
+            className="flex-none flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60 transition-colors"
+            style={{ background: 'rgba(239,68,68,0.85)' }}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${retrying ? 'animate-spin' : ''}`} />
+            {retrying ? 'Retrying…' : 'Retry'}
+          </button>
+        )}
       </div>
     );
   }

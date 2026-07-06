@@ -99,12 +99,12 @@ export const PLAN_FEATURES: Record<PlanKey, string[]> = {
   pro: [
     '60 sessions a month, 90 minutes each',
     'Online sessions available — Kith joins the call and records it for you',
+    'Clinical notes ready once the session ends',
     'Your calendar synced automatically, with a meeting link created for every session',
-    'AI-written clinical notes after every session',
   ],
   ultra: [
     'Unlimited sessions, 120 minutes each',
-    'Online sessions available — Kith joins the call and records it for you',
+    'Online sessions with live suggestions — homework and talking points update in real time as the session unfolds',
     'Your calendar synced automatically, with a meeting link created for every session',
     'Message patients directly on WhatsApp',
     'Priority support — first in line when you need help',

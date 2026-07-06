@@ -23,6 +23,7 @@ interface SessionRow {
   status: string;
   manual_notes: string | null;
   recording_source: string | null;
+  transcript_raw: unknown;
 }
 
 function avatarBg(name: string) {
@@ -60,7 +61,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
     service.from('patients').select('*').eq('id', params.id).eq('therapist_id', therapist.id).single(),
     service
       .from('sessions')
-      .select('id, session_number, started_at, ended_at, session_summary, key_points, status, manual_notes, recording_source')
+      .select('id, session_number, started_at, ended_at, session_summary, key_points, status, manual_notes, recording_source, transcript_raw')
       .eq('patient_id', params.id)
       .eq('therapist_id', therapist.id)
       .order('started_at', { ascending: false })
@@ -125,6 +126,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
           initialStatus={isFailed ? 'failed' : 'processing'}
           sessionId={latestSession?.id}
           isOnline={latestSession?.recording_source === 'online_bot'}
+          initialHasTranscript={Array.isArray(latestSession?.transcript_raw) && latestSession.transcript_raw.length > 0}
         />
       )}
 

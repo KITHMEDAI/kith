@@ -20,15 +20,18 @@ export async function GET(
   // Get the most recent session for this patient that is owned by this therapist
   const { data: session } = await service
     .from('sessions')
-    .select('id, status')
+    .select('id, status, transcript_raw')
     .eq('patient_id', params.id)
     .eq('therapist_id', therapist.id)
     .order('started_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
+  const hasTranscript = Array.isArray(session?.transcript_raw) && session.transcript_raw.length > 0;
+
   return NextResponse.json({
     sessionStatus: session?.status ?? 'none',
     sessionId: session?.id ?? null,
+    hasTranscript,
   });
 }

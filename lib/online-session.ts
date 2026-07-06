@@ -29,14 +29,28 @@ export async function finalizeOnlineSession(sessionId: string, botId: string | n
   const existingLen = Array.isArray(session.transcript_raw) ? session.transcript_raw.length : 0;
   if (session.status === 'processing' && existingLen > 0) return;
 
-  const transcript = botId ? await getRecallTranscript(botId) : [];
+  const { segments: transcript, hadRecording } = botId
+    ? await getRecallTranscript(botId)
+    : { segments: [], hadRecording: false };
   const now = new Date().toISOString();
 
-  // No transcript yet (e.g. force-stop before Recall finished processing, or a
-  // bot.done before transcript.done). Mark the session "processing" so the UI
-  // isn't stuck "in session", but WAIT for a later event that carries the
-  // transcript before generating notes — avoids empty/duplicate note runs.
   if (transcript.length === 0) {
+    // No recording ever happened — most often the bot sat in the meeting
+    // platform's waiting room and nobody admitted it. This is permanent: no
+    // later webhook will ever bring a transcript, so fail now instead of
+    // leaving the doctor staring at "Generating notes..." forever.
+    if (!hadRecording) {
+      await service.from('sessions').update({ status: 'failed', ended_at: now }).eq('id', sessionId);
+      if (session.appointment_id) {
+        await service.from('appointments').update({ status: 'completed' }).eq('id', session.appointment_id);
+      }
+      console.warn(`[Kith] online session ${sessionId} had no recording — was "Kith Notetaker" admitted to the call?`);
+      return;
+    }
+    // Recording exists but the transcript file isn't ready yet (e.g.
+    // force-stop before Recall finished processing, or a bot.done before
+    // transcript.done). Mark "processing" so the UI isn't stuck "in
+    // session", and WAIT for the later transcript.done event.
     await service.from('sessions').update({ status: 'processing', ended_at: now }).eq('id', sessionId);
     if (session.appointment_id) {
       await service.from('appointments').update({ status: 'completed' }).eq('id', session.appointment_id);
