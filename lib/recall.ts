@@ -30,8 +30,16 @@ const BOT_NAME = 'Kith Notetaker';
 export async function createRecallBot(opts: {
   meetingUrl: string;
   metadata?: Record<string, string>;
+  // Ultra+ only (costs extra on top of the base recording fee — see
+  // lib/entitlements.ts liveOnlineUpdates). Switches from the free
+  // platform-captions transcript to Recall's own streaming transcription, and
+  // adds a realtime webhook so utterances arrive DURING the call instead of
+  // only after the bot leaves — lets suggestions/homework update live.
+  liveUpdates?: boolean;
 }): Promise<{ id: string }> {
   if (RECALL_MOCK) return { id: `mock_bot_${Date.now()}` };
+
+  const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/api/webhooks/recall`;
 
   const res = await fetch(`${BASE}/bot/`, {
     method: 'POST',
@@ -43,13 +51,21 @@ export async function createRecallBot(opts: {
       meeting_url: opts.meetingUrl,
       bot_name: BOT_NAME,
       metadata: opts.metadata || {},
-      // Transcribe via the meeting platform's own captions — works out of the box
-      // with no third-party transcription key. The transcript is available after
-      // the call via the `transcript.done` webhook (recordings[].media_shortcuts.
-      // transcript.data.download_url), which getRecallTranscript() reads.
+      // Default: transcribe via the meeting platform's own captions — free,
+      // works out of the box, but only available after the bot leaves the
+      // call (via `transcript.done` / `recordings[].media_shortcuts.transcript
+      // .data.download_url`, read by getRecallTranscript()).
+      // Live-updates plans instead use Recall's own streaming provider plus a
+      // realtime webhook, so `transcript.data` events arrive while the call is
+      // still going — handled in app/api/webhooks/recall/route.ts.
       // NOTE: `recallai_async` is NOT valid here — that provider is only for the
       // separate post-call "Create Async Transcript" endpoint, not Create Bot.
-      recording_config: {
+      recording_config: opts.liveUpdates ? {
+        transcript: { provider: { recallai_streaming: {} } },
+        realtime_endpoints: [
+          { type: 'webhook', url: webhookUrl, events: ['transcript.data'] },
+        ],
+      } : {
         transcript: { provider: { meeting_captions: {} } },
       },
     }),
@@ -110,25 +126,40 @@ function transcriptDownloadUrl(bot: unknown): string | null {
 interface RecallWord { text: string; start_timestamp?: { relative?: number }; end_timestamp?: { relative?: number } }
 interface RecallEntry { participant?: { id?: number; name?: string | null }; words?: RecallWord[] }
 
+// Shared by the post-call batch transcript (normaliseTranscript) and the
+// realtime `transcript.data` webhook (normaliseRealtimeEntry), so a live
+// utterance ends up in exactly the same shape as one from the final file.
+function entryToSegment(entry: RecallEntry): TranscriptSegment | null {
+  const words = entry.words || [];
+  const text = words.map(w => w.text).join(' ').trim();
+  if (!text) return null;
+  const speaker = entry.participant?.name?.trim()
+    || `Speaker ${entry.participant?.id ?? '?'}`;
+  const start = words[0]?.start_timestamp?.relative ?? 0;
+  const end   = words[words.length - 1]?.end_timestamp?.relative ?? start;
+  return {
+    speaker,
+    text,
+    start_ms: Math.round(start * 1000),
+    end_ms: Math.round(end * 1000),
+    confidence: 0.95,
+    is_partial: false,
+  };
+}
+
+// Normalises one `transcript.data` webhook event's `data.data` payload
+// ({ words, participant }) into the same TranscriptSegment shape used
+// everywhere else. Returns null for an empty/no-text utterance.
+export function normaliseRealtimeEntry(data: unknown): TranscriptSegment | null {
+  return entryToSegment((data || {}) as RecallEntry);
+}
+
 function normaliseTranscript(raw: unknown): TranscriptSegment[] {
   if (!Array.isArray(raw)) return [];
   const segments: TranscriptSegment[] = [];
   for (const entry of raw as RecallEntry[]) {
-    const words = entry.words || [];
-    const text = words.map(w => w.text).join(' ').trim();
-    if (!text) continue;
-    const speaker = entry.participant?.name?.trim()
-      || `Speaker ${entry.participant?.id ?? '?'}`;
-    const start = words[0]?.start_timestamp?.relative ?? 0;
-    const end   = words[words.length - 1]?.end_timestamp?.relative ?? start;
-    segments.push({
-      speaker,
-      text,
-      start_ms: Math.round(start * 1000),
-      end_ms: Math.round(end * 1000),
-      confidence: 0.95,
-      is_partial: false,
-    });
+    const seg = entryToSegment(entry);
+    if (seg) segments.push(seg);
   }
   return segments;
 }

@@ -10,15 +10,27 @@ interface Props {
   initialStatus: BannerStatus;
   /** Latest session id — required for the "Retry" action on a failed note. */
   sessionId?: string;
+  /** Online (bot-recorded) sessions wait on the meeting platform + Recall's
+   *  own pipeline (bot leaving, packaging, transcribing) before we even see
+   *  a transcript — that's usually much longer than the in-person estimate,
+   *  and unrelated to how long the actual session was. */
+  isOnline?: boolean;
 }
 
 /**
  * Shows on the patient profile after a session ends.
  * Polls /api/sessions/status every 4 s until notes are ready, then reloads.
  */
-export function ProcessingBanner({ patientId, initialStatus, sessionId }: Props) {
+export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline }: Props) {
   const [status, setStatus] = useState<BannerStatus>(initialStatus);
   const [retrying, setRetrying] = useState(false);
+  const [elapsedSec, setElapsedSec] = useState(0);
+
+  useEffect(() => {
+    if (status !== 'processing') return;
+    const id = setInterval(() => setElapsedSec(s => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [status]);
 
   async function retry() {
     if (!sessionId) { window.location.reload(); return; }
@@ -80,6 +92,8 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId }: Props)
     );
   }
 
+  const longWait = elapsedSec >= 90;
+
   return (
     <div className="rounded-xl px-4 py-3 flex items-center gap-3 text-sm"
       style={{
@@ -89,7 +103,13 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId }: Props)
       <RefreshCw className="h-4 w-4 text-violet-400 animate-spin flex-none" />
       <div>
         <span className="font-medium text-violet-200">Generating clinical notes…</span>
-        <span className="ml-2 text-violet-400/70 text-xs">AI is analysing the session · typically 60–90 s</span>
+        <span className="ml-2 text-violet-400/70 text-xs">
+          {isOnline
+            ? (longWait
+                ? "Still waiting on your meeting platform to finish packaging the recording — this step is outside Kith's control and can take a few minutes, regardless of how long the session was."
+                : 'Online sessions wait on your meeting platform to finish processing the recording before Kith can generate notes — usually a few minutes.')
+            : 'AI is analysing the session · typically 60–90 s'}
+        </span>
       </div>
     </div>
   );

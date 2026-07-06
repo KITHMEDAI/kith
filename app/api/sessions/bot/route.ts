@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
     const bot = await createRecallBot({
       meetingUrl: cleanMeetUrl(appt.meeting_url),   // bot needs the plain link, no authuser
       metadata: { session_id: session.id },
+      liveUpdates: entitlements.liveOnlineUpdates,
     });
     botId = bot.id;
   } catch (err) {

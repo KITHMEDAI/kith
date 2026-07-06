@@ -23,7 +23,7 @@ export async function GET(
       id, session_number, started_at, ended_at, status,
       soap_note, key_points, session_summary, ai_suggestions,
       homework_assigned, next_session_plan,
-      manual_notes, resource_suggestions, therapist_id,
+      manual_notes, resource_suggestions, therapist_id, transcript_raw,
       patient:patients(id, display_name, diagnosis, date_of_birth, phone, whatsapp_number)
     `)
     .eq('id', params.id)

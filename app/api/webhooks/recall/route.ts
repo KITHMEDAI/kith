@@ -7,8 +7,8 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
-import { verifyRecallSignature } from '@/lib/recall';
-import { finalizeOnlineSession, failOnlineSession } from '@/lib/online-session';
+import { verifyRecallSignature, normaliseRealtimeEntry } from '@/lib/recall';
+import { finalizeOnlineSession, failOnlineSession, appendLiveTranscriptSegment } from '@/lib/online-session';
 
 export const maxDuration = 60;
 
@@ -62,6 +62,17 @@ export async function POST(req: NextRequest) {
       case 'bot.recording_permission_denied':
         await failOnlineSession(sessionId, 'recording permission denied');
         break;
+      // Ultra-only realtime path (see lib/entitlements.ts liveOnlineUpdates):
+      // one utterance, delivered while the call is still in progress. Appends
+      // to the session's transcript so live suggestions/homework can update
+      // the same way in-person sessions already do — see fetchLiveUpdate in
+      // app/(dashboard)/session/[id]/page.tsx.
+      case 'transcript.data': {
+        const utterance = (data.data as Record<string, unknown>) || {};
+        const segment = normaliseRealtimeEntry(utterance);
+        if (segment) await appendLiveTranscriptSegment(sessionId, segment);
+        break;
+      }
       default:
         // joining_call / in_call_recording / call_ended etc. — acknowledged, no-op.
         break;

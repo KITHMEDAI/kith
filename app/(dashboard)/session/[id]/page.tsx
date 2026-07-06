@@ -10,7 +10,7 @@ import {
   Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2, AlignLeft, Sparkles, Pause,
 } from 'lucide-react';
 import Nebula from '@/components/session/Nebula';
-import type { Appointment, Patient } from '@/types';
+import type { Appointment, Patient, TranscriptSegment } from '@/types';
 import type { SpeakerMap } from '@/app/api/identify-speakers/route';
 
 // ─── Pulsing waveform bar ─────────────────────────────────────────────────────
@@ -214,7 +214,6 @@ export default function LiveSessionPage() {
   const transcriptEndRef = useRef<HTMLDivElement>(null);
   const liveTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
   const segmentsRef      = useRef(segments);
-  segmentsRef.current = segments;
 
   const [appointment, setAppointment]     = useState<Appointment | null>(null);
   const [patient, setPatient]             = useState<Patient | null>(null);
@@ -250,12 +249,49 @@ export default function LiveSessionPage() {
   // Online sessions (Teams/Meet) are recorded by a Recall bot, not the local mic.
   const isOnline = appointment?.modality === 'video';
 
+  // Ultra+ only — see lib/entitlements.ts liveOnlineUpdates. When true, the bot
+  // was dispatched with Recall's realtime webhook enabled, so utterances land
+  // in the session's transcript_raw while the call is still going. We can't
+  // see that append happen server-side, so we poll for it.
+  const [liveOnlineEntitled, setLiveOnlineEntitled] = useState(false);
+  const [onlineSegments, setOnlineSegments] = useState<TranscriptSegment[]>([]);
+
   useEffect(() => {
     fetch('/api/me/entitlements')
       .then(r => r.json())
-      .then(d => { if (typeof d.sessionDurationCapMinutes === 'number') setDurationCapMinutes(d.sessionDurationCapMinutes); })
+      .then(d => {
+        if (typeof d.sessionDurationCapMinutes === 'number') setDurationCapMinutes(d.sessionDurationCapMinutes);
+        setLiveOnlineEntitled(!!d.liveOnlineUpdates);
+      })
       .catch(() => {});
   }, []);
+
+  // Poll the growing transcript for an in-progress ONLINE session — no
+  // websocket for bot-recorded calls, so this is the only way the client sees
+  // realtime segments as they're appended by the Recall webhook.
+  const onlineSegmentsActive = isOnline && liveOnlineEntitled && botDispatched && sessionStatus !== 'ended';
+  useEffect(() => {
+    if (!onlineSegmentsActive || !sessionId) return;
+    let cancelled = false;
+    async function poll() {
+      try {
+        const res = await fetch(`/api/sessions/${sessionId}`);
+        if (!res.ok || cancelled) return;
+        const { session } = await res.json();
+        if (Array.isArray(session?.transcript_raw)) setOnlineSegments(session.transcript_raw);
+      } catch { /* keep polling */ }
+    }
+    poll();
+    const id = setInterval(poll, 15000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [onlineSegmentsActive, sessionId]);
+
+  // What fetchLiveUpdate / speaker-ID actually read: the mic transcript for
+  // in-person, the polled Recall segments for a live-updates-entitled online
+  // session, empty otherwise (matches today's fully-batch behaviour).
+  const effectiveSegments = isOnline ? onlineSegments : segments;
+  const liveActive = isRecording || onlineSegmentsActive;
+  segmentsRef.current = effectiveSegments;
 
   useEffect(() => {
     async function load() {
@@ -316,18 +352,18 @@ export default function LiveSessionPage() {
   // Runs after every 10 new segments while recording. Uses Claude Haiku to map
   // "Speaker A" → "Dr. Mehta (Therapist)", "Speaker B" → "Rohan (Patient)" etc.
   useEffect(() => {
-    if (!isRecording) return;
-    if (segments.length < 5) return;
-    if (segments.length - lastIdentifiedCount.current < 10 && lastIdentifiedCount.current > 0) return;
+    if (!liveActive) return;
+    if (effectiveSegments.length < 5) return;
+    if (effectiveSegments.length - lastIdentifiedCount.current < 10 && lastIdentifiedCount.current > 0) return;
 
-    lastIdentifiedCount.current = segments.length;
+    lastIdentifiedCount.current = effectiveSegments.length;
     setIdentifying(true);
 
     fetch('/api/identify-speakers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        segments: segments.slice(0, 40), // first 40 is enough context
+        segments: effectiveSegments.slice(0, 40), // first 40 is enough context
         patientName: patient?.display_name || '',
       }),
     })
@@ -335,7 +371,7 @@ export default function LiveSessionPage() {
       .then(d => { if (d.speakers) setSpeakerMap(d.speakers); })
       .catch(() => {})
       .finally(() => setIdentifying(false));
-  }, [segments.length, isRecording, patient]); // eslint-disable-line
+  }, [effectiveSegments.length, liveActive, patient]); // eslint-disable-line
 
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -373,13 +409,13 @@ export default function LiveSessionPage() {
   }, [patient, manualNotes]);
 
   useEffect(() => {
-    if (isRecording) {
+    if (liveActive) {
       liveTimerRef.current = setInterval(fetchLiveUpdate, LIVE_UPDATE_MS);
     } else {
       if (liveTimerRef.current) { clearInterval(liveTimerRef.current); liveTimerRef.current = null; }
     }
     return () => { if (liveTimerRef.current) clearInterval(liveTimerRef.current); };
-  }, [isRecording, fetchLiveUpdate]);
+  }, [liveActive, fetchLiveUpdate]);
 
   const handleStart = async () => {
     if (!patient) return;
@@ -816,7 +852,7 @@ export default function LiveSessionPage() {
             <span className="text-[10px] text-slate-700">
               {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true })}` : 'Auto-updates every 2 min'}
             </span>
-            <button onClick={fetchLiveUpdate} disabled={isUpdating || segments.length < 3}
+            <button onClick={fetchLiveUpdate} disabled={isUpdating || effectiveSegments.length < 3}
               className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium text-slate-500 hover:text-blue-400 disabled:opacity-30 transition-colors">
               <RefreshCw className={`h-3 w-3 ${isUpdating ? 'animate-spin text-blue-400' : ''}`} />
               {isUpdating ? 'Updating…' : 'Refresh now'}

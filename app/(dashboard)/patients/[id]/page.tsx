@@ -22,6 +22,7 @@ interface SessionRow {
   key_points: string[] | null;
   status: string;
   manual_notes: string | null;
+  recording_source: string | null;
 }
 
 function avatarBg(name: string) {
@@ -59,7 +60,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
     service.from('patients').select('*').eq('id', params.id).eq('therapist_id', therapist.id).single(),
     service
       .from('sessions')
-      .select('id, session_number, started_at, ended_at, session_summary, key_points, status, manual_notes')
+      .select('id, session_number, started_at, ended_at, session_summary, key_points, status, manual_notes, recording_source')
       .eq('patient_id', params.id)
       .eq('therapist_id', therapist.id)
       .order('started_at', { ascending: false })
@@ -123,6 +124,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
           patientId={p.id}
           initialStatus={isFailed ? 'failed' : 'processing'}
           sessionId={latestSession?.id}
+          isOnline={latestSession?.recording_source === 'online_bot'}
         />
       )}
 

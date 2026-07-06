@@ -28,6 +28,7 @@ export interface Entitlements {
   calendarSync: boolean;      // Google Calendar connect + auto Meet creation
   patientMessaging: boolean;  // WhatsApp / SMS to patients
   groupSessionTypes: boolean; // couples / family / group session types (Free = individual only)
+  liveOnlineUpdates: boolean; // real-time transcript streaming for online (bot) sessions — Ultra+ only, costs extra per Recall session
 }
 
 interface BillingFields {
@@ -81,6 +82,7 @@ export function getEntitlements(t: BillingFields): Entitlements {
     calendarSync: plan !== 'free',
     patientMessaging: plan === 'ultra' || plan === 'clinic',
     groupSessionTypes: plan !== 'free',
+    liveOnlineUpdates: plan === 'ultra' || plan === 'clinic',
   };
 }
 

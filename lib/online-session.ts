@@ -11,6 +11,7 @@
 
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { getRecallTranscript } from '@/lib/recall';
+import type { TranscriptSegment } from '@/types';
 
 export async function finalizeOnlineSession(sessionId: string, botId: string | null): Promise<void> {
   const service = createServiceRoleClient();
@@ -64,6 +65,30 @@ export async function finalizeOnlineSession(sessionId: string, botId: string | n
     headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },
     body: JSON.stringify({ sessionId }),
   }).catch(err => console.error('[Kith] online process-notes trigger failed:', err));
+}
+
+// Appends one realtime utterance (Ultra-only `transcript.data` webhook events,
+// see app/api/webhooks/recall/route.ts) to the session's transcript while the
+// call is still in progress. Purely for the live suggestions/homework preview
+// — finalizeOnlineSession() overwrites transcript_raw with Recall's authoritative
+// post-call file once the bot leaves, so a missed or duplicated live segment
+// here has no effect on the actual clinical notes.
+export async function appendLiveTranscriptSegment(sessionId: string, segment: TranscriptSegment): Promise<void> {
+  const service = createServiceRoleClient();
+
+  const { data: session } = await service
+    .from('sessions')
+    .select('status, transcript_raw')
+    .eq('id', sessionId)
+    .single();
+
+  // Session already finalised (or gone) — nothing to append to.
+  if (!session || session.status === 'completed' || session.status === 'failed') return;
+
+  const existing = Array.isArray(session.transcript_raw) ? session.transcript_raw : [];
+  await service.from('sessions')
+    .update({ transcript_raw: [...existing, segment] })
+    .eq('id', sessionId);
 }
 
 export async function failOnlineSession(sessionId: string, reason: string): Promise<void> {
