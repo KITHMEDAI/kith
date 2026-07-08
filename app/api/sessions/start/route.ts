@@ -78,9 +78,14 @@ export async function POST(request: Request) {
         .gte('started_at', startOfMonth.toISOString());
 
       if ((count ?? 0) >= cap) {
+        // Pro raises the cap to 60/month but is still capped — only Ultra is
+        // truly unlimited, so the upgrade suggestion must match reality.
+        const upgradeHint = effectivePlan === 'free'
+          ? 'Upgrade to Pro for 60 sessions/month, or Ultra for unlimited.'
+          : 'Upgrade to Ultra for unlimited sessions.';
         return NextResponse.json(
           {
-            error: `Monthly session limit reached (${cap} sessions on your ${effectivePlan} plan). Upgrade to Pro for unlimited sessions.`,
+            error: `Monthly session limit reached (${cap} sessions on your ${effectivePlan} plan). ${upgradeHint}`,
           },
           { status: 402 }
         );

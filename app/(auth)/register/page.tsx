@@ -105,6 +105,7 @@ export default function RegisterPage() {
   const [excelUploading, setExcelUploading] = useState(false);
   const [excelDone, setExcelDone] = useState(false);
   const [gcalLoading, setGcalLoading] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
 
   const [form, setForm] = useState({
     email: '', password: '',
@@ -283,7 +284,7 @@ export default function RegisterPage() {
         </div>
         <div>
           <p className="text-xs text-purple-600/50">Free plan forever · No credit card</p>
-          <p className="text-xs text-purple-700/30 mt-1">HIPAA & DPDP compliant</p>
+          <p className="text-xs text-purple-700/30 mt-1">Encrypted · DPDP 2023 aligned</p>
         </div>
       </div>
 
@@ -316,7 +317,21 @@ export default function RegisterPage() {
               <div><h1 className="text-2xl font-bold text-slate-900">Create your account</h1><p className="mt-1 text-sm text-slate-500">Your secure Kith workspace starts here</p></div>
               <div><label className={LABEL}>Work email *</label><input type="email" autoFocus placeholder="you@clinic.com" value={form.email} onChange={e => set('email', e.target.value)} className={INPUT}/></div>
               <div><label className={LABEL}>Password *</label><input type="password" placeholder="Minimum 8 characters" value={form.password} onChange={e => set('password', e.target.value)} className={INPUT}/></div>
-              <button onClick={next} className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 py-3.5 text-sm font-bold text-white hover:bg-violet-700 transition-colors shadow-lg shadow-violet-200">
+              <label className="flex items-start gap-2.5 text-xs text-slate-500 leading-relaxed cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentChecked}
+                  onChange={e => setConsentChecked(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 flex-none rounded border-purple-300 text-violet-600 focus:ring-violet-400"
+                />
+                <span>
+                  I agree to Kith&rsquo;s <Link href="/terms" target="_blank" className="font-semibold text-violet-600 hover:underline">Terms of Service</Link> and{' '}
+                  <Link href="/privacy" target="_blank" className="font-semibold text-violet-600 hover:underline">Privacy Policy</Link>, and I confirm I&rsquo;m
+                  responsible for obtaining my patients&rsquo; consent before recording or AI-processing any session.
+                </span>
+              </label>
+              <button onClick={next} disabled={!consentChecked}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-violet-600 py-3.5 text-sm font-bold text-white hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-violet-200">
                 Continue <ChevronRight className="h-4 w-4"/>
               </button>
               <div className="flex items-center gap-3">
@@ -324,7 +339,7 @@ export default function RegisterPage() {
                 <span className="text-xs text-slate-400">or</span>
                 <div className="h-px flex-1 bg-purple-200/60" />
               </div>
-              <GoogleButton label="Sign up with Google" />
+              <GoogleButton label="Sign up with Google" disabled={!consentChecked} />
               <p className="text-center text-sm text-slate-500">Already have an account? <Link href="/login" className="font-bold text-violet-600">Sign in</Link></p>
             </div>
           )}

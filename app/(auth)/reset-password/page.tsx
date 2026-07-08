@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
           <p className="text-3xl font-semibold text-white leading-snug">Set a new password</p>
           <p className="text-purple-300/80 text-sm leading-relaxed max-w-xs">Choose a strong password you don&apos;t use elsewhere.</p>
         </div>
-        <p className="text-xs text-purple-400/50">HIPAA · DPDP 2023 · Encrypted at rest &amp; in transit</p>
+        <p className="text-xs text-purple-400/50">DPDP 2023 aligned · Encrypted at rest &amp; in transit</p>
       </div>
 
       <div className="flex flex-1 items-center justify-center px-6 py-12"

@@ -61,7 +61,7 @@ export default function LoginPage() {
             Ambient transcription, intelligent SOAP notes, and patient insights — so you can focus entirely on the person in front of you.
           </p>
         </div>
-        <p className="text-xs text-purple-400/50">HIPAA · DPDP 2023 · End-to-end encrypted</p>
+        <p className="text-xs text-purple-400/50">DPDP 2023 aligned · Encrypted at rest &amp; in transit</p>
       </div>
 
       {/* Right panel — form */}

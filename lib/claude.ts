@@ -79,12 +79,7 @@ async function compressTranscript(
         .join('\n')
     : '';
 
-  const res = await client.messages.create({
-    model: HAIKU,
-    max_tokens: 1600,
-    messages: [{
-      role: 'user',
-      content: `You are an expert clinical transcript analyst. Recording: single laptop mic, clinician and patient in same room. Speaker labels are voice-diarization (reliable across full session, may slip on 1-2 short turns).
+  const prompt = `You are an expert clinical transcript analyst. Recording: single laptop mic, clinician and patient in same room. Speaker labels are voice-diarization (reliable across full session, may slip on 1-2 short turns).
 
 REPAIR LOW-CONFIDENCE WORDS FIRST:
 - Some words are marked ⟨low-confidence words to verify from context: …⟩ — these were probably mis-heard by the speech recogniser.
@@ -115,13 +110,36 @@ Return ONLY valid JSON — be SPECIFIC to THIS session, not a template. Every fi
   "risk_signals": "List ANY SI/SH/HI or hopelessness statements verbatim. If none: 'No SI/SH/HI detected this session.'",
   "homework_discussed": "Exact task assigned + review of previous homework, or 'None assigned'",
   "session_arc": "How state shifted start-to-end — e.g. 'Opened guarded; tearful mid-session on father topic; closed with relief after behavioural plan'"
-}`,
-    }],
-  });
+}`;
 
-  const text = res.content[0]?.type === 'text' ? res.content[0].text : '{}';
-  const match = text.match(/\{[\s\S]*\}/);
-  return match ? match[0] : text;
+  // Longer/busier sessions (more turns, more low-confidence flags, noisier
+  // diarization) need more room to fill out every field — 1600 tokens was
+  // measured truncating mid-JSON on real 500+-segment sessions, producing
+  // invalid JSON that Sonnet would then misread as "the transcript is
+  // corrupted" (it isn't — Layer 1 just got cut off). One retry on invalid
+  // JSON since these calls are stochastic; a truncated/malformed response
+  // isn't necessarily reproducible on a second attempt.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const res = await client.messages.create({
+      model: HAIKU,
+      max_tokens: 3000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const text = res.content[0]?.type === 'text' ? res.content[0].text : '{}';
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        JSON.parse(match[0]);
+        return match[0];
+      } catch { /* fall through to retry */ }
+    }
+    if (attempt === 2) {
+      throw new Error('Layer 1 (transcript compression) did not return valid JSON after retry — refusing to pass malformed data to note synthesis.');
+    }
+  }
+  // Unreachable, but keeps TypeScript happy about the return type.
+  throw new Error('Layer 1 (transcript compression) failed');
 }
 
 // ─── Stage 2: Sonnet clinical synthesis ───────────────────────────────────────

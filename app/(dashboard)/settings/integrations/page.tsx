@@ -229,7 +229,7 @@ export default function IntegrationsPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-sm font-semibold text-foreground">WhatsApp Business (Twilio)</h3>
-              <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">Pro plan</span>
+              <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">Ultra plan</span>
             </div>
             <p className="text-sm text-muted-foreground">Send appointment reminders and rescheduling messages via WhatsApp.</p>
             <p className="text-xs text-muted-foreground/60 mt-1">Configure TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in your .env.local file</p>

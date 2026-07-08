@@ -28,3 +28,11 @@ export async function register() {
     });
   }
 }
+
+// Sentry.init() above only sets up the client — without this export, Next.js
+// never actually routes uncaught errors from Route Handlers/Server Components
+// to it, so nothing ever gets reported regardless of a valid DSN.
+export async function onRequestError(...args: Parameters<typeof import('@sentry/nextjs').captureRequestError>) {
+  const Sentry = await import('@sentry/nextjs');
+  Sentry.captureRequestError(...args);
+}

@@ -5,9 +5,10 @@ import {
   Save, Loader2, Upload, Mail, Phone,
   Calendar, Clock, Users, Shield,
   CheckCircle, TrendingUp, Edit3, ExternalLink, BadgeCheck, X as XIcon, MapPin,
-  Sparkles, ArrowUpRight,
+  Sparkles, ArrowUpRight, AlertTriangle,
 } from 'lucide-react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
+import DeleteAccountModal from '@/components/settings/DeleteAccountModal';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Profile {
@@ -247,6 +248,7 @@ export default function ProfilePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [editMode, setEditMode]     = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   useEffect(() => {
     fetch('/api/profile')
       .then(r => r.json())
@@ -563,8 +565,27 @@ export default function ProfilePage() {
       <div className="rounded-xl px-5 py-3.5 text-[12px] text-teal-400 flex items-center gap-2"
         style={{ background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.2)' }}>
         <Shield className="h-4 w-4 shrink-0" />
-        Profile data is encrypted at rest (AES-256) and stored in compliance with DPDP Act 2023. License information is never shared with third parties.
+        Profile data is encrypted in transit and at rest, aligned with the DPDP Act 2023. License information is never shared with third parties.
       </div>
+
+      {/* Danger zone */}
+      <div className="rounded-xl px-5 py-4 flex items-center justify-between gap-4"
+        style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <div className="flex items-center gap-2.5">
+          <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
+          <div>
+            <p className="text-[13px] font-semibold text-red-300">Delete account</p>
+            <p className="text-[12px] text-red-400/70">Permanently deletes your account and all patient data. Cannot be undone.</p>
+          </div>
+        </div>
+        <button onClick={() => setShowDeleteModal(true)}
+          className="flex-none rounded-lg px-3.5 py-2 text-[13px] font-semibold text-red-300 hover:text-white hover:bg-red-500/80 transition-colors"
+          style={{ border: '1px solid rgba(239,68,68,0.4)' }}>
+          Delete my account
+        </button>
+      </div>
+
+      {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
     </div>
   );
 }

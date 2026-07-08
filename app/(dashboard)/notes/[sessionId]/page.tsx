@@ -60,12 +60,12 @@ function ClinicalText({ text, dot = 'bg-teal-400' }: { text: string; dot?: strin
   // Points come back joined by ' • ' (or occasionally newlines); split on either.
   const lines = text.split(/\s*•\s*|\n/).map(l => l.replace(/^\s*[-*]\s*/, '').trim()).filter(Boolean);
   if (lines.length <= 1) {
-    return <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap"><Highlighted text={text} /></p>;
+    return <p className="text-base text-gray-200 leading-relaxed whitespace-pre-wrap"><Highlighted text={text} /></p>;
   }
   return (
     <ul className="space-y-2">
       {lines.map((l, i) => (
-        <li key={i} className="flex items-start gap-2.5 text-sm text-gray-200 leading-snug">
+        <li key={i} className="flex items-start gap-2.5 text-base text-gray-200 leading-snug">
           <span className={`w-1.5 h-1.5 rounded-full ${dot} mt-1.5 shrink-0`} />
           <Highlighted text={l} />
         </li>
@@ -325,7 +325,7 @@ export default function NoteDetailPage() {
             <h2 className="text-sm font-semibold text-gray-300 mb-3">Key Points</h2>
             <ul className="space-y-2">
               {session.key_points.map((pt, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                <li key={i} className="flex items-start gap-2 text-base text-gray-300">
                   <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 shrink-0" />
                   <Highlighted text={pt} />
                 </li>
@@ -363,13 +363,13 @@ export default function NoteDetailPage() {
                       value={editedSOAP[field] || ''}
                       onChange={e => setEditedSOAP(s => ({ ...s, [field]: e.target.value }))}
                       rows={4}
-                      className="w-full bg-transparent text-sm text-gray-200 resize-none focus:outline-none placeholder-gray-600"
+                      className="w-full bg-transparent text-base text-gray-200 resize-none focus:outline-none placeholder-gray-600"
                       placeholder={`Enter ${field} notes...`}
                     />
                   ) : (
                     soap[field]
                       ? <ClinicalText text={soap[field] as string} />
-                      : <p className="text-sm"><span className="text-gray-600 italic">Not recorded</span></p>
+                      : <p className="text-base"><span className="text-gray-600 italic">Not recorded</span></p>
                   )}
                 </div>
               </div>
@@ -383,7 +383,7 @@ export default function NoteDetailPage() {
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Doctor&apos;s private notes</h3>
                 </div>
                 <div className="p-4">
-                  <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{session.manual_notes}</p>
+                  <p className="text-base text-gray-200 leading-relaxed whitespace-pre-wrap">{session.manual_notes}</p>
                 </div>
               </div>
             )}
@@ -402,7 +402,7 @@ export default function NoteDetailPage() {
                 <p className="text-[11px] text-gray-500 mb-3">These are notes for you — only send one to the patient if clinically appropriate.</p>
                 <ul className="space-y-2">
                   {session.ai_suggestions.map((s, i) => (
-                    <li key={i} className="text-sm text-gray-300 flex items-start gap-2 flex-wrap">
+                    <li key={i} className="text-base text-gray-300 flex items-start gap-2 flex-wrap">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                       <span className="flex-1 min-w-0"><Highlighted text={s} /></span>
                       {session.patient && (

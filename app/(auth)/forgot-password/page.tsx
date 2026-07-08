@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
             We&apos;ll email you a secure link to set a new password.
           </p>
         </div>
-        <p className="text-xs text-purple-400/50">HIPAA · DPDP 2023 · Encrypted at rest &amp; in transit</p>
+        <p className="text-xs text-purple-400/50">DPDP 2023 aligned · Encrypted at rest &amp; in transit</p>
       </div>
 
       {/* Right form panel */}

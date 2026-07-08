@@ -115,6 +115,12 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
   }
 
   const longWait = elapsedSec >= 90;
+  // If the background job itself died (server restart, hard timeout) before
+  // reaching its own catch handler, the session can stay 'processing' in the
+  // DB forever — polling alone never recovers that. Past a generous threshold,
+  // offer a manual retry even though status hasn't flipped to 'failed' yet.
+  const stuckThresholdSec = isOnline ? 360 : 180;
+  const stuck = elapsedSec >= stuckThresholdSec;
 
   return (
     <div className="rounded-xl px-4 py-3 flex items-center gap-3 text-sm"
@@ -123,7 +129,7 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
         border: '1px solid rgba(139,92,246,0.25)',
       }}>
       <RefreshCw className="h-4 w-4 text-violet-400 animate-spin flex-none" />
-      <div>
+      <div className="flex-1">
         <span className="font-medium text-violet-200">Generating clinical notes…</span>
         <span className="ml-2 text-violet-400/70 text-xs">
           {isOnline
@@ -133,6 +139,17 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
             : 'AI is analysing the session · typically 60–90 s'}
         </span>
       </div>
+      {stuck && sessionId && (
+        <button
+          onClick={retry}
+          disabled={retrying}
+          className="flex-none flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60 transition-colors"
+          style={{ background: 'rgba(139,92,246,0.85)' }}
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${retrying ? 'animate-spin' : ''}`} />
+          {retrying ? 'Retrying…' : 'Taking too long — retry'}
+        </button>
+      )}
     </div>
   );
 }

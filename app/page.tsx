@@ -147,11 +147,15 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <KithLockup markSize={20} className="text-[14px] text-white/60" gradientId="kith-footer" gradientFrom="#e9d5ff" gradientTo="#a78bfa" />
           <p className="text-xs text-purple-300/30 flex items-center gap-1.5">
-            <ShieldCheck className="h-3.5 w-3.5" /> Encrypted · DPDP 2023 compliant
+            <ShieldCheck className="h-3.5 w-3.5" /> Encrypted · DPDP 2023 aligned
           </p>
-          <a href="mailto:hello@kith.space" className="text-xs text-purple-300/40 hover:text-purple-200 transition-colors">
-            hello@kith.space
-          </a>
+          <div className="flex items-center gap-4 text-xs text-purple-300/40">
+            <Link href="/privacy" className="hover:text-purple-200 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-purple-200 transition-colors">Terms</Link>
+            <a href="mailto:hello@kith.space" className="hover:text-purple-200 transition-colors">
+              hello@kith.space
+            </a>
+          </div>
         </div>
       </footer>
     </div>

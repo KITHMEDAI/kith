@@ -19,7 +19,7 @@ function GoogleG() {
 // Shared "Continue with Google" button — works for both sign-up and sign-in,
 // since Supabase OAuth creates the auth user automatically on first use.
 // Profile bootstrap (name/avatar/email) happens server-side in the callback.
-export default function GoogleButton({ label = 'Continue with Google' }: { label?: string }) {
+export default function GoogleButton({ label = 'Continue with Google', disabled = false }: { label?: string; disabled?: boolean }) {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,8 +48,8 @@ export default function GoogleButton({ label = 'Continue with Google' }: { label
       <button
         type="button"
         onClick={handleClick}
-        disabled={loading}
-        className="w-full flex items-center justify-center gap-2.5 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 transition-colors shadow-sm"
+        disabled={loading || disabled}
+        className="w-full flex items-center justify-center gap-2.5 rounded-lg border border-slate-200 bg-white py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" /> : <GoogleG />}
         {label}

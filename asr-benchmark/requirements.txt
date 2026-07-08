@@ -1,0 +1,29 @@
+# Core (needed even in mock mode)
+numpy>=1.26.0
+requests>=2.31.0
+
+# Dataset streaming (data_loader.py)
+# Pinned below 4.x: newer `datasets` defaults Audio-feature decoding to
+# torchcodec, which needs a "full-shared" FFmpeg build with exposed DLLs —
+# not what Windows FFmpeg installers normally ship. This range decodes audio
+# via soundfile/librosa instead, which we already depend on anyway.
+datasets>=2.19.0,<4.0.0
+soundfile>=0.12.1
+librosa>=0.10.1
+
+# Transcription (pipeline.py)
+faster-whisper>=1.0.1
+
+# Diarization (pipeline.py) — pulls in torch + torchaudio as dependencies.
+# Pin these two to the SAME version explicitly: pip's resolver doesn't
+# reliably keep them in lockstep on its own (confirmed on Windows — it let
+# torch drift to 2.12.1 while torchaudio stayed at 2.11.0, which breaks
+# torchaudio's native extension at import time). If you change this pin,
+# change both together.
+pyannote.audio>=3.1.1
+torch==2.11.0
+torchaudio==2.11.0
+
+# Evaluation harness (eval.py)
+evaluate>=0.4.1
+jiwer>=3.0.3

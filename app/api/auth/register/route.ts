@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceRoleClient, createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/server';
 
 const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK === 'true' ||
@@ -35,31 +35,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Clinic name is required' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
-
     const admin = createServiceRoleClient();
 
-    // 1. Create auth user
-    const { data: auth, error: authErr } = await supabase.auth.signUp({
+    // 1. Create auth user via the admin API (not auth.signUp()) — signUp() triggers
+    // a confirmation-email send that we immediately discard anyway (email_confirm:
+    // true below skips it), and that wasted send burns Supabase's shared-mailer
+    // rate limit hard enough to lock out all new signups project-wide.
+    const { data: auth, error: authErr } = await admin.auth.admin.createUser({
       email,
       password,
-      options: { data: { display_name } },
+      email_confirm: true,
+      user_metadata: { display_name },
     });
 
-    // Supabase returns identities:[] when the email already exists (instead of an error)
     if (authErr) {
       const msg = authErr.message.toLowerCase();
-      if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+      if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('already been registered')) {
         return NextResponse.json({ error: 'An account with this email already exists. Please sign in instead.', code: 'EMAIL_EXISTS' }, { status: 409 });
       }
       return NextResponse.json({ error: authErr.message }, { status: 400 });
     }
     if (!auth.user) return NextResponse.json({ error: 'Signup failed — please try again' }, { status: 500 });
-
-    // Detect silent duplicate: Supabase returns the user but with no identities
-    if (!auth.user.identities || auth.user.identities.length === 0) {
-      return NextResponse.json({ error: 'An account with this email already exists. Please sign in instead.', code: 'EMAIL_EXISTS' }, { status: 409 });
-    }
 
     // 2. Upsert therapist profile (service role bypasses RLS)
     // Use upsert so that retrying registration after a partial failure never causes a duplicate key error
@@ -85,9 +81,6 @@ export async function POST(req: NextRequest) {
       await admin.auth.admin.deleteUser(auth.user.id);
       return NextResponse.json({ error: profileErr.message }, { status: 500 });
     }
-
-    // 3. Auto-confirm email so the user can log in immediately (no inbox check required)
-    await admin.auth.admin.updateUserById(auth.user.id, { email_confirm: true });
 
     return NextResponse.json({ ok: true, userId: auth.user.id });
   } catch (err) {

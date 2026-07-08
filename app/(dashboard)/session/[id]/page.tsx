@@ -217,6 +217,9 @@ export default function LiveSessionPage() {
 
   const [appointment, setAppointment]     = useState<Appointment | null>(null);
   const [patient, setPatient]             = useState<Patient | null>(null);
+  // True until the appointment-recovery check below has run — blocks the
+  // online auto-start effect from racing ahead of it (see that effect).
+  const [recovering, setRecovering]       = useState(true);
   const [sessionId, setSessionId]         = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<'new'|'active'|'paused'|'ended'>('new');
   const [manualNotes, setManualNotes]     = useState('');
@@ -312,6 +315,13 @@ export default function LiveSessionPage() {
           if (existing) { setSessionId(existing.id); setSessionStatus('paused'); }
         }
       }
+      // Only now is it safe for the auto-start effect to decide whether this
+      // is a fresh online session — setAppointment() above re-renders with
+      // sessionStatus still 'new' while this recovery check is in flight, and
+      // without this gate the auto-start effect fires on that intermediate
+      // render, dispatching a second (paid) Recall bot for an already-active
+      // session before setSessionStatus('paused') above ever lands.
+      setRecovering(false);
     }
     load();
   }, [params.id]); // eslint-disable-line
@@ -458,12 +468,13 @@ export default function LiveSessionPage() {
   // Fires exactly once (guarded by the ref), and only for a fresh session.
   const autoStartedRef = useRef(false);
   useEffect(() => {
+    if (recovering) return; // wait for the recovery check to resolve sessionStatus first
     if (!isOnline || !appointment) return;
     if (autoStartedRef.current) return;
     if (sessionStatus !== 'new' || botDispatched) return;
     autoStartedRef.current = true;
     handleStartOnline();
-  }, [isOnline, appointment, sessionStatus, botDispatched]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recovering, isOnline, appointment, sessionStatus, botDispatched]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist the doctor's private notes (debounced) so they survive even when an
   // online session finalises via the Recall webhook (the doctor never clicks
@@ -926,7 +937,7 @@ export default function LiveSessionPage() {
                       <div className="rounded-xl p-4 space-y-2.5" style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Questions to ask</p>
                         {suggestions.questions!.map((q, i) => (
-                          <p key={i} className="text-sm text-slate-300 flex gap-2.5 leading-relaxed">
+                          <p key={i} className="text-base text-slate-300 flex gap-2.5 leading-relaxed">
                             <span className="text-blue-500 font-bold shrink-0 mt-0.5">{i + 1}.</span> {q}
                           </p>
                         ))}
@@ -938,7 +949,7 @@ export default function LiveSessionPage() {
                       <div className="rounded-xl p-4 space-y-2.5" style={{ background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.15)' }}>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Treatment &amp; medication notes</p>
                         {suggestions.treatment!.map((t, i) => (
-                          <p key={i} className="text-sm text-slate-300 flex gap-2 leading-relaxed">
+                          <p key={i} className="text-base text-slate-300 flex gap-2 leading-relaxed">
                             <span className="text-emerald-500 mt-0.5 shrink-0">→</span> {t}
                           </p>
                         ))}
@@ -950,7 +961,7 @@ export default function LiveSessionPage() {
                       <div className="rounded-xl p-4 space-y-2.5" style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.15)' }}>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400">Exercises &amp; mindfulness</p>
                         {suggestions.mindfulness!.map((m, i) => (
-                          <p key={i} className="text-sm text-slate-300 flex gap-2 leading-relaxed">
+                          <p key={i} className="text-base text-slate-300 flex gap-2 leading-relaxed">
                             <span className="text-violet-500 mt-0.5 shrink-0">✦</span> {m}
                           </p>
                         ))}
@@ -985,7 +996,7 @@ export default function LiveSessionPage() {
                       <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Key points</p>
                         {keyPoints.map((pt, i) => (
-                          <p key={i} className="text-sm text-slate-300 flex gap-2.5 leading-relaxed">
+                          <p key={i} className="text-base text-slate-300 flex gap-2.5 leading-relaxed">
                             <span className="text-blue-500 mt-0.5 shrink-0">·</span> {pt}
                           </p>
                         ))}
@@ -998,7 +1009,7 @@ export default function LiveSessionPage() {
                         {(['subjective','objective','assessment','plan'] as const).map(f => (
                           <div key={f}>
                             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">{f}</p>
-                            <p className="text-sm text-slate-400 leading-relaxed">{soapNote[f]}</p>
+                            <p className="text-base text-slate-400 leading-relaxed">{soapNote[f]}</p>
                           </div>
                         ))}
                       </div>
@@ -1015,7 +1026,7 @@ export default function LiveSessionPage() {
 
           {/* Footer */}
           <div className="px-5 py-2.5 text-center text-[10px] text-slate-700" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            🔒 Audio deleted after processing · AES-256 · HIPAA & DPDP compliant
+            🔒 Audio deleted after processing · Encrypted in transit &amp; at rest · DPDP 2023 aligned
           </div>
         </div>
       </div>

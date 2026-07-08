@@ -41,8 +41,13 @@ export async function middleware(request: NextRequest) {
   const isAuthPage = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/forgot-password');
   const isResetPage = pathname.startsWith('/reset-password');
   const isApiRoute = pathname.startsWith('/api');
+  // Legal pages must stay reachable by logged-out visitors (and by Google's
+  // OAuth verification reviewer) without being treated as an "auth" page —
+  // a logged-in user should still be able to open them, not get bounced to
+  // /dashboard the way visiting /login while signed in does.
+  const isPublicPage = pathname.startsWith('/privacy') || pathname.startsWith('/terms');
 
-  if (!user && !isAuthPage && !isResetPage && !isApiRoute) {
+  if (!user && !isAuthPage && !isResetPage && !isApiRoute && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = '';
