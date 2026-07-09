@@ -16,9 +16,13 @@ export interface NotifyParams {
   subject: string;
   message: string;
   channels: ('email' | 'sms' | 'whatsapp')[];
+  /** Attaches a calendar invite (.ics) to the email — patients get a native
+   *  "Add to Calendar" / RSVP prompt in Gmail/Outlook instead of just reading
+   *  a sentence with the time in it. */
+  icsAttachment?: { filename: string; content: string; contentType: string };
 }
 
-export async function sendNotification({ to, subject, message, channels }: NotifyParams) {
+export async function sendNotification({ to, subject, message, channels, icsAttachment }: NotifyParams) {
   const results: { email?: boolean; sms?: boolean; whatsapp?: boolean } = {};
 
   if (channels.includes('email') && to.email) {
@@ -35,6 +39,7 @@ export async function sendNotification({ to, subject, message, channels }: Notif
           </div>
         `,
         text: message,
+        ...(icsAttachment ? { attachments: [icsAttachment] } : {}),
       });
       results.email = true;
     } catch (err) {
@@ -89,6 +94,7 @@ export async function sendRescheduleNotification(params: {
   newTime: string;
   message?: string;
   channels: ('email' | 'sms' | 'whatsapp')[];
+  icsAttachment?: { filename: string; content: string; contentType: string };
 }) {
   const defaultMessage = `Hi ${params.patient.display_name}, your appointment has been rescheduled from ${new Date(params.oldTime).toLocaleString('en-IN')} to ${new Date(params.newTime).toLocaleString('en-IN')}. Please reply to confirm.`;
 
@@ -101,6 +107,7 @@ export async function sendRescheduleNotification(params: {
     subject: 'Appointment Rescheduled — Kith',
     message: params.message || defaultMessage,
     channels: params.channels,
+    icsAttachment: params.icsAttachment,
   });
 }
 

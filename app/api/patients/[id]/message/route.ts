@@ -4,9 +4,11 @@ import { getEntitlements, upgradeMessage } from '@/lib/entitlements';
 import { sendNotification } from '@/lib/notify';
 import { checkRateLimit } from '@/lib/rate-limit';
 
-// POST /api/patients/[id]/message — manual WhatsApp/SMS send to a patient.
+// POST /api/patients/[id]/message — manual email send to a patient.
 // Ultra/Clinic only (entitlements.patientMessaging) — this is the real
-// feature behind the "WhatsApp & SMS to patients" line on the pricing page.
+// feature behind the "Message patients directly" line on the pricing page.
+// WhatsApp deprioritized for now (sandbox-only until Twilio's business
+// verification is approved) — email via Resend needs no external approval.
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -35,31 +37,30 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const body = await req.json().catch(() => ({}));
-  const channel: 'whatsapp' | 'sms' = body.channel;
   const message: string | undefined = body.message;
-  if ((channel !== 'whatsapp' && channel !== 'sms') || !message?.trim()) {
-    return NextResponse.json({ error: 'Missing or invalid channel/message' }, { status: 422 });
+  if (!message?.trim()) {
+    return NextResponse.json({ error: 'Message is required' }, { status: 422 });
   }
 
   const service = createServiceRoleClient();
   const { data: patient } = await service
-    .from('patients').select('id, phone, whatsapp_number, therapist_id').eq('id', params.id).single();
+    .from('patients').select('id, email, therapist_id').eq('id', params.id).single();
   if (!patient || patient.therapist_id !== therapist.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
+  if (!patient.email) {
+    return NextResponse.json({ error: 'This patient has no email address on file.' }, { status: 422 });
+  }
 
   const results = await sendNotification({
-    to: {
-      phone: channel === 'sms' ? patient.phone || undefined : undefined,
-      whatsapp: channel === 'whatsapp' ? (patient.whatsapp_number || patient.phone || undefined) : undefined,
-    },
+    to: { email: patient.email },
     subject: 'Message from your therapist',
     message: message.trim(),
-    channels: [channel],
+    channels: ['email'],
   });
 
-  if (!results[channel]) {
-    return NextResponse.json({ error: 'Message failed to send — Twilio may not be configured yet. Contact support.' }, { status: 502 });
+  if (!results.email) {
+    return NextResponse.json({ error: 'Message failed to send — please try again shortly.' }, { status: 502 });
   }
   return NextResponse.json({ ok: true });
 }

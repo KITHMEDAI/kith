@@ -35,7 +35,7 @@ interface SessionDetail {
     exercises?: { name: string; description: string; frequency: string }[];
     apps?: { name: string; platform: string; reason: string }[];
   } | null;
-  patient: { id: string; display_name: string; diagnosis: string[]; date_of_birth: string | null; phone: string | null; whatsapp_number: string | null } | null;
+  patient: { id: string; display_name: string; diagnosis: string[]; date_of_birth: string | null; phone: string | null; whatsapp_number: string | null; email: string | null } | null;
 }
 
 // The AI wraps the single most clinically load-bearing word/phrase per bullet
@@ -410,8 +410,7 @@ export default function NoteDetailPage() {
                           text={s}
                           patientId={session.patient.id}
                           patientName={session.patient.display_name}
-                          hasPhone={!!session.patient.phone}
-                          hasWhatsapp={!!(session.patient.whatsapp_number || session.patient.phone)}
+                          hasEmail={!!session.patient.email}
                           entitled={canMessagePatient}
                         />
                       )}
@@ -512,8 +511,7 @@ export default function NoteDetailPage() {
                       text={session.homework_assigned}
                       patientId={session.patient.id}
                       patientName={session.patient.display_name}
-                      hasPhone={!!session.patient.phone}
-                      hasWhatsapp={!!(session.patient.whatsapp_number || session.patient.phone)}
+                      hasEmail={!!session.patient.email}
                       entitled={canMessagePatient}
                     />
                   )}

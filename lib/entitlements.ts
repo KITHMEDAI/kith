@@ -106,7 +106,7 @@ export const PLAN_FEATURES: Record<PlanKey, string[]> = {
     'Unlimited sessions, 120 minutes each',
     'Online sessions with live suggestions — homework and talking points update in real time as the session unfolds',
     'Your calendar synced automatically, with a meeting link created for every session',
-    'Message patients directly on WhatsApp',
+    'Message patients directly by email',
     'Priority support — first in line when you need help',
   ],
   clinic: ['Everything in Ultra', 'Multiple therapist seats', 'Admin dashboard', 'White-label option'],

@@ -175,7 +175,7 @@ export default function IntegrationsPage() {
                 ? <span className="flex items-center gap-1 text-xs text-emerald-600"><CheckCircle2 className="h-3.5 w-3.5"/> Connected</span>
                 : <span className="flex items-center gap-1 text-xs text-muted-foreground"><XCircle className="h-3.5 w-3.5"/> Not connected</span>}
             </div>
-            <p className="text-sm text-muted-foreground">Import appointments from your Google Calendar into Kith. Read-only — Kith never writes to or edits your calendar.</p>
+            <p className="text-sm text-muted-foreground">Imports appointments from your Google Calendar into Kith, and creates a calendar event with a Google Meet link when you book an online session. Kith never touches any other event on your calendar.</p>
             {calendarConnected && (
               <div className="mt-3">
                 <label className="block text-xs font-medium text-muted-foreground mb-1.5">Sync appointments from</label>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { X, Mic, MicOff, Mail, MessageSquare } from 'lucide-react';
+import { X, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,7 +18,9 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled }:
   const [time, setTime] = useState('');
   const [reason, setReason] = useState('');
   const [message, setMessage] = useState('');
-  const [channels, setChannels] = useState<string[]>(['email', 'whatsapp']);
+  // WhatsApp deprioritized for now — sandbox-only until Twilio's business
+  // verification is approved. Email is the only notification channel.
+  const channels = ['email'];
   const [isVoice, setIsVoice] = useState(false);
   const [listening, setListening] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -46,10 +48,6 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled }:
     r.start();
     recognitionRef.current = r;
     setListening(true);
-  };
-
-  const toggleChannel = (ch: string) => {
-    setChannels(prev => prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]);
   };
 
   const handleSubmit = async () => {
@@ -105,20 +103,6 @@ export default function RescheduleModal({ appointment, onClose, onRescheduled }:
           <div className="space-y-1.5">
             <Label>Reason <span className="text-muted-foreground text-xs">(optional)</span></Label>
             <Input placeholder="e.g. Doctor unavailable" value={reason} onChange={e => setReason(e.target.value)} />
-          </div>
-
-          {/* Notification channels */}
-          <div className="space-y-2">
-            <Label>Notify patient via</Label>
-            <div className="flex gap-2 flex-wrap">
-              {/* SMS deprioritized for now — see MessagePatientButton.tsx comment. */}
-              {[{ id: 'email', label: 'Email', icon: Mail }, { id: 'whatsapp', label: 'WhatsApp', icon: MessageSquare }].map(ch => (
-                <button key={ch.id} type="button" onClick={() => toggleChannel(ch.id)}
-                  className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${channels.includes(ch.id) ? 'bg-teal-50 border-teal-300 text-teal-700' : 'bg-muted border-border text-muted-foreground hover:bg-muted/80'}`}>
-                  <ch.icon className="h-3.5 w-3.5" />{ch.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Message */}

@@ -185,8 +185,8 @@ export default function OnboardingPage() {
 
   // ── Profile save ──────────────────────────────────────────────────────────
   const saveProfile = async () => {
-    if (!displayName.trim() || !designation) {
-      setProfileError('Name and designation are required.');
+    if (!displayName.trim()) {
+      setProfileError('Name is required.');
       return;
     }
     setProfileSaving(true);
@@ -455,7 +455,7 @@ export default function OnboardingPage() {
 
                 {/* Designation */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Designation *</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Designation <span className="font-normal text-slate-400">(optional)</span></label>
                   <div className="relative">
                     <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/>
                     <select value={designation} onChange={e => setDesignation(e.target.value)}

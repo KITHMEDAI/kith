@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { createMeetEvent, getTokensFromVault } from '@/lib/google-calendar';
 import { getEntitlements, upgradeMessage } from '@/lib/entitlements';
 import { sendNotification } from '@/lib/notify';
+import { buildCalendarInvite } from '@/lib/ics';
 import { addWeeks, addMonths } from 'date-fns';
 import { z } from 'zod';
 
@@ -196,14 +197,31 @@ export async function POST(req: NextRequest) {
       try {
         const [{ data: pt }, { data: therapistInfo }] = await Promise.all([
           supabase.from('patients').select('display_name, phone, whatsapp_number, email').eq('id', patient_id).single(),
-          supabase.from('therapists').select('display_name').eq('id', therapist.id).single(),
+          supabase.from('therapists').select('display_name, email').eq('id', therapist.id).single(),
         ]);
         if (pt) {
           const firstTime = toInsert[0].at.toLocaleString('en-IN', {
             weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true,
           });
           const recurringNote = recurrence ? ` (repeats ${recurrence.frequency})` : '';
-          const message = `Hi ${pt.display_name}, your online session with ${therapistInfo?.display_name || 'your therapist'} is booked for ${firstTime}${recurringNote}. Join here: ${resolvedMeetingUrl}`;
+          const therapistName = therapistInfo?.display_name || 'your therapist';
+          const message = `Hi ${pt.display_name}, your online session with ${therapistName} is booked for ${firstTime}${recurringNote}. Join here: ${resolvedMeetingUrl}`;
+          // Attaches a real calendar invite so the patient gets an "Add to
+          // Calendar" prompt in their email client, regardless of whether the
+          // therapist has Google Calendar connected on their own end.
+          const icsAttachment = buildCalendarInvite({
+            uid: createdIds[0],
+            sequence: 0,
+            title: `Therapy session with ${therapistName}`,
+            description: `Join link: ${resolvedMeetingUrl}`,
+            location: resolvedMeetingUrl,
+            start: toInsert[0].at,
+            durationMinutes: duration_minutes,
+            organizerEmail: therapistInfo?.email || process.env.RESEND_FROM_EMAIL || 'noreply@kith.space',
+            organizerName: therapistName,
+            attendeeEmail: pt.email || undefined,
+            attendeeName: pt.display_name,
+          });
           await sendNotification({
             to: {
               email: pt.email || undefined,
@@ -212,8 +230,10 @@ export async function POST(req: NextRequest) {
             },
             subject: 'Your online session — Kith',
             message,
-            // SMS deprioritized for now — see MessagePatientButton.tsx comment.
-            channels: ['email', 'whatsapp'],
+            // WhatsApp deprioritized for now — sandbox-only until Twilio's
+            // business verification is approved (see MessagePatientButton.tsx).
+            channels: ['email'],
+            icsAttachment,
           });
         }
       } catch (err) {

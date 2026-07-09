@@ -200,15 +200,12 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                   </div>
                 )}
               </div>
-              {(p.phone || p.whatsapp_number) && (
-                <MessagePatientButton
-                  patientId={p.id}
-                  patientName={p.display_name}
-                  hasPhone={!!p.phone}
-                  hasWhatsapp={!!(p.whatsapp_number || p.phone)}
-                  entitled={canMessagePatients}
-                />
-              )}
+              <MessagePatientButton
+                patientId={p.id}
+                patientName={p.display_name}
+                hasEmail={!!p.email}
+                entitled={canMessagePatients}
+              />
             </div>
           )}
 

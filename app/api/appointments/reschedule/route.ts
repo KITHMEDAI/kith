@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { sendRescheduleNotification } from '@/lib/notify';
+import { buildCalendarInvite } from '@/lib/ics';
 import { z } from 'zod';
 
 // Accept both snake_case (API-native) and camelCase (what the modal historically
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('id, display_name, clinic_name')
+    .select('id, display_name, clinic_name, email')
     .eq('user_id', user.id)
     .single();
   if (!therapist) return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
   // Fetch the appointment (with its duration + patient contact for the notice)
   const { data: appt } = await supabase
     .from('appointments')
-    .select('id, scheduled_at, duration_minutes, patient:patients(display_name, email, phone, whatsapp_number)')
+    .select('id, scheduled_at, duration_minutes, modality, meeting_url, patient:patients(display_name, email, phone, whatsapp_number)')
     .eq('id', appointment_id!)
     .eq('therapist_id', therapist.id)
     .single();
@@ -97,6 +98,20 @@ export async function POST(req: NextRequest) {
     const patient = (Array.isArray(appt.patient) ? appt.patient[0] : appt.patient) as
       | { display_name: string; email: string; phone: string; whatsapp_number: string }
       | null;
+    const therapistName = therapist.display_name || 'your therapist';
+    const icsAttachment = buildCalendarInvite({
+      uid: appt.id,
+      sequence: 1,
+      title: `Therapy session with ${therapistName}`,
+      description: appt.meeting_url ? `Join link: ${appt.meeting_url}` : undefined,
+      location: appt.meeting_url || undefined,
+      start: new Date(new_datetime!),
+      durationMinutes: appt.duration_minutes || 50,
+      organizerEmail: therapist.email || process.env.RESEND_FROM_EMAIL || 'noreply@kith.space',
+      organizerName: therapistName,
+      attendeeEmail: patient?.email || undefined,
+      attendeeName: patient?.display_name,
+    });
     notifications = await sendRescheduleNotification({
       patient: {
         display_name: patient?.display_name || 'Patient',
@@ -108,6 +123,7 @@ export async function POST(req: NextRequest) {
       newTime: new_datetime!,
       message,
       channels,
+      icsAttachment,
     }).catch(() => null);
   }
 

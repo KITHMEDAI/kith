@@ -9,8 +9,7 @@ interface Props {
   text: string;
   patientId: string;
   patientName: string;
-  hasPhone: boolean;
-  hasWhatsapp: boolean;
+  hasEmail: boolean;
   entitled: boolean;
 }
 
@@ -18,13 +17,13 @@ interface Props {
 // clinician-facing text (jargon, ' • ' bullets, **bold**) to a short plain-
 // English message via Claude, then hands off to MessagePatientButton so the
 // therapist reviews/edits before actually sending. Never sends automatically.
-export default function SendToPatientAction({ text, patientId, patientName, hasPhone, hasWhatsapp, entitled }: Props) {
+export default function SendToPatientAction({ text, patientId, patientName, hasEmail, entitled }: Props) {
   const [state, setState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [plain, setPlain] = useState('');
 
   if (!entitled) {
     return (
-      <LockedFeatureButton requiredPlan="ultra" featureLabel="WhatsApp messaging to patients" className="ml-2 inline-block">
+      <LockedFeatureButton requiredPlan="ultra" featureLabel="Direct messaging to patients" className="ml-2 inline-block">
         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
           <Send className="h-3 w-3" /> Send to patient 🔒
         </span>
@@ -32,7 +31,7 @@ export default function SendToPatientAction({ text, patientId, patientName, hasP
     );
   }
 
-  if (!hasPhone && !hasWhatsapp) return null;
+  if (!hasEmail) return null;
 
   async function start() {
     setState('loading');
@@ -55,7 +54,7 @@ export default function SendToPatientAction({ text, patientId, patientName, hasP
     return (
       <MessagePatientButton
         patientId={patientId} patientName={patientName}
-        hasPhone={hasPhone} hasWhatsapp={hasWhatsapp} entitled={entitled}
+        hasEmail={hasEmail} entitled={entitled}
         initialMessage={plain} triggerLabel="Send to patient" autoOpen
         className="ml-2 inline-flex !mt-0 text-[10px]"
       />
