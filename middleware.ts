@@ -45,7 +45,11 @@ export async function middleware(request: NextRequest) {
   // OAuth verification reviewer) without being treated as an "auth" page —
   // a logged-in user should still be able to open them, not get bounced to
   // /dashboard the way visiting /login while signed in does.
-  const isPublicPage = pathname.startsWith('/privacy') || pathname.startsWith('/terms');
+  // opengraph-image/twitter-image are Next.js's dynamic metadata-image
+  // routes — link-preview crawlers (WhatsApp, Slack, Twitter, etc.) fetch
+  // these unauthenticated, so they must never redirect to /login either.
+  const isPublicPage = pathname.startsWith('/privacy') || pathname.startsWith('/terms')
+    || pathname.startsWith('/opengraph-image') || pathname.startsWith('/twitter-image');
 
   if (!user && !isAuthPage && !isResetPage && !isApiRoute && !isPublicPage) {
     const url = request.nextUrl.clone();

@@ -9,10 +9,26 @@ const inter = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
+const title = 'Kith — AI Clinical Workspace for Therapists';
+const description =
+  'Private clinical workspace with AI-assisted SOAP notes and real-time session transcription.';
+
 export const metadata: Metadata = {
-  title: 'Kith — AI Clinical Workspace for Therapists',
-  description:
-    'Private clinical workspace with AI-assisted SOAP notes and real-time session transcription.',
+  metadataBase: new URL('https://kith.space'),
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    url: 'https://kith.space',
+    siteName: 'Kith',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title,
+    description,
+  },
 };
 
 export default function RootLayout({
