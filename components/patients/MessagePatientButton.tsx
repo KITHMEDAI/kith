@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { MessageSquare, Loader2, Send, X } from 'lucide-react';
+import { MessageSquare, Loader2, Send, X, Info } from 'lucide-react';
 import LockedFeatureButton from '@/components/upgrade/LockedFeatureButton';
 
 interface Props {
@@ -26,6 +26,7 @@ export default function MessagePatientButton({
   const [message, setMessage] = useState(initialMessage || '');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<'sent' | 'error' | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
   // Just-in-time email capture: email stays optional on the patient record
   // right up until the moment you actually try to message them, at which
   // point it's required — asked for here instead of forcing it on every
@@ -123,13 +124,22 @@ export default function MessagePatientButton({
           <div className="w-full max-w-sm mx-4 rounded-2xl p-5 space-y-4"
             style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 70px rgba(139,92,246,0.35), 0 0 20px rgba(139,92,246,0.25), 0 40px 80px rgba(0,0,0,0.6)' }}>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-white">Message {patientName}</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold text-white">Message {patientName}</p>
+                <div className="relative">
+                  <button type="button" onClick={() => setShowInfo(v => !v)} onBlur={() => setShowInfo(false)}
+                    className="flex items-center text-slate-500 hover:text-violet-400 transition-colors">
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                  {showInfo && (
+                    <div className="absolute left-0 top-6 z-10 w-52 rounded-lg p-2.5 text-[11px] leading-relaxed text-slate-300"
+                      style={{ background: '#1a1a3a', border: '1px solid rgba(139,92,246,0.35)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+                      This isn&apos;t a direct message — it&apos;s sent to {patientName}&apos;s email.
+                    </div>
+                  )}
+                </div>
+              </div>
               <button onClick={() => setOpen(false)}><X className="h-4 w-4 text-slate-500 hover:text-white transition-colors" /></button>
-            </div>
-
-            <div className="flex items-start gap-2 rounded-lg px-3 py-2.5 text-[11px] leading-relaxed" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#fbbf24' }}>
-              <span>⚠️</span>
-              <span>This isn&apos;t a private clinical channel. Avoid diagnosis, medication names, or risk details — keep it to logistics and general encouragement.</span>
             </div>
 
             <textarea

@@ -27,23 +27,34 @@ export async function sendNotification({ to, subject, message, channels, icsAtta
 
   if (channels.includes('email') && to.email) {
     try {
-      await resend.emails.send({
+      // resend.emails.send() does NOT throw on API-level failures (bad
+      // domain, invalid recipient, rate limit, etc.) — it resolves with
+      // { data: null, error: {...} }. Only network-level failures throw.
+      // Previously this was never checked, so every Resend-side rejection
+      // was silently reported as a successful send.
+      const { data, error } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL || 'noreply@kith.in',
         to: to.email,
         subject,
         html: `
-          <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#111827">
-            <p style="margin:0 0 16px;font-size:15px;line-height:1.6">${message.replace(/\n/g, '<br/>')}</p>
-            <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0"/>
-            <p style="font-size:11px;color:#9ca3af;margin:0">Sent by Kith · Your clinical workspace · All data encrypted</p>
+          <div style="font-family:-apple-system,Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 28px">
+            <p style="margin:0 0 24px;font-size:14px;font-weight:700;letter-spacing:0.02em;color:#7c3aed">KITH</p>
+            <p style="margin:0;font-size:14px;line-height:1.65;color:#1e1b3a">${message.replace(/\n/g, '<br/>')}</p>
+            <p style="margin:24px 0 0;padding-top:14px;border-top:1px solid #ece6ff;font-size:11px;color:#9992ad">Sent via Kith on behalf of your therapist.</p>
           </div>
         `,
         text: message,
         ...(icsAttachment ? { attachments: [icsAttachment] } : {}),
       });
-      results.email = true;
+      if (error) {
+        console.error('[Kith] Email send rejected by Resend:', JSON.stringify(error));
+        results.email = false;
+      } else {
+        console.log(`[Kith] Email sent via Resend, id=${data?.id}`);
+        results.email = true;
+      }
     } catch (err) {
-      console.error('[Kith] Email send failed:', err);
+      console.error('[Kith] Email send threw:', err);
       results.email = false;
     }
   }
