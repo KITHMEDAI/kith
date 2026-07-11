@@ -18,10 +18,38 @@ function fmtTime(d: Date) {
   return d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+// "HH:MM" -> "10:00 AM", for readable option labels while the underlying
+// value stays in the 24h form the API expects.
+function fmtTimeLabel(hhmm: string): string {
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h < 12 ? 'AM' : 'PM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
+// Every 15-min slot in a day, optionally floored at minHHMM (today) so a
+// dropdown of times literally cannot offer a past one — a real <select>
+// enforces this everywhere, unlike a native <input type="time">'s picker UI.
+function timeSlots(minHHMM?: string): string[] {
+  const out: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      const t = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      if (!minHHMM || t >= minHHMM) out.push(t);
+    }
+  }
+  return out;
+}
+
 // Shared dark-theme input style — matches the rest of Kith's modals (session
 // page consent/upgrade dialogs) rather than a plain light native form.
 const FIELD = 'w-full rounded-lg border px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500';
 const FIELD_STYLE = { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.12)' } as const;
+// Native <option> popups are rendered by the OS/browser, not by our CSS — they
+// ignore the dark theme and show a light background regardless. Force dark
+// text on every option so it stays legible there instead of near-invisible
+// white-on-white (as seen on kith.space).
+const OPTION_STYLE = { color: '#1e1b3a', background: '#fff' } as const;
 
 // ── Booking dialog ──────────────────────────────────────────────────────────
 // Self-contained appointment booking modal. Used both on the Appointments page
@@ -181,6 +209,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   // render so it stays accurate as the clock moves while the dialog is open.
   const nowHHMM = new Date().toTimeString().slice(0, 5);
   const minTime = isToday ? nowHHMM : undefined;
+  const availableTimeSlots = useMemo(() => timeSlots(minTime), [minTime]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -244,7 +273,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
       <div className="relative w-full max-w-sm rounded-2xl shadow-2xl flex flex-col max-h-[85vh]"
-        style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
+        style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 70px rgba(139,92,246,0.35), 0 0 20px rgba(139,92,246,0.25), 0 40px 80px rgba(0,0,0,0.6)' }}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b flex-none" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <div>
@@ -352,17 +381,23 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                 onChange={e => {
                   setDate(e.target.value);
                   // Jumping onto today with an already-past time selected —
-                  // bump it forward instead of silently allowing a past slot.
-                  if (e.target.value === minDate && time < new Date().toTimeString().slice(0, 5)) {
-                    setTime(new Date().toTimeString().slice(0, 5));
+                  // bump it forward to the next available slot instead of
+                  // silently allowing a past one.
+                  if (e.target.value === minDate) {
+                    const nextSlots = timeSlots(new Date().toTimeString().slice(0, 5));
+                    if (!nextSlots.includes(time)) setTime(nextSlots[0] ?? time);
                   }
                 }}
                 className={FIELD} style={FIELD_STYLE} />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Time</label>
-              <input type="time" min={minTime} value={time} onChange={e => setTime(e.target.value)}
-                className={FIELD} style={FIELD_STYLE} />
+              <select value={time} onChange={e => setTime(e.target.value)}
+                className={FIELD} style={FIELD_STYLE}>
+                {availableTimeSlots.map(t => (
+                  <option key={t} value={t} style={OPTION_STYLE}>{fmtTimeLabel(t)}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -408,10 +443,10 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
             <div className="flex items-center gap-2">
               <select value={repeat} onChange={e => setRepeat(e.target.value as typeof repeat)}
                 className={`flex-1 ${FIELD}`} style={FIELD_STYLE}>
-                <option value="none">Does not repeat</option>
-                <option value="weekly">Weekly</option>
-                <option value="biweekly">Every 2 weeks</option>
-                <option value="monthly">Monthly</option>
+                <option value="none" style={OPTION_STYLE}>Does not repeat</option>
+                <option value="weekly" style={OPTION_STYLE}>Weekly</option>
+                <option value="biweekly" style={OPTION_STYLE}>Every 2 weeks</option>
+                <option value="monthly" style={OPTION_STYLE}>Monthly</option>
               </select>
               {repeat !== 'none' && (
                 <div className="flex items-center gap-1.5 flex-none">
@@ -433,15 +468,15 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Duration</label>
               <select value={duration} onChange={e => setDuration(e.target.value)}
                 className={FIELD} style={FIELD_STYLE}>
-                {['30','45','50','60','90'].map(d => <option key={d} value={d}>{d} min</option>)}
+                {['30','45','50','60','90'].map(d => <option key={d} value={d} style={OPTION_STYLE}>{d} min</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Mode</label>
               <select value={modality} onChange={e => setModality(e.target.value as typeof modality)}
                 className={FIELD} style={FIELD_STYLE}>
-                <option value="in_person">In person</option>
-                <option value="video" disabled={onlineLocked}>Online{onlineLocked ? ' 🔒 Upgrade to unlock' : ''}</option>
+                <option value="in_person" style={OPTION_STYLE}>In person</option>
+                <option value="video" disabled={onlineLocked} style={OPTION_STYLE}>Online{onlineLocked ? ' 🔒 Upgrade to unlock' : ''}</option>
               </select>
               {onlineLocked && (
                 <LockedFeatureButton requiredPlan="pro" featureLabel="Online sessions" className="mt-1">
