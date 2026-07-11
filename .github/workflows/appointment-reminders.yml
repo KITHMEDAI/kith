@@ -1,20 +1,23 @@
-name: Appointment reminders
+name: Kith 15-minute backstops
 
-# Vercel's own Cron Jobs are Hobby-plan-limited to once a day — not frequent
-# enough to catch a 10-hour-out reminder window for appointments spread across
-# the day. GitHub Actions' schedule isn't subject to that limit, so it polls
-# the (CRON_SECRET-protected) reminder endpoint instead. Requires a repo
-# secret KITH_CRON_SECRET set to the same value as Vercel's CRON_SECRET env var.
+# Vercel's own Cron Jobs are Hobby-plan-limited to once a day — nowhere near
+# frequent enough for either job below. GitHub Actions' schedule isn't subject
+# to that limit, so it polls both (CRON_SECRET-protected) endpoints instead.
+# Requires a repo secret KITH_CRON_SECRET matching Vercel's CRON_SECRET env var.
 on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch: {}
 
 jobs:
-  ping-reminders:
+  ping-backstops:
     runs-on: ubuntu-latest
     steps:
-      - name: Call reminder endpoint
+      - name: Send appointment reminders (~10h before session)
         run: |
           curl -sf -X GET "https://kith.space/api/cron/send-appointment-reminders" \
+            -H "Authorization: Bearer ${{ secrets.KITH_CRON_SECRET }}"
+      - name: Retry sessions stuck generating notes
+        run: |
+          curl -sf -X GET "https://kith.space/api/cron/retry-stuck-sessions" \
             -H "Authorization: Bearer ${{ secrets.KITH_CRON_SECRET }}"
