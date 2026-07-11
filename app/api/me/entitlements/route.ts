@@ -12,10 +12,17 @@ export async function GET() {
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('subscription_plan, subscription_status, trial_ends_at')
+    .select('subscription_plan, subscription_status, trial_ends_at, google_calendar_vault_secret_id')
     .eq('user_id', user.id)
     .single();
   if (!therapist) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  return NextResponse.json(getEntitlements(therapist));
+  return NextResponse.json({
+    ...getEntitlements(therapist),
+    // Plan-unlocked (autoMeetAndInvite) isn't the same as actually wired up —
+    // without this the UI can promise "Kith will create a Meet" when Google
+    // Calendar was never successfully connected, and the doctor only finds
+    // out later when no email arrives.
+    googleCalendarConnected: !!therapist.google_calendar_vault_secret_id,
+  });
 }

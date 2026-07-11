@@ -1,0 +1,20 @@
+name: Appointment reminders
+
+# Vercel's own Cron Jobs are Hobby-plan-limited to once a day — not frequent
+# enough to catch a 10-hour-out reminder window for appointments spread across
+# the day. GitHub Actions' schedule isn't subject to that limit, so it polls
+# the (CRON_SECRET-protected) reminder endpoint instead. Requires a repo
+# secret KITH_CRON_SECRET set to the same value as Vercel's CRON_SECRET env var.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  ping-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call reminder endpoint
+        run: |
+          curl -sf -X GET "https://kith.space/api/cron/send-appointment-reminders" \
+            -H "Authorization: Bearer ${{ secrets.KITH_CRON_SECRET }}"

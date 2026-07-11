@@ -75,6 +75,11 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   const [onlineUnlocked, setOnlineUnlocked] = useState<boolean | null>(null);
   const [groupTypesUnlocked, setGroupTypesUnlocked] = useState<boolean | null>(null);
   const [autoMeetUnlocked, setAutoMeetUnlocked] = useState<boolean | null>(null);
+  // Plan-unlocked isn't the same as actually wired up — without checking this
+  // too, the dialog would promise "Kith will create a Meet" even when Google
+  // Calendar was never successfully connected, and the doctor only finds out
+  // later when no email arrives (exactly what happened before this check existed).
+  const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
   useEffect(() => {
     fetch('/api/me/entitlements')
       .then(r => r.ok ? r.json() : null)
@@ -82,8 +87,9 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
         setOnlineUnlocked(d ? d.onlineSessions : true);
         setGroupTypesUnlocked(d ? d.groupSessionTypes : true);
         setAutoMeetUnlocked(d ? d.autoMeetAndInvite : false);
+        setCalendarConnected(d ? !!d.googleCalendarConnected : false);
       })
-      .catch(() => { setOnlineUnlocked(true); setGroupTypesUnlocked(true); setAutoMeetUnlocked(false); });
+      .catch(() => { setOnlineUnlocked(true); setGroupTypesUnlocked(true); setAutoMeetUnlocked(false); setCalendarConnected(false); });
   }, []);
   const onlineLocked = onlineUnlocked === false;
   const groupTypesLocked = groupTypesUnlocked === false;
@@ -124,7 +130,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   // it's asked for here, just-in-time, rather than being mandatory on every
   // patient up front.
   const needsPatientEmail = !preselectedPatientId && modality === 'video' && autoMeetUnlocked === true
-    && !meetingUrl.trim() && !!selectedPatient && !patientEmailInput.trim();
+    && calendarConnected === true && !meetingUrl.trim() && !!selectedPatient && !patientEmailInput.trim();
   const filtered = search.trim()
     ? localPatients.filter(p => p.display_name.toLowerCase().includes(search.toLowerCase()))
     : localPatients;
@@ -488,10 +494,23 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
             </div>
           </div>}
 
-          {/* Online (video) sessions — Kith auto-creates a Google Meet on Ultra */}
+          {/* Online (video) sessions — Kith auto-creates a Google Meet on Ultra,
+              but only if Calendar is actually connected (plan-unlocked and
+              actually wired up are two different things — see calendarConnected). */}
           {!isExisting && modality === 'video' && !onlineLocked && (
             <div className="rounded-lg p-3" style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.08)' }}>
-              {autoMeetUnlocked ? (
+              {autoMeetUnlocked && calendarConnected === false ? (
+                <>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-amber-300">
+                    <Video className="h-3.5 w-3.5" /> Connect Google Calendar to auto-create the Meet
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
+                    Your plan supports it, but Google Calendar isn&apos;t connected yet — Kith can&apos;t generate or
+                    email a Meet link without it. <a href="/settings" className="text-violet-400 hover:text-violet-300 underline">Connect it in Settings</a>, or
+                    paste your own link below for this booking.
+                  </p>
+                </>
+              ) : autoMeetUnlocked ? (
                 <>
                   <div className="flex items-center gap-2 text-xs font-semibold text-violet-300">
                     <Video className="h-3.5 w-3.5" /> Kith will create a Google Meet automatically
@@ -516,7 +535,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                   </span>
                 </LockedFeatureButton>
               )}
-              {autoMeetUnlocked && !meetingUrl.trim() && (
+              {autoMeetUnlocked && calendarConnected === true && !meetingUrl.trim() && (
                 <div className="mt-2.5 pt-2.5 border-t" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
                   <label className="block text-[11px] font-medium text-slate-400 mb-1">
                     Patient email <span className="text-red-400">*</span> <span className="text-slate-500">— needed to send the Meet link</span>

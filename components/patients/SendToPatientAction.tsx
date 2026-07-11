@@ -31,7 +31,10 @@ export default function SendToPatientAction({ text, patientId, patientName, hasE
     );
   }
 
-  if (!hasEmail) return null;
+  // Previously returned null here when the patient had no email — the whole
+  // action just silently vanished. MessagePatientButton now handles the
+  // no-email case itself (inline capture, just-in-time), so let this flow
+  // through to it instead of hiding the feature entirely.
 
   async function start() {
     setState('loading');
