@@ -123,10 +123,11 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
   const stuck = elapsedSec >= stuckThresholdSec;
 
   return (
-    <div className="rounded-xl px-4 py-3 flex items-center gap-3 text-sm"
+    <div className="rounded-xl px-4 py-3 flex items-center gap-3 text-sm animate-pulse-slow"
       style={{
-        background: 'linear-gradient(135deg,rgba(139,92,246,0.12),rgba(59,130,246,0.1))',
-        border: '1px solid rgba(139,92,246,0.25)',
+        background: 'linear-gradient(135deg,rgba(139,92,246,0.14),rgba(59,130,246,0.1))',
+        border: '1px solid rgba(139,92,246,0.35)',
+        boxShadow: '0 0 24px rgba(139,92,246,0.3)',
       }}>
       <RefreshCw className="h-4 w-4 text-violet-400 animate-spin flex-none" />
       <div className="flex-1">

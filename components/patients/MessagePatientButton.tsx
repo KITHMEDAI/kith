@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { MessageSquare, Loader2, Send, X } from 'lucide-react';
 import LockedFeatureButton from '@/components/upgrade/LockedFeatureButton';
 
@@ -112,9 +113,15 @@ export default function MessagePatientButton({
         <MessageSquare className="h-3.5 w-3.5" /> {triggerLabel}
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}>
-          <div className="w-full max-w-sm mx-4 rounded-2xl p-5 space-y-4" style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)' }}>
+      {/* Rendered via portal straight to <body> — this button often sits
+          inside a backdrop-blur card (e.g. the Contact card on the patient
+          page), and any ancestor with backdrop-filter/transform becomes a
+          containing block for position:fixed, which clips the overlay to
+          that card's box instead of covering the full viewport. */}
+      {open && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm mx-4 rounded-2xl p-5 space-y-4"
+            style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.4)', boxShadow: '0 0 70px rgba(139,92,246,0.35), 0 0 20px rgba(139,92,246,0.25), 0 40px 80px rgba(0,0,0,0.6)' }}>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-white">Message {patientName}</p>
               <button onClick={() => setOpen(false)}><X className="h-4 w-4 text-slate-500 hover:text-white transition-colors" /></button>
@@ -141,7 +148,8 @@ export default function MessagePatientButton({
               {result === 'sent' ? 'Sent!' : result === 'error' ? 'Failed — try again' : 'Send'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
