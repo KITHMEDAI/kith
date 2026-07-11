@@ -188,7 +188,7 @@ Return ONLY valid JSON:
     "areas_of_concern": ["short points, ≤ 12 words — cite actual risk signals, avoidance, regression"],
     "narrative": "1 short sentence on trajectory toward goals"
   },
-  "ai_suggestions": ["0-3 observations — ONLY ones you are genuinely confident are clinically useful and specific to what happened THIS session. If nothing in the brief clearly warrants a suggestion, or you're not confident, return an EMPTY array. NEVER pad with a generic or filler entry (e.g. 'continue monitoring', 'session trajectory positive') just to have something to show. ACTION-FIRST verb, ≤ 14 words each. Never judge the patient or their choices."],
+  "ai_suggestions": ["0-3 observations — ONLY ones you are genuinely confident are clinically useful and specific to what happened THIS session. If nothing in the brief clearly warrants a suggestion, or you're not confident, return an EMPTY array. NEVER pad with a generic or filler entry (e.g. 'continue monitoring', 'session trajectory positive') just to have something to show. ACTION-FIRST verb, ≤ 14 words each. Never judge the patient or their choices. Phrase every point as a forward-looking next step for the clinician to consider — never as a critique of what the clinician did or didn't do this session."],
   "prescription_notes": {
     "medication_relevant": false,
     "note": null,
@@ -274,14 +274,16 @@ export type ImportFieldKey =
   | 'display_name' | 'nickname' | 'date_of_birth' | 'age' | 'gender'
   | 'phone' | 'whatsapp_number' | 'email'
   | 'emergency_contact_name' | 'emergency_contact_phone'
-  | 'diagnosis' | 'therapy_modality' | 'medications'
-  | 'presenting_concerns' | 'total_sessions' | 'session_frequency';
+  | 'diagnosis' | 'icd_codes' | 'therapy_modality' | 'therapy_goals' | 'medications'
+  | 'presenting_concerns' | 'total_sessions' | 'session_frequency'
+  | 'patient_id_number' | 'fee_per_session';
 
 const IMPORT_FIELDS: ImportFieldKey[] = [
   'display_name', 'nickname', 'date_of_birth', 'age', 'gender',
   'phone', 'whatsapp_number', 'email', 'emergency_contact_name',
-  'emergency_contact_phone', 'diagnosis', 'therapy_modality',
+  'emergency_contact_phone', 'diagnosis', 'icd_codes', 'therapy_modality', 'therapy_goals',
   'medications', 'presenting_concerns', 'total_sessions', 'session_frequency',
+  'patient_id_number', 'fee_per_session',
 ];
 
 // Deterministic fallback — keyword matching, returns field → sourceColumn
@@ -297,12 +299,16 @@ function keywordMapping(headers: string[]): Partial<Record<ImportFieldKey, strin
     email: ['email', 'e-mail', 'mail'],
     emergency_contact_name: ['emergency contact name', 'emergency name', 'next of kin'],
     emergency_contact_phone: ['emergency contact phone', 'emergency phone', 'emergency number'],
-    diagnosis: ['diagnosis', 'condition', 'disorder', 'dx', 'icd', 'presenting problem'],
+    diagnosis: ['diagnosis', 'condition', 'disorder', 'dx', 'presenting problem'],
+    icd_codes: ['icd', 'icd-10', 'icd10', 'icd code'],
     therapy_modality: ['modality', 'therapy type', 'treatment type', 'approach'],
+    therapy_goals: ['therapy goals', 'treatment goals', 'goals', 'objectives'],
     medications: ['medication', 'meds', 'drugs', 'prescription'],
     presenting_concerns: ['presenting concern', 'concerns', 'chief complaint', 'reason', 'notes', 'issues'],
     total_sessions: ['total sessions', 'session count', 'no of sessions', 'number of sessions', 'sessions'],
     session_frequency: ['frequency', 'session frequency', 'cadence'],
+    patient_id_number: ['patient id', 'file no', 'file number', 'record number', 'mrn', 'uhid'],
+    fee_per_session: ['fee', 'rate', 'charge', 'price per session', 'session fee'],
   };
   const used = new Set<string>();
   const out: Partial<Record<ImportFieldKey, string>> = {};
@@ -348,12 +354,16 @@ TARGET FIELDS (map to these exact keys):
 - email
 - emergency_contact_name
 - emergency_contact_phone
-- diagnosis     (clinical condition(s))
+- diagnosis     (clinical condition(s), plain-language)
+- icd_codes     (ICD-10/ICD-11 diagnostic codes specifically, e.g. "F41.1" — distinct from the plain-language diagnosis column if both exist)
 - therapy_modality (CBT, DBT, EMDR, etc.)
+- therapy_goals (treatment goals/objectives, free text or list)
 - medications
 - presenting_concerns (free-text notes / chief complaint)
 - total_sessions (a count)
 - session_frequency (weekly / biweekly / monthly)
+- patient_id_number (clinic's own file/record number — MRN, UHID, file no., etc.)
+- fee_per_session (a monetary amount)
 
 COLUMN HEADERS:
 ${JSON.stringify(headers)}

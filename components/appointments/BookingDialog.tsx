@@ -18,6 +18,11 @@ function fmtTime(d: Date) {
   return d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
 
+// Shared dark-theme input style — matches the rest of Kith's modals (session
+// page consent/upgrade dialogs) rather than a plain light native form.
+const FIELD = 'w-full rounded-lg border px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500';
+const FIELD_STYLE = { background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.12)' } as const;
+
 // ── Booking dialog ──────────────────────────────────────────────────────────
 // Self-contained appointment booking modal. Used both on the Appointments page
 // and inline on the Dashboard so the doctor never has to leave the page they're on.
@@ -41,17 +46,23 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   // a disabled control before the real entitlement is known).
   const [onlineUnlocked, setOnlineUnlocked] = useState<boolean | null>(null);
   const [groupTypesUnlocked, setGroupTypesUnlocked] = useState<boolean | null>(null);
+  const [autoMeetUnlocked, setAutoMeetUnlocked] = useState<boolean | null>(null);
   useEffect(() => {
     fetch('/api/me/entitlements')
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         setOnlineUnlocked(d ? d.onlineSessions : true);
         setGroupTypesUnlocked(d ? d.groupSessionTypes : true);
+        setAutoMeetUnlocked(d ? d.autoMeetAndInvite : false);
       })
-      .catch(() => { setOnlineUnlocked(true); setGroupTypesUnlocked(true); });
+      .catch(() => { setOnlineUnlocked(true); setGroupTypesUnlocked(true); setAutoMeetUnlocked(false); });
   }, []);
   const onlineLocked = onlineUnlocked === false;
   const groupTypesLocked = groupTypesUnlocked === false;
+  // Only relevant once the patient is known to need an auto-created Meet
+  // (Ultra, video, no manually-pasted link) — captured just-in-time rather
+  // than making email mandatory on every patient up front.
+  const [patientEmailInput, setPatientEmailInput] = useState('');
   const [sessionType, setSessionType] = useState<'individual'|'couples'|'group'|'family'>('individual');
   const [goals, setGoals]             = useState('');
   const [meetingUrl, setMeetingUrl]   = useState('');
@@ -73,6 +84,19 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   const [addErr, setAddErr]           = useState('');
 
   const selectedPatient = localPatients.find(p => p.id === patientId);
+
+  // Seed the just-in-time email capture whenever the selected patient changes.
+  useEffect(() => {
+    setPatientEmailInput((selectedPatient as unknown as { email?: string } | undefined)?.email || '');
+  }, [patientId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Ultra auto-creates the Meet + auto-emails the patient — but only when
+  // there's no manually-pasted link. That's the one path where a missing
+  // patient email would silently mean nobody ever gets the join link, so
+  // it's asked for here, just-in-time, rather than being mandatory on every
+  // patient up front.
+  const needsPatientEmail = !preselectedPatientId && modality === 'video' && autoMeetUnlocked === true
+    && !meetingUrl.trim() && !!selectedPatient && !patientEmailInput.trim();
   const filtered = search.trim()
     ? localPatients.filter(p => p.display_name.toLowerCase().includes(search.toLowerCase()))
     : localPatients;
@@ -151,13 +175,33 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
     [dayAppts],
   );
 
+  const minDate = new Date().toISOString().split('T')[0];
+  const isToday = date === minDate;
+  // "HH:MM" floor for the time picker when today is selected — recomputed each
+  // render so it stays accurate as the clock moves while the dialog is open.
+  const nowHHMM = new Date().toTimeString().slice(0, 5);
+  const minTime = isToday ? nowHHMM : undefined;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!patientId) { setError('Please select a patient'); return; }
     if (!date)      { setError('Please pick a date'); return; }
+    if (isToday && time < nowHHMM) { setError('Pick a time that hasn\'t already passed.'); return; }
     if (slotConflict) { setError(`That slot overlaps ${slotConflict.patient?.display_name || 'an existing appointment'} at ${fmtTime(new Date(slotConflict.scheduled_at))}. Pick another time.`); return; }
+    if (needsPatientEmail) { setError("This patient needs an email so Kith can send them the Meet link — add one above."); return; }
     setLoading(true); setError('');
     try {
+      // Just-in-time: persist the email the doctor entered above, if the
+      // patient didn't already have one, before booking creates the Meet.
+      const existingEmail = (selectedPatient as unknown as { email?: string } | undefined)?.email;
+      if (modality === 'video' && patientEmailInput.trim() && patientEmailInput.trim() !== existingEmail) {
+        await fetch(`/api/patients/${patientId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: patientEmailInput.trim() }),
+        }).catch(() => {});
+      }
+
       const scheduled_at = new Date(`${date}T${time}:00`).toISOString();
       const res = await fetch('/api/appointments', {
         method: 'POST',
@@ -194,61 +238,67 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
     }
   }
 
-  const minDate = new Date().toISOString().split('T')[0];
   const isExisting = !!preselectedPatientId;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm rounded-2xl bg-white shadow-2xl">
+      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
+      <div className="relative w-full max-w-sm rounded-2xl shadow-2xl flex flex-col max-h-[85vh]"
+        style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-5 py-4 border-b flex-none" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
           <div>
-            <h2 className="text-base font-semibold text-foreground">Book Appointment</h2>
+            <h2 className="text-base font-semibold text-white">Book Appointment</h2>
             {isExisting && selectedPatient && (
-              <p className="text-xs text-muted-foreground mt-0.5">{selectedPatient.display_name}</p>
+              <p className="text-xs text-slate-400 mt-0.5">{selectedPatient.display_name}</p>
             )}
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        {/* Scrollable body — action buttons live in a separate, always-visible
+            footer below so a tall form (recurrence + video + goals) never
+            hides "Book appointment" below the fold. */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto p-5 space-y-4">
 
           {/* Patient — only show selector when NOT preselected */}
           {!isExisting && (
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                Patient <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                Patient <span className="text-red-400">*</span>
               </label>
               <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
                   onClick={() => { setDropdown(o => !o); setSearch(''); }}
-                  className="w-full flex items-center justify-between rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 text-left"
+                  className={`${FIELD} flex items-center justify-between text-left`} style={FIELD_STYLE}
                 >
-                  <span className={selectedPatient ? 'text-foreground' : 'text-muted-foreground'}>
+                  <span className={selectedPatient ? 'text-white' : 'text-slate-500'}>
                     {selectedPatient ? selectedPatient.display_name : 'Select patient…'}
                   </span>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-lg border border-slate-200 bg-white shadow-lg overflow-hidden">
+                  <div className="absolute z-50 mt-1 w-full rounded-lg shadow-lg overflow-hidden"
+                    style={{ background: '#1a1a3a', border: '1px solid rgba(255,255,255,0.12)' }}>
                     {adding ? (
                       /* Inline add-patient form — no navigation */
                       <div className="p-3 space-y-2.5">
-                        <p className="text-xs font-medium text-foreground">New patient</p>
+                        <p className="text-xs font-medium text-white">New patient</p>
                         <input autoFocus type="text" placeholder="Full name" value={newName}
                           onChange={e => { setNewName(e.target.value); setAddErr(''); }}
                           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddPatient(); } }}
-                          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                          className={FIELD} style={FIELD_STYLE} />
                         <PhoneInput value={newPhone} onChange={setNewPhone} placeholder="Phone (optional)" />
-                        {addErr && <p className="text-xs text-red-500">{addErr}</p>}
+                        {addErr && <p className="text-xs text-red-400">{addErr}</p>}
                         <div className="flex gap-2">
                           <button type="button" onClick={() => { setAdding(false); setAddErr(''); }}
-                            className="flex-1 rounded-lg border border-input py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors">
+                            className="flex-1 rounded-lg py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+                            style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
                             Back
                           </button>
                           <button type="button" onClick={handleAddPatient} disabled={creating}
@@ -259,30 +309,30 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                       </div>
                     ) : (
                       <>
-                        <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2">
-                          <Search className="h-3.5 w-3.5 text-muted-foreground flex-none" />
+                        <div className="flex items-center gap-2 border-b px-3 py-2" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                          <Search className="h-3.5 w-3.5 text-slate-500 flex-none" />
                           <input autoFocus type="text" placeholder="Search patients…" value={search}
                             onChange={e => setSearch(e.target.value)}
-                            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+                            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-500" />
                         </div>
                         <div className="max-h-44 overflow-y-auto">
                           {filtered.length === 0 ? (
-                            <p className="px-3 py-3 text-sm text-muted-foreground">No patients found</p>
+                            <p className="px-3 py-3 text-sm text-slate-500">No patients found</p>
                           ) : filtered.map(p => (
                             <button key={p.id} type="button"
                               onClick={() => { setPatientId(p.id); setDropdown(false); setSearch(''); setError(''); }}
-                              className={`w-full text-left px-3 py-2.5 text-sm hover:bg-slate-50 transition-colors ${patientId === p.id ? 'bg-violet-50 text-violet-700' : 'text-foreground'}`}>
+                              className={`w-full text-left px-3 py-2.5 text-sm hover:bg-white/5 transition-colors ${patientId === p.id ? 'bg-violet-500/15 text-violet-300' : 'text-white'}`}>
                               <span className="font-medium">{p.display_name}</span>
                               {(p.diagnosis as string[])?.[0] && (
-                                <span className="ml-2 text-xs text-muted-foreground">{(p.diagnosis as string[])[0]}</span>
+                                <span className="ml-2 text-xs text-slate-500">{(p.diagnosis as string[])[0]}</span>
                               )}
                             </button>
                           ))}
                         </div>
-                        <div className="border-t border-slate-100">
+                        <div className="border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
                           <button type="button"
                             onClick={() => { setAdding(true); setNewName(search); setAddErr(''); }}
-                            className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors">
+                            className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium text-violet-400 hover:bg-violet-500/10 transition-colors">
                             <UserPlus className="h-3.5 w-3.5" /> Add new patient
                           </button>
                         </div>
@@ -297,23 +347,31 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
           {/* Date + Time — always shown */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Date <span className="text-red-500">*</span></label>
-              <input type="date" min={minDate} value={date} onChange={e => setDate(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Date <span className="text-red-400">*</span></label>
+              <input type="date" min={minDate} value={date}
+                onChange={e => {
+                  setDate(e.target.value);
+                  // Jumping onto today with an already-past time selected —
+                  // bump it forward instead of silently allowing a past slot.
+                  if (e.target.value === minDate && time < new Date().toTimeString().slice(0, 5)) {
+                    setTime(new Date().toTimeString().slice(0, 5));
+                  }
+                }}
+                className={FIELD} style={FIELD_STYLE} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Time</label>
-              <input type="time" value={time} onChange={e => setTime(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Time</label>
+              <input type="time" min={minTime} value={time} onChange={e => setTime(e.target.value)}
+                className={FIELD} style={FIELD_STYLE} />
             </div>
           </div>
 
           {/* Real-time availability for the chosen slot */}
           {date && (
-            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
-              checking ? 'border-slate-200 bg-slate-50 text-muted-foreground'
-              : slotConflict ? 'border-red-200 bg-red-50 text-red-700'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-700'}`}>
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs" style={
+              checking ? { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: '#94a3b8' }
+              : slotConflict ? { borderColor: 'rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.08)', color: '#fca5a5' }
+              : { borderColor: 'rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.08)', color: '#34d399' }}>
               {checking ? (
                 <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Checking availability…</>
               ) : slotConflict ? (
@@ -326,30 +384,30 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
 
           {/* The day's existing schedule (context, Teams-style) */}
           {otherDayAppts.length > 0 && (
-            <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-              <p className="text-[11px] font-medium text-muted-foreground mb-1">{otherDayAppts.length} appointment{otherDayAppts.length > 1 ? 's' : ''} booked this day</p>
+            <div className="rounded-lg border px-3 py-2" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+              <p className="text-[11px] font-medium text-slate-400 mb-1">{otherDayAppts.length} appointment{otherDayAppts.length > 1 ? 's' : ''} booked this day</p>
               <ul className="space-y-0.5">
                 {otherDayAppts.slice(0, 4).map(a => {
                   const s = new Date(a.scheduled_at);
                   const e = new Date(s.getTime() + (a.duration_minutes || 50) * 60000);
                   return (
-                    <li key={a.id} className="flex justify-between text-xs text-slate-600">
+                    <li key={a.id} className="flex justify-between text-xs text-slate-400">
                       <span>{fmtTime(s)} – {fmtTime(e)}</span>
                       <span className="ml-2 truncate">{a.patient?.display_name || '—'}</span>
                     </li>
                   );
                 })}
-                {otherDayAppts.length > 4 && <li className="text-[11px] text-muted-foreground">+{otherDayAppts.length - 4} more</li>}
+                {otherDayAppts.length > 4 && <li className="text-[11px] text-slate-500">+{otherDayAppts.length - 4} more</li>}
               </ul>
             </div>
           )}
 
           {/* Recurrence */}
           <div>
-            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mb-1.5"><Repeat className="h-3 w-3" /> Repeat</label>
+            <label className="flex items-center gap-1.5 text-xs font-medium text-slate-400 mb-1.5"><Repeat className="h-3 w-3" /> Repeat</label>
             <div className="flex items-center gap-2">
               <select value={repeat} onChange={e => setRepeat(e.target.value as typeof repeat)}
-                className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+                className={`flex-1 ${FIELD}`} style={FIELD_STYLE}>
                 <option value="none">Does not repeat</option>
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Every 2 weeks</option>
@@ -357,37 +415,37 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
               </select>
               {repeat !== 'none' && (
                 <div className="flex items-center gap-1.5 flex-none">
-                  <span className="text-xs text-muted-foreground">for</span>
+                  <span className="text-xs text-slate-400">for</span>
                   <input type="number" min={2} max={52} value={count} onChange={e => setCount(e.target.value)}
-                    className="w-14 rounded-lg border border-input bg-background px-2 py-2 text-sm text-center focus:outline-none focus:ring-2 focus:ring-violet-500" />
-                  <span className="text-xs text-muted-foreground">sessions</span>
+                    className="w-14 rounded-lg border px-2 py-2 text-sm text-center text-white focus:outline-none focus:ring-2 focus:ring-violet-500" style={FIELD_STYLE} />
+                  <span className="text-xs text-slate-400">sessions</span>
                 </div>
               )}
             </div>
             {repeat !== 'none' && (
-              <p className="mt-1 text-[11px] text-muted-foreground">Creates {count} sessions at the same time. Any that clash with existing appointments are skipped.</p>
+              <p className="mt-1 text-[11px] text-slate-500">Creates {count} sessions at the same time. Any that clash with existing appointments are skipped.</p>
             )}
           </div>
 
           {/* Duration + Modality — only for new bookings without preselected patient */}
           {!isExisting && <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Duration</label>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Duration</label>
               <select value={duration} onChange={e => setDuration(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+                className={FIELD} style={FIELD_STYLE}>
                 {['30','45','50','60','90'].map(d => <option key={d} value={d}>{d} min</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">Mode</label>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Mode</label>
               <select value={modality} onChange={e => setModality(e.target.value as typeof modality)}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+                className={FIELD} style={FIELD_STYLE}>
                 <option value="in_person">In person</option>
                 <option value="video" disabled={onlineLocked}>Online{onlineLocked ? ' 🔒 Upgrade to unlock' : ''}</option>
               </select>
               {onlineLocked && (
                 <LockedFeatureButton requiredPlan="pro" featureLabel="Online sessions" className="mt-1">
-                  <span className="flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
+                  <span className="flex items-center gap-1 text-[11px] text-violet-400 hover:text-violet-300">
                     <Lock className="h-3 w-3" /> Online sessions need Pro or higher
                   </span>
                 </LockedFeatureButton>
@@ -395,19 +453,44 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
             </div>
           </div>}
 
-          {/* Online (video) sessions — Kith auto-creates a Google Meet */}
+          {/* Online (video) sessions — Kith auto-creates a Google Meet on Ultra */}
           {!isExisting && modality === 'video' && !onlineLocked && (
-            <div className="rounded-lg border border-violet-200 bg-violet-50/60 p-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-violet-700">
-                <Video className="h-3.5 w-3.5" /> Kith will create a Google Meet automatically
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
-                A Meet link is generated on your connected Google account, shared with the patient, and the
-                notetaker joins to record. You don&apos;t need to create one.
-              </p>
+            <div className="rounded-lg p-3" style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.08)' }}>
+              {autoMeetUnlocked ? (
+                <>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-violet-300">
+                    <Video className="h-3.5 w-3.5" /> Kith will create a Google Meet automatically
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">
+                    A Meet link is generated on your connected Google account, emailed to the patient, and the
+                    notetaker joins to record. You don&apos;t need to create one.
+                  </p>
+                </>
+              ) : (
+                <div className="flex items-center gap-2 text-xs font-semibold text-violet-300">
+                  <Video className="h-3.5 w-3.5" /> Paste your meeting link
+                </div>
+              )}
               <input type="url" value={meetingUrl} onChange={e => setMeetingUrl(e.target.value)}
-                placeholder="…or paste your own Teams / Zoom / Meet link"
-                className="mt-2 w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                placeholder={autoMeetUnlocked ? '…or paste your own Teams / Zoom / Meet link' : 'Teams / Zoom / Meet link'}
+                className={`mt-2 ${FIELD}`} style={FIELD_STYLE} />
+              {!autoMeetUnlocked && (
+                <LockedFeatureButton requiredPlan="ultra" featureLabel="Automatic Meet creation + patient email" className="mt-1.5">
+                  <span className="flex items-center gap-1 text-[11px] text-violet-400 hover:text-violet-300">
+                    <Lock className="h-3 w-3" /> Upgrade to Ultra to have Kith create and send the link automatically
+                  </span>
+                </LockedFeatureButton>
+              )}
+              {autoMeetUnlocked && !meetingUrl.trim() && (
+                <div className="mt-2.5 pt-2.5 border-t" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                    Patient email <span className="text-red-400">*</span> <span className="text-slate-500">— needed to send the Meet link</span>
+                  </label>
+                  <input type="email" value={patientEmailInput} onChange={e => setPatientEmailInput(e.target.value)}
+                    placeholder="patient@email.com"
+                    className={FIELD} style={FIELD_STYLE} />
+                </div>
+              )}
             </div>
           )}
 
@@ -415,17 +498,19 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
           {!isExisting && (
             <>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">Session type</label>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">Session type</label>
                 <div className="flex gap-2">
                   {(['individual','couples','group','family'] as const).map(t => {
                     const locked = t !== 'individual' && groupTypesLocked;
                     return (
                       <button key={t} type="button" disabled={locked}
                         onClick={() => setSessionType(t)}
-                        className={`flex-1 rounded-lg border py-1.5 text-xs font-medium capitalize transition-colors ${
-                          locked ? 'border-input text-muted-foreground/50 cursor-not-allowed'
-                          : sessionType === t ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-input text-muted-foreground hover:border-slate-300'
-                        }`}>
+                        className="flex-1 rounded-lg py-1.5 text-xs font-medium capitalize transition-colors"
+                        style={
+                          locked ? { border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(148,163,184,0.5)', cursor: 'not-allowed' }
+                          : sessionType === t ? { border: '1px solid rgba(139,92,246,0.5)', background: 'rgba(139,92,246,0.15)', color: '#c4b5fd' }
+                          : { border: '1px solid rgba(255,255,255,0.12)', color: '#94a3b8' }
+                        }>
                         {t}{locked ? ' 🔒' : ''}
                       </button>
                     );
@@ -433,32 +518,36 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                 </div>
                 {groupTypesLocked && (
                   <LockedFeatureButton requiredPlan="pro" featureLabel="Couples, family & group session types" className="mt-1">
-                    <span className="flex items-center gap-1 text-[11px] text-violet-600 hover:text-violet-700">
+                    <span className="flex items-center gap-1 text-[11px] text-violet-400 hover:text-violet-300">
                       <Lock className="h-3 w-3" /> Couples, family & group need Pro or higher
                     </span>
                   </LockedFeatureButton>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                  Session goals <span className="text-muted-foreground/60">(optional)</span>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  Session goals <span className="text-slate-500">(optional)</span>
                 </label>
                 <textarea value={goals} onChange={e => setGoals(e.target.value)} rows={2}
                   placeholder="What do you want to focus on this session?"
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-violet-500" />
+                  className={`${FIELD} resize-none`} style={FIELD_STYLE} />
               </div>
             </>
           )}
 
-          {error && <p className="text-xs text-red-500">{error}</p>}
+          {error && <p className="text-xs text-red-400">{error}</p>}
+          </div>
 
-          <div className="flex gap-2 pt-1">
+          {/* Footer — outside the scrollable area so it's always reachable */}
+          <div className="flex gap-2 p-5 pt-3 border-t flex-none" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <button type="button" onClick={onClose}
-              className="flex-1 rounded-lg border border-input py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+              className="flex-1 rounded-lg py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+              style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
               Cancel
             </button>
             <button type="submit" disabled={loading}
-              className="flex-1 rounded-lg bg-violet-600 py-2.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60 flex items-center justify-center gap-2 transition-colors">
+              className="flex-1 rounded-lg py-2.5 text-sm font-semibold text-white disabled:opacity-60 flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)' }}>
               {loading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Booking…</> : 'Book appointment'}
             </button>
           </div>

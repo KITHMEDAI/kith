@@ -25,7 +25,8 @@ export interface Entitlements {
   sessionCap: number;         // -1 = unlimited
   sessionDurationCapMinutes: number; // hard per-session length limit for this plan
   onlineSessions: boolean;    // video modality + automatic notetaker bot
-  calendarSync: boolean;      // Google Calendar connect + auto Meet creation
+  calendarSync: boolean;      // Google Calendar connect (Pro+); auto Meet+invite creation is gated separately below
+  autoMeetAndInvite: boolean; // Kith auto-creates the Google Meet + auto-emails the patient on booking — Ultra+ only
   patientMessaging: boolean;  // WhatsApp / SMS to patients
   groupSessionTypes: boolean; // couples / family / group session types (Free = individual only)
   liveOnlineUpdates: boolean; // real-time transcript streaming for online (bot) sessions — Ultra+ only, costs extra per Recall session
@@ -80,6 +81,7 @@ export function getEntitlements(t: BillingFields): Entitlements {
     sessionDurationCapMinutes: SESSION_DURATION_CAPS[plan] ?? SESSION_DURATION_CAPS.free,
     onlineSessions: plan !== 'free',
     calendarSync: plan !== 'free',
+    autoMeetAndInvite: plan === 'ultra' || plan === 'clinic',
     patientMessaging: plan === 'ultra' || plan === 'clinic',
     groupSessionTypes: plan !== 'free',
     liveOnlineUpdates: plan === 'ultra' || plan === 'clinic',
@@ -100,18 +102,19 @@ export const PLAN_FEATURES: Record<PlanKey, string[]> = {
     '60 sessions a month, 90 minutes each',
     'Online sessions available — Kith joins the call and records it for you',
     'Clinical notes ready once the session ends',
-    'Your calendar synced automatically, with a meeting link created for every session',
+    'Your calendar synced automatically — bring your own Teams/Zoom/Meet link',
   ],
   ultra: [
     'Unlimited sessions, 120 minutes each',
     'Online sessions with live suggestions — homework and talking points update in real time as the session unfolds',
-    'Your calendar synced automatically, with a meeting link created for every session',
+    'A meeting link is created and emailed to the patient automatically for every online session',
     'Message patients directly by email',
     'Priority support — first in line when you need help',
   ],
   clinic: ['Everything in Ultra', 'Multiple therapist seats', 'Admin dashboard', 'White-label option'],
 };
 
-export function upgradeMessage(feature: 'online sessions' | 'Google Calendar sync' | 'patient messaging'): string {
+export function upgradeMessage(feature: 'online sessions' | 'Google Calendar sync' | 'patient messaging' | 'automatic Meet creation'): string {
+  if (feature === 'automatic Meet creation') return 'Upgrade to Ultra so Kith creates the Meet link and emails it to the patient automatically.';
   return `Upgrade to Pro or Ultra to unlock ${feature}.`;
 }

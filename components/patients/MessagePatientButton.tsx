@@ -25,6 +25,14 @@ export default function MessagePatientButton({
   const [message, setMessage] = useState(initialMessage || '');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<'sent' | 'error' | null>(null);
+  // Just-in-time email capture: email stays optional on the patient record
+  // right up until the moment you actually try to message them, at which
+  // point it's required — asked for here instead of forcing it on every
+  // patient up front.
+  const [localHasEmail, setLocalHasEmail] = useState(hasEmail);
+  const [emailInput, setEmailInput] = useState('');
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [emailErr, setEmailErr] = useState('');
 
   if (!entitled) {
     return (
@@ -36,11 +44,46 @@ export default function MessagePatientButton({
     );
   }
 
-  if (!hasEmail) {
+  async function saveEmailAndContinue() {
+    const email = emailInput.trim();
+    if (!email) { setEmailErr('Enter an email address'); return; }
+    setSavingEmail(true); setEmailErr('');
+    try {
+      const res = await fetch(`/api/patients/${patientId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Could not save email');
+      setLocalHasEmail(true);
+      setMessage(initialMessage || '');
+      setResult(null);
+      setOpen(true);
+    } catch (e) {
+      setEmailErr(e instanceof Error ? e.message : 'Could not save email');
+    } finally {
+      setSavingEmail(false);
+    }
+  }
+
+  if (!localHasEmail) {
     return (
-      <span className={`${className} flex items-center gap-1.5 text-xs text-muted-foreground`}>
-        <MessageSquare className="h-3.5 w-3.5" /> Add an email address to message this patient
-      </span>
+      <div className={className}>
+        <p className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1.5">
+          <MessageSquare className="h-3.5 w-3.5" /> Add an email to message {patientName}
+        </p>
+        <div className="flex items-center gap-1.5">
+          <input type="email" value={emailInput} onChange={e => { setEmailInput(e.target.value); setEmailErr(''); }}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); saveEmailAndContinue(); } }}
+            placeholder="patient@email.com"
+            className="flex-1 rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          <button type="button" onClick={saveEmailAndContinue} disabled={savingEmail}
+            className="flex-none rounded-lg bg-violet-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-violet-700 disabled:opacity-60 flex items-center gap-1 transition-colors">
+            {savingEmail ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Save'}
+          </button>
+        </div>
+        {emailErr && <p className="mt-1 text-[11px] text-red-500">{emailErr}</p>}
+      </div>
     );
   }
 

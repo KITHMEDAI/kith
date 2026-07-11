@@ -68,12 +68,14 @@ export function rowToPatientFields(
     age = Math.max(0, Math.floor((Date.now() - new Date(dob).getTime()) / 31557600000));
   }
 
-  const diagnosisRaw = pick('diagnosis');
-  const diagnosis = diagnosisRaw
-    ? diagnosisRaw.split(/[,;/]/).map(s => s.trim()).filter(Boolean)
-    : [];
+  const splitList = (raw: string): string[] => raw ? raw.split(/[,;/]/).map(s => s.trim()).filter(Boolean) : [];
+  const diagnosis = splitList(pick('diagnosis'));
+  const icdCodes = splitList(pick('icd_codes'));
+  const therapyGoals = splitList(pick('therapy_goals'));
 
   const totalSessions = parseInt(pick('total_sessions'), 10);
+  const feeRaw = pick('fee_per_session').replace(/[^0-9.]/g, '');
+  const fee = feeRaw ? parseFloat(feeRaw) : NaN;
 
   return {
     display_name: name,
@@ -87,11 +89,15 @@ export function rowToPatientFields(
     emergency_contact_name: pick('emergency_contact_name') || null,
     emergency_contact_phone: pick('emergency_contact_phone') || null,
     diagnosis,
+    icd_codes: icdCodes,
     therapy_modality: pick('therapy_modality') || null,
+    therapy_goals: therapyGoals,
     medications: pick('medications') || null,
     presenting_concerns: pick('presenting_concerns') || null,
     total_sessions: isNaN(totalSessions) ? null : totalSessions,
     session_frequency: normalizeFrequency(pick('session_frequency')),
+    patient_id_number: pick('patient_id_number') || null,
+    fee_per_session: isNaN(fee) ? null : fee,
     imported_from: source,
   };
 }

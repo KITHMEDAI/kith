@@ -7,7 +7,7 @@ import { useRealTimeTranscript } from '@/hooks/useRealTimeTranscript';
 import { formatDuration, getInitials } from '@/lib/utils';
 import {
   ArrowLeft, Mic, Square, Wifi, WifiOff, Clock,
-  Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2, AlignLeft, Sparkles, Pause,
+  Lightbulb, FileText, RefreshCw, Calendar, Video, Loader2, AlignLeft, Sparkles, Pause, ShieldCheck,
 } from 'lucide-react';
 import Nebula from '@/components/session/Nebula';
 import type { Appointment, Patient, TranscriptSegment } from '@/types';
@@ -249,6 +249,17 @@ export default function LiveSessionPage() {
   const [durationCapMinutes, setDurationCapMinutes] = useState<number | null>(null);
   const autoEndedRef = useRef(false);
 
+  // Consent gate — blocks BOTH the manual "Start session" click (in-person)
+  // and the automatic bot dispatch (online) until the therapist confirms
+  // patient consent, closing the gap between what the privacy policy promises
+  // ("you are responsible for obtaining consent") and what the product
+  // actually enforced (nothing — see app/api/sessions/start/route.ts, which
+  // only logged a warning). Recorded once per patient via consent_recording.
+  const [consentConfirmed, setConsentConfirmed] = useState(false);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [consentChecked, setConsentChecked]     = useState(false);
+  const [savingConsent, setSavingConsent]       = useState(false);
+
   // Online sessions (Teams/Meet) are recorded by a Recall bot, not the local mic.
   const isOnline = appointment?.modality === 'video';
 
@@ -306,6 +317,7 @@ export default function LiveSessionPage() {
       if (appt) {
         setAppointment(appt as Appointment);
         setPatient(appt.patient as Patient);
+        setConsentConfirmed(!!(appt.patient as Patient | null)?.consent_recording);
         if ((appt as Record<string, unknown>).status === 'in_session') {
           const { data: existing } = await supabase
             .from('sessions').select('id,status')
@@ -472,9 +484,47 @@ export default function LiveSessionPage() {
     if (!isOnline || !appointment) return;
     if (autoStartedRef.current) return;
     if (sessionStatus !== 'new' || botDispatched) return;
+    if (!consentConfirmed) return; // consent gate below must be cleared before a bot ever joins the call
     autoStartedRef.current = true;
     handleStartOnline();
-  }, [recovering, isOnline, appointment, sessionStatus, botDispatched]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recovering, isOnline, appointment, sessionStatus, botDispatched, consentConfirmed]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Surface the consent gate the moment we know it's needed — before the
+  // in-person "Start session" button can be clicked and before the online
+  // auto-start effect above is allowed to fire. Only for a genuinely fresh
+  // session (a resumed/paused one already has recording underway).
+  useEffect(() => {
+    if (recovering || !patient) return;
+    if (sessionStatus !== 'new') return;
+    if (consentConfirmed) return;
+    setShowConsentModal(true);
+  }, [recovering, patient, sessionStatus, consentConfirmed]);
+
+  const handleConfirmConsent = async () => {
+    if (!patient || !consentChecked) return;
+    setSavingConsent(true);
+    try {
+      await fetch(`/api/patients/${patient.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          consent_recording: true,
+          consent_ai_notes: true,
+          consent_date: new Date().toISOString(),
+        }),
+      });
+    } catch { /* best-effort persist — the gate itself already did its job for this session */ }
+    setPatient(p => p ? { ...p, consent_recording: true, consent_ai_notes: true } : p);
+    setSavingConsent(false);
+    setShowConsentModal(false);
+    setConsentConfirmed(true);
+    if (!isOnline) handleStart();
+  };
+
+  const handleCancelConsent = () => {
+    setShowConsentModal(false);
+    router.push(patient ? `/patients/${patient.id}` : '/patients');
+  };
 
   // Persist the doctor's private notes (debounced) so they survive even when an
   // online session finalises via the Recall webhook (the doctor never clicks
@@ -620,11 +670,20 @@ export default function LiveSessionPage() {
             </span>
           )}
 
-          {/* Timer */}
+          {/* Timer — in-person uses the local-mic-driven `duration` clock;
+              online has no local mic connection, so it uses the shared
+              `elapsedSec` clock (already ticking for the duration cap, just
+              never rendered) instead. */}
           {isRecording && (
             <div className="flex items-center gap-2 font-mono text-sm font-medium text-white">
               <span className="h-2 w-2 rounded-full bg-red-500" style={{ animation: 'pulse-rec 1.2s ease-in-out infinite' }} />
               {formatDuration(duration)}
+            </div>
+          )}
+          {isOnline && botDispatched && sessionStatus !== 'ended' && (
+            <div className="flex items-center gap-2 font-mono text-sm font-medium text-white">
+              <span className="h-2 w-2 rounded-full bg-red-500" style={{ animation: 'pulse-rec 1.2s ease-in-out infinite' }} />
+              {formatDuration(elapsedSec)}
             </div>
           )}
           {/* Plan duration-cap warning — last 5 min */}
@@ -637,7 +696,7 @@ export default function LiveSessionPage() {
 
           {/* Action buttons */}
           {sessionStatus === 'new' && !isRecording && !isOnline && (
-            <button onClick={handleStart}
+            <button onClick={() => { if (!consentConfirmed) { setShowConsentModal(true); return; } handleStart(); }}
               className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white"
               style={{ background: 'linear-gradient(135deg,#2563eb,#4f46e5)', boxShadow: '0 0 20px rgba(59,130,246,0.25)' }}>
               <Mic className="h-4 w-4" /> Start session
@@ -1056,6 +1115,44 @@ export default function LiveSessionPage() {
                 className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50"
                 style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)' }}>
                 End & generate notes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Consent gate — blocks recording start until confirmed ───────────── */}
+      {showConsentModal && patient && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm mx-4 rounded-2xl p-6 space-y-5"
+            style={{ background: '#0f172a', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
+            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full"
+              style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)' }}>
+              <ShieldCheck className="h-5 w-5 text-violet-400" />
+            </div>
+            <div className="space-y-1.5 text-center">
+              <h3 className="text-base font-semibold text-white">Patient consent required</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                {patient.display_name} doesn&rsquo;t have recording consent on file yet. Per Kith&rsquo;s terms, you&rsquo;re
+                responsible for obtaining consent before this session is recorded and AI-assisted notes are generated.
+              </p>
+            </div>
+            <label className="flex items-start gap-2.5 text-sm text-slate-300 cursor-pointer">
+              <input type="checkbox" checked={consentChecked}
+                onChange={e => setConsentChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded accent-violet-500" />
+              <span>I confirm {patient.display_name} has given consent to be recorded and to AI-assisted note generation.</span>
+            </label>
+            <div className="flex gap-3">
+              <button onClick={handleCancelConsent}
+                className="flex-1 rounded-xl py-2.5 text-sm text-slate-400 hover:text-white transition-colors"
+                style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                Cancel
+              </button>
+              <button onClick={handleConfirmConsent} disabled={!consentChecked || savingConsent}
+                className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)' }}>
+                {savingConsent ? 'Saving…' : 'Confirm & start'}
               </button>
             </div>
           </div>

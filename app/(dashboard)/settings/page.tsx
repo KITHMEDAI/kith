@@ -143,6 +143,7 @@ function GoogleCalendarCard() {
   const [connected, setConnected] = useState(false);
   const [loading, setLoading]     = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [connectError, setConnectError] = useState('');
 
   useEffect(() => {
     // Check from URL param first (returned from OAuth)
@@ -159,10 +160,19 @@ function GoogleCalendarCard() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const connect = async () => {
-    setActionLoading(true);
-    const res = await fetch('/api/google-calendar/auth-url');
-    if (res.ok) { const { url } = await res.json(); window.location.href = url; }
-    else setActionLoading(false);
+    setActionLoading(true); setConnectError('');
+    try {
+      const res = await fetch('/api/google-calendar/auth-url');
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) { window.location.href = data.url; return; }
+      // Previously failed silently here — button looked "dummy" if Google
+      // wasn't configured or the plan didn't unlock it, with zero feedback.
+      setConnectError(typeof data.error === 'string' ? data.error : 'Could not start Google Calendar connection. Try again.');
+    } catch {
+      setConnectError('Could not reach Kith — check your connection and try again.');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const disconnect = async () => {
@@ -217,6 +227,10 @@ function GoogleCalendarCard() {
           </button>
         )}
       </div>
+
+      {connectError && (
+        <p className="mt-3 text-[12px] text-red-400">{connectError}</p>
+      )}
 
       {connected && (
         <div className="mt-4 grid grid-cols-3 gap-3">

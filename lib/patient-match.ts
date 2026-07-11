@@ -25,11 +25,15 @@ export interface PatientFields {
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
   diagnosis?: string[];
+  icd_codes?: string[];
   therapy_modality?: string | null;
+  therapy_goals?: string[];
   medications?: string | null;
   presenting_concerns?: string | null;
   total_sessions?: number | null;
   session_frequency?: string | null;
+  patient_id_number?: string | null;
+  fee_per_session?: number | null;
   imported_from?: string | null;
 }
 
@@ -76,20 +80,23 @@ function pickExistingColumns(
   return out;
 }
 
+interface ExistingPatient { id: string; diagnosis: string[] | null; icd_codes: string[] | null; therapy_goals: string[] | null }
+
 async function findExisting(
   supabase: SupabaseClient,
   therapistId: string,
   fields: PatientFields,
-): Promise<{ id: string; diagnosis: string[] | null } | null> {
+): Promise<ExistingPatient | null> {
+  const SELECT = 'id, diagnosis, icd_codes, therapy_goals, phone';
   const base = supabase
     .from('patients')
-    .select('id, diagnosis, phone')
+    .select(SELECT)
     .eq('therapist_id', therapistId);
 
   // 1) email — most reliable unique-ish key
   if (fields.email) {
     const { data } = await base.ilike('email', fields.email).limit(1);
-    if (data && data.length) return { id: data[0].id, diagnosis: data[0].diagnosis };
+    if (data && data.length) return data[0] as unknown as ExistingPatient;
   }
 
   // 2) phone — compare on trailing digits to ignore formatting/country code
@@ -97,29 +104,29 @@ async function findExisting(
   if (digits.length >= 7) {
     const { data } = await supabase
       .from('patients')
-      .select('id, diagnosis, phone')
+      .select(SELECT)
       .eq('therapist_id', therapistId)
       .not('phone', 'is', null);
     const hit = (data || []).find(r => phoneDigits(r.phone) === digits);
-    if (hit) return { id: hit.id, diagnosis: hit.diagnosis };
+    if (hit) return hit as unknown as ExistingPatient;
   }
 
   // 3) exact name (case-insensitive)
   if (fields.display_name) {
     const { data } = await supabase
       .from('patients')
-      .select('id, diagnosis, phone')
+      .select(SELECT)
       .eq('therapist_id', therapistId)
       .ilike('display_name', fields.display_name)
       .limit(1);
-    if (data && data.length) return { id: data[0].id, diagnosis: data[0].diagnosis };
+    if (data && data.length) return data[0] as unknown as ExistingPatient;
   }
 
   return null;
 }
 
 // Build an update payload containing only the fields that actually carry a value.
-function nonEmptyUpdate(fields: PatientFields, existingDiagnosis: string[] | null): Record<string, unknown> {
+function nonEmptyUpdate(fields: PatientFields, existing: ExistingPatient): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   const maybe = (key: keyof PatientFields, val: unknown) => {
     if (val !== undefined && val !== null && val !== '') out[key as string] = val;
@@ -137,18 +144,30 @@ function nonEmptyUpdate(fields: PatientFields, existingDiagnosis: string[] | nul
   maybe('medications', fields.medications);
   maybe('presenting_concerns', fields.presenting_concerns);
   maybe('session_frequency', fields.session_frequency);
+  maybe('patient_id_number', fields.patient_id_number);
   if (typeof fields.total_sessions === 'number') out.total_sessions = fields.total_sessions;
+  if (typeof fields.fee_per_session === 'number') out.fee_per_session = fields.fee_per_session;
 
-  // Diagnosis: union of existing + incoming (case-insensitive de-dupe)
-  if (fields.diagnosis && fields.diagnosis.length) {
+  // Diagnosis / ICD codes / therapy goals: union of existing + incoming
+  // (case-insensitive de-dupe) so re-importing the same source never blanks
+  // out data recorded since the last import.
+  const union = (existing: string[] | null | undefined, incoming: string[] | undefined) => {
+    if (!incoming || !incoming.length) return null;
     const seen = new Set<string>();
     const merged: string[] = [];
-    for (const d of [...(existingDiagnosis || []), ...fields.diagnosis]) {
+    for (const d of [...(existing || []), ...incoming]) {
       const key = d.trim().toLowerCase();
       if (d.trim() && !seen.has(key)) { seen.add(key); merged.push(d.trim()); }
     }
-    out.diagnosis = merged;
-  }
+    return merged;
+  };
+  const diagnosisMerged = union(existing.diagnosis, fields.diagnosis);
+  if (diagnosisMerged) out.diagnosis = diagnosisMerged;
+  const icdMerged = union(existing.icd_codes, fields.icd_codes);
+  if (icdMerged) out.icd_codes = icdMerged;
+  const goalsMerged = union(existing.therapy_goals, fields.therapy_goals);
+  if (goalsMerged) out.therapy_goals = goalsMerged;
+
   return out;
 }
 
@@ -161,7 +180,7 @@ export async function matchOrCreatePatient(
   const existing = await findExisting(supabase, therapistId, fields);
 
   if (existing) {
-    const update = pickExistingColumns(nonEmptyUpdate(fields, existing.diagnosis), columns);
+    const update = pickExistingColumns(nonEmptyUpdate(fields, existing), columns);
     if (Object.keys(update).length) {
       await supabase.from('patients').update(update).eq('id', existing.id);
     }

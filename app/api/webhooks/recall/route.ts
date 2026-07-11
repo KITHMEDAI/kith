@@ -10,7 +10,10 @@ import { createServiceRoleClient } from '@/lib/supabase/server';
 import { verifyRecallSignature, normaliseRealtimeEntry } from '@/lib/recall';
 import { finalizeOnlineSession, failOnlineSession, appendLiveTranscriptSegment } from '@/lib/online-session';
 
-export const maxDuration = 60;
+// finalizeOnlineSession() now kicks off note generation inline via
+// waitUntil() (see lib/online-session.ts) rather than a fire-and-forget
+// fetch to a separate route — needs room for the full Haiku + Sonnet pipeline.
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();

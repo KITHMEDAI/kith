@@ -1,20 +1,32 @@
 /**
  * POST /api/sessions/end
  *
- * Fast path (~200 ms):
+ * Fast response (~200 ms), note generation continues in the background:
  *   1. Verify auth
  *   2. Save transcript → mark session "processing"
  *   3. Update appointment status
- *   4. Fire-and-forget → /api/sessions/process-notes  (runs independently, up to 5 min)
- *   5. Return { ok, patientId } immediately so the client can navigate away
+ *   4. Return { ok, patientId } immediately so the client can navigate away
+ *   5. waitUntil(runNoteGeneration(...)) keeps this invocation alive in the
+ *      background until note generation finishes, WITHOUT blocking the
+ *      response above.
  *
- * Note generation happens in process-notes, NOT here.
+ * Previously step 4/5 was a fire-and-forget `fetch()` to a separate
+ * /api/sessions/process-notes route. On Vercel that's not safe — once the
+ * response is sent, the function instance can be frozen before the fetch
+ * even completes its handshake, silently dropping note generation and
+ * leaving the session stuck at "processing" forever. waitUntil() guarantees
+ * the promise is allowed to finish (up to maxDuration below).
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { runNoteGeneration } from '@/lib/process-notes';
 import type { TranscriptSegment } from '@/types';
 
-export const maxDuration = 30;  // this route is fast — 30 s is plenty
+// Was 30s when this route only kicked off a fetch — now the actual Haiku +
+// Sonnet pipeline runs inline via waitUntil, so it needs the same ceiling
+// process-notes used to have.
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   const supabase = createServerSupabaseClient();
@@ -67,25 +79,15 @@ export async function POST(req: NextRequest) {
     .update({ last_session_date: now.split('T')[0] })
     .eq('id', session.patient_id);
 
-  // 4. Fire-and-forget: trigger background note generation
-  //    This creates an INDEPENDENT serverless invocation — end route returns before it finishes.
-  //    Derive the base URL from the actual request origin first so the trigger always
-  //    hits the same server/port it's running on (env is only a fallback).
-  const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
-  const internalSecret = process.env.INTERNAL_API_SECRET || '';
-
-  // Don't await — let it run independently
-  fetch(`${baseUrl}/api/sessions/process-notes`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-internal-secret': internalSecret,
-    },
-    body: JSON.stringify({ sessionId, speakerMap, manualNotes }),
-  }).catch(err => {
-    // Best-effort — patient profile will show "failed" if this silently errors
-    console.error('[Kith] process-notes trigger failed:', err);
-  });
+  // 4. Kick off note generation in the background — waitUntil() keeps this
+  //    invocation alive until the promise settles, without delaying the
+  //    response below. Any failure still lands on the session as
+  //    status: 'failed' inside runNoteGeneration's own try/catch.
+  waitUntil(
+    runNoteGeneration(sessionId, { speakerMap, manualNotes }).catch(err => {
+      console.error('[Kith] process-notes (waitUntil) failed:', err);
+    }),
+  );
 
   // 5. Return immediately — client navigates to patient profile
   return NextResponse.json({

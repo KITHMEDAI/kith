@@ -9,8 +9,10 @@
  * directly from /api/sessions/bot so the flow completes locally without a real call.
  */
 
+import { waitUntil } from '@vercel/functions';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { getRecallTranscript } from '@/lib/recall';
+import { runNoteGeneration } from '@/lib/process-notes';
 import type { TranscriptSegment } from '@/types';
 
 export async function finalizeOnlineSession(sessionId: string, botId: string | null): Promise<void> {
@@ -71,14 +73,16 @@ export async function finalizeOnlineSession(sessionId: string, botId: string | n
     .update({ last_session_date: now.split('T')[0] })
     .eq('id', session.patient_id);
 
-  // Fire-and-forget the existing note pipeline (same as /api/sessions/end).
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
-  const internalSecret = process.env.INTERNAL_API_SECRET || '';
-  fetch(`${baseUrl}/api/sessions/process-notes`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },
-    body: JSON.stringify({ sessionId }),
-  }).catch(err => console.error('[Kith] online process-notes trigger failed:', err));
+  // Run the existing note pipeline (same as /api/sessions/end) in the
+  // background. waitUntil() keeps the webhook invocation alive until this
+  // settles — previously this was a fire-and-forget fetch() to a separate
+  // route, which Vercel could silently drop the moment the webhook handler's
+  // response was sent, leaving the session stuck at "processing" forever.
+  waitUntil(
+    runNoteGeneration(sessionId).catch(err => {
+      console.error('[Kith] online process-notes (waitUntil) failed:', err);
+    }),
+  );
 }
 
 // Appends one realtime utterance (Ultra-only `transcript.data` webhook events,

@@ -6,9 +6,13 @@
  * status → 'processing' and fire-and-forget the background processor again.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { runNoteGeneration } from '@/lib/process-notes';
 
-export const maxDuration = 30;
+// Note generation now runs inline via waitUntil (see below), not a fetch to
+// a separate route — needs the same ceiling process-notes used to have.
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();
@@ -37,14 +41,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // Reset to processing so the (idempotent) processor will run — it guards on this state.
   await service.from('sessions').update({ status: 'processing' }).eq('id', params.id);
 
-  const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
-  const internalSecret = process.env.INTERNAL_API_SECRET || '';
-
-  fetch(`${baseUrl}/api/sessions/process-notes`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },
-    body: JSON.stringify({ sessionId: params.id }),
-  }).catch(err => console.error('[Kith] retry process-notes trigger failed:', err));
+  waitUntil(
+    runNoteGeneration(params.id).catch(err => {
+      console.error('[Kith] retry-notes (waitUntil) failed:', err);
+    }),
+  );
 
   return NextResponse.json({ ok: true });
 }

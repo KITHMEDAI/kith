@@ -138,34 +138,53 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Auto-create a Google Meet for online (video) sessions ──────────────────
-  // A manually-pasted meeting_url always wins. Otherwise, if the therapist has
-  // Google connected, Kith creates the Meet (one event/link for a recurring
-  // series). Failures never block the booking — we just flag a warning so the
-  // doctor can add a link later from the appointment.
+  // A manually-pasted meeting_url always wins. Otherwise, if the therapist is
+  // Ultra+ and has Google connected, Kith creates the Meet (one event/link for
+  // a recurring series) and auto-emails the patient the join link — see the
+  // notification block below. Pro can still book video sessions, just with a
+  // manually-pasted link (no auto-create, no auto-email — that's the Ultra
+  // automation). Failures never block the booking — we just flag a warning so
+  // the doctor can add a link later from the appointment.
   let resolvedMeetingUrl: string | null = meeting_url || null;
   let googleEventId: string | null = null;
   let meetWarning: string | null = null;
 
   if (modality === 'video' && !resolvedMeetingUrl && toInsert.length > 0) {
-    try {
-      const tokens = await getTokensFromVault(therapist.id); // throws if not connected
+    if (!entitlements.autoMeetAndInvite) {
+      meetWarning = 'Automatic Meet creation is an Ultra feature — paste your own Teams/Zoom/Meet link above, or upgrade to have Kith create and send one automatically.';
+    } else {
       const { data: pt } = await supabase
         .from('patients').select('display_name, email').eq('id', patient_id).single();
-      const meet = await createMeetEvent(tokens, {
-        summary: `Therapy session — ${pt?.display_name || 'Patient'}`,
-        description: goals ? `Session focus: ${goals}` : undefined,
-        startISO: toInsert[0].at.toISOString(),
-        durationMin: duration_minutes,
-        attendees: pt?.email ? [{ email: pt.email }] : undefined,
-        recurrenceRule: recurrence ? rruleFor(recurrence.frequency, recurrence.count) : null,
-      });
-      resolvedMeetingUrl = meet.meetingUrl;
-      googleEventId = meet.eventId;
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : '';
-      meetWarning = /tokens found|reconnect/i.test(msg)
-        ? 'Connect Google Calendar in Settings to auto-create Meet links — or paste a link when booking.'
-        : 'Booked, but Kith could not create a Google Meet right now. Add a link from the appointment to enable the notetaker.';
+
+      // Strict, at point of use: the whole point of this feature is emailing
+      // the patient the link, so refuse to silently create a Meet nobody
+      // receives — the therapist would only find out when the patient asks
+      // "how do I join?". Pro/Free never hit this (no auto-create for them).
+      if (!pt?.email) {
+        return NextResponse.json(
+          { error: 'This patient needs an email on file before Kith can auto-create and send the Meet link. Add one and try again.', code: 'EMAIL_REQUIRED' },
+          { status: 422 },
+        );
+      }
+
+      try {
+        const tokens = await getTokensFromVault(therapist.id); // throws if not connected
+        const meet = await createMeetEvent(tokens, {
+          summary: `Therapy session — ${pt?.display_name || 'Patient'}`,
+          description: goals ? `Session focus: ${goals}` : undefined,
+          startISO: toInsert[0].at.toISOString(),
+          durationMin: duration_minutes,
+          attendees: pt?.email ? [{ email: pt.email }] : undefined,
+          recurrenceRule: recurrence ? rruleFor(recurrence.frequency, recurrence.count) : null,
+        });
+        resolvedMeetingUrl = meet.meetingUrl;
+        googleEventId = meet.eventId;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : '';
+        meetWarning = /tokens found|reconnect/i.test(msg)
+          ? 'Connect Google Calendar in Settings to auto-create Meet links — or paste a link when booking.'
+          : 'Booked, but Kith could not create a Google Meet right now. Add a link from the appointment to enable the notetaker.';
+      }
     }
   }
 
@@ -188,12 +207,11 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     createdIds = (data || []).map(d => d.id);
 
-    // Auto-notify the patient with the session time + join link, right away —
-    // an online session is useless to them if they never get the link. Not
-    // gated behind the Ultra messaging entitlement: this is core to the
-    // "online sessions" feature Pro+ already unlocks, not the separate
-    // ad-hoc patient-messaging upsell.
-    if (modality === 'video' && resolvedMeetingUrl && createdIds.length > 0) {
+    // Auto-notify the patient with the session time + join link, right away.
+    // Ultra-only, in line with entitlements.autoMeetAndInvite above — Pro can
+    // still book a video session with its own pasted link, but automatically
+    // messaging the patient on the therapist's behalf is the Ultra automation.
+    if (modality === 'video' && resolvedMeetingUrl && createdIds.length > 0 && entitlements.autoMeetAndInvite) {
       try {
         const [{ data: pt }, { data: therapistInfo }] = await Promise.all([
           supabase.from('patients').select('display_name, phone, whatsapp_number, email').eq('id', patient_id).single(),
