@@ -238,16 +238,32 @@ STRICT RULES:
 - ai_suggestions: never judge patient behaviour or choices. State observations clinically and neutrally. If things are going well, say so directly.
 - Return ONLY JSON, no markdown fences.`;
 
-  const res = await client.messages.create({
-    model: SONNET,
-    max_tokens: 4096,   // headroom so long sessions don't truncate mid-JSON
-    messages: [{ role: 'user', content: prompt }],
-  });
+  // One retry on invalid/missing JSON — same reasoning as Layer 1's retry:
+  // these calls are stochastic, so a malformed response isn't necessarily
+  // reproducible on a second attempt. Previously this stage had NO retry at
+  // all, so a single bad generation (more likely here than in Layer 1 given
+  // how much larger and more nested this output schema is) failed the whole
+  // session outright with no second chance.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const res = await client.messages.create({
+      model: SONNET,
+      max_tokens: 4096,   // headroom so long sessions don't truncate mid-JSON
+      messages: [{ role: 'user', content: prompt }],
+    });
 
-  const text  = res.content[0]?.type === 'text' ? res.content[0].text : '';
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('Sonnet returned non-JSON response');
-  return parseNotesJson(match[0]);
+    const text  = res.content[0]?.type === 'text' ? res.content[0].text : '';
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return parseNotesJson(match[0]);
+      } catch { /* fall through to retry */ }
+    }
+    if (attempt === 2) {
+      throw new Error('Sonnet did not return valid JSON after retry');
+    }
+  }
+  // Unreachable, but keeps TypeScript happy about the return type.
+  throw new Error('Sonnet synthesis failed');
 }
 
 // Robust JSON parse for model output: the common failure is a raw newline/tab
