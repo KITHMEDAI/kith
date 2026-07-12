@@ -129,7 +129,7 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
   // patient email would silently mean nobody ever gets the join link, so
   // it's asked for here, just-in-time, rather than being mandatory on every
   // patient up front.
-  const needsPatientEmail = !preselectedPatientId && modality === 'video' && autoMeetUnlocked === true
+  const needsPatientEmail = modality === 'video' && autoMeetUnlocked === true
     && calendarConnected === true && !meetingUrl.trim() && !!selectedPatient && !patientEmailInput.trim();
   const filtered = search.trim()
     ? localPatients.filter(p => p.display_name.toLowerCase().includes(search.toLowerCase()))
@@ -468,8 +468,8 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
             )}
           </div>
 
-          {/* Duration + Modality — only for new bookings without preselected patient */}
-          {!isExisting && <div className="grid grid-cols-2 gap-3">
+          {/* Duration + Modality — available for existing patients too, not just new bookings */}
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Duration</label>
               <select value={duration} onChange={e => setDuration(e.target.value)}
@@ -492,12 +492,12 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                 </LockedFeatureButton>
               )}
             </div>
-          </div>}
+          </div>
 
           {/* Online (video) sessions — Kith auto-creates a Google Meet on Ultra,
               but only if Calendar is actually connected (plan-unlocked and
               actually wired up are two different things — see calendarConnected). */}
-          {!isExisting && modality === 'video' && !onlineLocked && (
+          {modality === 'video' && !onlineLocked && (
             <div className="rounded-lg p-3" style={{ border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(139,92,246,0.08)' }}>
               {autoMeetUnlocked && calendarConnected === false ? (
                 <>
@@ -548,10 +548,8 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
             </div>
           )}
 
-          {/* Session type + goals — only for new (non-preselected) bookings */}
-          {!isExisting && (
-            <>
-              <div>
+          {/* Session type + goals — available for existing patients too */}
+          <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Session type</label>
                 <div className="flex gap-2">
                   {(['individual','couples','group','family'] as const).map(t => {
@@ -586,8 +584,6 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
                   placeholder="What do you want to focus on this session?"
                   className={`${FIELD} resize-none`} style={FIELD_STYLE} />
               </div>
-            </>
-          )}
 
           {error && <p className="text-xs text-red-400">{error}</p>}
           </div>
