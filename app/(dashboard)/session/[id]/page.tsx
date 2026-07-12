@@ -324,7 +324,17 @@ export default function LiveSessionPage() {
             .eq('appointment_id', params.id)
             .in('status', ['active','processing'])
             .maybeSingle();
-          if (existing) { setSessionId(existing.id); setSessionStatus('paused'); }
+          if (existing) {
+            setSessionId(existing.id);
+            setSessionStatus('paused');
+            // botDispatched is local React state — it does NOT survive a page
+            // reload/reopen on its own. Without restoring it here, an online
+            // session that's reopened (e.g. after closing the tab and coming
+            // back) looks like the bot was never dispatched, which stops the
+            // elapsed-time clock dead (its effect requires botDispatched)
+            // even though the bot is still recording in the call.
+            if ((appt as Record<string, unknown>).modality === 'video') setBotDispatched(true);
+          }
         }
       }
       // Only now is it safe for the auto-start effect to decide whether this
@@ -470,6 +480,17 @@ export default function LiveSessionPage() {
       setSessionStatus('active');
       setElapsedSec(0);
       setBotDispatched(true);
+      // Best-effort: open the Meet call in its own tab the moment the
+      // notetaker joins, so the doctor doesn't have to hunt for a separate
+      // "Open Meet" click. Browsers only allow window.open() reliably when
+      // it's a direct result of a click — this call runs from a page-load
+      // effect when auto-started, so most browsers WILL silently block it
+      // there (this is a browser security policy, not something any web app
+      // can override). It works reliably when this fires from an actual
+      // click instead (e.g. "Retry recorder"). Either way, the persistent
+      // "Open Meet" button above is the guaranteed fallback.
+      const url = (appointment as { meeting_url?: string } | null)?.meeting_url;
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
     } catch (err) {
       setBotError(err instanceof Error ? err.message : 'Failed to send notetaker');
     }
@@ -702,8 +723,13 @@ export default function LiveSessionPage() {
               <Mic className="h-4 w-4" /> Start session
             </button>
           )}
-          {/* Online: open the Meet (host) while the recorder starts automatically */}
-          {isOnline && !botDispatched && (appointment as { meeting_url?: string } | null)?.meeting_url && (
+          {/* Online: open/reopen the Meet call. Previously this vanished the
+              instant the bot dispatched, so closing or losing that tab left
+              no way back in short of re-navigating. Now it stays available
+              for the whole session (it also gets auto-opened once — see the
+              startedMeetTabRef effect below — this is the reliable fallback
+              for whenever a browser's popup blocker stops that). */}
+          {isOnline && sessionStatus !== 'ended' && (appointment as { meeting_url?: string } | null)?.meeting_url && (
             <a href={(appointment as { meeting_url?: string }).meeting_url} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white"
               style={{ background: 'linear-gradient(135deg,#2563eb,#4f46e5)', boxShadow: '0 0 20px rgba(59,130,246,0.25)' }}>
