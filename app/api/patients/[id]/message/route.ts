@@ -16,7 +16,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('id, subscription_plan, subscription_status, trial_ends_at')
+    .select('id, display_name, subscription_plan, subscription_status, trial_ends_at')
     .eq('user_id', user.id)
     .single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const results = await sendNotification({
     to: { email: patient.email },
-    subject: 'Message from your therapist',
+    subject: `Message from ${therapist.display_name || 'your therapist'}`,
     message: message.trim(),
     channels: ['email'],
   });

@@ -38,7 +38,10 @@ export async function sendNotification({ to, subject, message, channels, icsAtta
         subject,
         html: `
           <div style="font-family:-apple-system,Helvetica,Arial,sans-serif;max-width:440px;margin:0 auto;padding:32px 28px">
-            <p style="margin:0 0 24px;font-size:14px;font-weight:700;letter-spacing:0.02em;color:#7c3aed">KITH</p>
+            <div style="display:flex;align-items:center;gap:8px;margin:0 0 24px">
+              <img src="https://kith.space/kith-logo-email.png" width="22" height="22" alt="Kith" style="display:block" />
+              <span style="font-size:14px;font-weight:700;letter-spacing:0.02em;color:#7c3aed">KITH</span>
+            </div>
             <p style="margin:0;font-size:14px;line-height:1.65;color:#1e1b3a">${message.replace(/\n/g, '<br/>')}</p>
             <p style="margin:24px 0 0;padding-top:14px;border-top:1px solid #ece6ff;font-size:11px;color:#9992ad">Sent via Kith on behalf of your therapist.</p>
           </div>
