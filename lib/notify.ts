@@ -33,7 +33,7 @@ export async function sendNotification({ to, subject, message, channels, icsAtta
       // Previously this was never checked, so every Resend-side rejection
       // was silently reported as a successful send.
       const { data, error } = await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@kith.in',
+        from: `Kith <${process.env.RESEND_FROM_EMAIL || 'noreply@kith.in'}>`,
         to: to.email,
         subject,
         html: `
