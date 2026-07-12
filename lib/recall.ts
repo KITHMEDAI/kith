@@ -60,8 +60,17 @@ export async function createRecallBot(opts: {
       // still going — handled in app/api/webhooks/recall/route.ts.
       // NOTE: `recallai_async` is NOT valid here — that provider is only for the
       // separate post-call "Create Async Transcript" endpoint, not Create Bot.
+      //
+      // mode: 'prioritize_accuracy' + language_code: 'auto' (not
+      // 'prioritize_low_latency') — deliberate tradeoff. Recall's low-latency
+      // mode delivers events in 1-3s but HARD-REQUIRES language_code: 'en'
+      // (non-English speech fails to transcribe — this is what produced
+      // garbled Hindi output in testing). Accuracy mode supports 30+
+      // languages with code-switching, but delays transcript.data events by
+      // 3-10 minutes. There is no fast+multilingual option on Recall's side;
+      // this picks correctness over "live" for non-English-speaking users.
       recording_config: opts.liveUpdates ? {
-        transcript: { provider: { recallai_streaming: {} } },
+        transcript: { provider: { recallai_streaming: { mode: 'prioritize_accuracy', language_code: 'auto' } } },
         realtime_endpoints: [
           { type: 'webhook', url: webhookUrl, events: ['transcript.data'] },
         ],

@@ -29,7 +29,10 @@ export interface Entitlements {
   autoMeetAndInvite: boolean; // Kith auto-creates the Google Meet + auto-emails the patient on booking — Ultra+ only
   patientMessaging: boolean;  // WhatsApp / SMS to patients
   groupSessionTypes: boolean; // couples / family / group session types (Free = individual only)
-  liveOnlineUpdates: boolean; // real-time transcript streaming for online (bot) sessions — Ultra+ only, costs extra per Recall session
+  liveOnlineUpdates: boolean; // multilingual transcript streaming for online (bot) sessions — Ultra+ only, costs extra per Recall session.
+                              // Runs in Recall's accuracy-priority mode (not low-latency) so non-English/code-switched
+                              // speech transcribes correctly — tradeoff is transcript.data events land 3-10 min behind
+                              // real time rather than 1-3s, so in-session suggestions lag rather than being truly live.
 }
 
 interface BillingFields {
@@ -106,7 +109,7 @@ export const PLAN_FEATURES: Record<PlanKey, string[]> = {
   ],
   ultra: [
     'Unlimited sessions, 120 minutes each',
-    'Online sessions with live suggestions — homework and talking points update in real time as the session unfolds',
+    'Online sessions with in-session suggestions — homework and talking points update as the session progresses, in any supported language',
     'A meeting link is created and emailed to the patient automatically for every online session',
     'Message patients directly by email',
     'Priority support — first in line when you need help',
