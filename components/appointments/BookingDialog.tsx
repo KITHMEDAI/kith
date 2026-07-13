@@ -297,7 +297,13 @@ export default function BookingDialog({ patients, preselectedPatientId, onClose,
             footer below so a tall form (recurrence + video + goals) never
             hides "Book appointment" below the fold. */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {/* overflow-x-hidden is load-bearing, not decorative: per the CSS
+              overflow spec, setting overflow-y to a non-'visible' value while
+              overflow-x is left at its default 'visible' gets silently
+              computed to overflow-x:auto by the browser — so any absolutely
+              positioned child overflowing sideways (e.g. LockedFeatureButton's
+              upgrade popup) was creating a stray horizontal scrollbar here. */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-4">
 
           {/* Patient — only show selector when NOT preselected */}
           {!isExisting && (
