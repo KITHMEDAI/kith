@@ -58,7 +58,7 @@ function Highlighted({ text }: { text: string }) {
 // bullet list; falls back to a paragraph for single-line / legacy prose notes.
 function ClinicalText({ text, dot = 'bg-teal-400' }: { text: string; dot?: string }) {
   // Points come back joined by ' • ' (or occasionally newlines); split on either.
-  const lines = text.split(/\s*•\s*|\n/).map(l => l.replace(/^\s*[-*]\s*/, '').trim()).filter(Boolean);
+  const lines = text.split(/\s*•\s*|\n/).map(l => l.replace(/^\s*(?:-\s+|\*(?!\*)\s+)/, '').trim()).filter(Boolean);
   if (lines.length <= 1) {
     return <p className="text-base text-gray-200 leading-relaxed whitespace-pre-wrap"><Highlighted text={text} /></p>;
   }

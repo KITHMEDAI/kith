@@ -298,9 +298,15 @@ export default async function PatientProfilePage({ params }: { params: { id: str
                       {/* Summary + key point */}
                       <div className="flex-1 min-w-0">
                         {isProc ? (
-                          <p className="text-sm font-medium flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full animate-pulse-slow"
-                            style={{ color: '#c4b5fd', background: 'rgba(139,92,246,0.14)', boxShadow: '0 0 14px rgba(139,92,246,0.5)' }}>
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Generating notes…
+                          <p className="text-sm font-semibold flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full animate-pulse-slow"
+                            style={{
+                              color: '#5b21b6',
+                              background: 'linear-gradient(135deg,#f3e8ff,#ede9fe)',
+                              border: '1px solid rgba(139,92,246,0.4)',
+                              textShadow: '0 0 10px rgba(139,92,246,0.45)',
+                              boxShadow: '0 0 14px rgba(139,92,246,0.3)',
+                            }}>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" style={{ color: '#6d28d9' }} /> Generating notes…
                           </p>
                         ) : isFailed ? (
                           <p className="text-sm text-red-400 italic">Note generation failed — transcript saved</p>

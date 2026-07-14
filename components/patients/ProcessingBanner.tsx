@@ -125,14 +125,14 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
   return (
     <div className="rounded-xl px-4 py-3 flex items-center gap-3 text-sm animate-pulse-slow"
       style={{
-        background: 'linear-gradient(135deg,rgba(139,92,246,0.14),rgba(59,130,246,0.1))',
-        border: '1px solid rgba(139,92,246,0.35)',
-        boxShadow: '0 0 24px rgba(139,92,246,0.3)',
+        background: 'linear-gradient(135deg,#f3e8ff,#ede9fe)',
+        border: '1px solid rgba(139,92,246,0.4)',
+        boxShadow: '0 0 24px rgba(139,92,246,0.25)',
       }}>
-      <RefreshCw className="h-4 w-4 text-violet-400 animate-spin flex-none" />
+      <RefreshCw className="h-4 w-4 animate-spin flex-none" style={{ color: '#6d28d9' }} />
       <div className="flex-1">
-        <span className="font-medium text-violet-200">Generating clinical notes…</span>
-        <span className="ml-2 text-violet-400/70 text-xs">
+        <span className="font-semibold" style={{ color: '#5b21b6', textShadow: '0 0 12px rgba(139,92,246,0.45)' }}>Generating clinical notes…</span>
+        <span className="ml-2 text-xs" style={{ color: '#7c3aed' }}>
           {isOnline
             ? (longWait
                 ? "Still waiting on your meeting platform to finish packaging the recording — this step is outside Kith's control and can take a few minutes, regardless of how long the session was."
