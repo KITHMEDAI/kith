@@ -64,13 +64,18 @@ export async function PATCH(
   }
 
   const body = await req.json().catch(() => ({}));
-  const { soap_note, manual_notes } = body;
+  const { soap_note, manual_notes, transcript_raw } = body;
 
   // Only update the fields actually provided (SOAP edit from the note page,
-  // or the doctor's private-notes autosave during/after a session).
+  // the doctor's private-notes autosave during/after a session, or the
+  // in-person mic transcript's periodic autosave — see the effect in
+  // app/(dashboard)/session/[id]/page.tsx; previously transcript_raw was only
+  // written once at "End session", so a reload mid-recording lost everything
+  // captured so far with no way to recover it).
   const updates: Record<string, unknown> = {};
   if (soap_note !== undefined) updates.soap_note = soap_note;
   if (manual_notes !== undefined) updates.manual_notes = manual_notes;
+  if (transcript_raw !== undefined) updates.transcript_raw = transcript_raw;
   if (Object.keys(updates).length === 0) return NextResponse.json({ ok: true });
 
   const { error } = await service.from('sessions').update(updates).eq('id', params.id);

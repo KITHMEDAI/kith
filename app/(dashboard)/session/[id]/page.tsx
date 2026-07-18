@@ -220,13 +220,14 @@ function mergeUniqueNotes(existing: string[], incoming: string[]): string[] {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const LIVE_UPDATE_MS = 2 * 60 * 1000; // 2 minutes
+const TRANSCRIPT_AUTOSAVE_MS = 15 * 1000; // 15 seconds
 
 export default function LiveSessionPage() {
   const params   = useParams();
   const router   = useRouter();
   const supabase = createClient();
 
-  const { segments, partialText, isConnected, connectionStatus, connect, disconnect } = useRealTimeTranscript();
+  const { segments, partialText, isConnected, connectionStatus, connect, disconnect, restoreSegments } = useRealTimeTranscript();
 
   // Simple duration timer — driven by isConnected, no separate MediaRecorder needed
   const [duration, setDuration]   = useState(0);
@@ -343,7 +344,7 @@ export default function LiveSessionPage() {
         setConsentConfirmed(!!(appt.patient as Patient | null)?.consent_recording);
         if ((appt as Record<string, unknown>).status === 'in_session') {
           const { data: existing } = await supabase
-            .from('sessions').select('id,status')
+            .from('sessions').select('id,status,transcript_raw')
             .eq('appointment_id', params.id)
             .in('status', ['active','processing'])
             .maybeSingle();
@@ -356,7 +357,16 @@ export default function LiveSessionPage() {
             // back) looks like the bot was never dispatched, which stops the
             // elapsed-time clock dead (its effect requires botDispatched)
             // even though the bot is still recording in the call.
-            if ((appt as Record<string, unknown>).modality === 'video') setBotDispatched(true);
+            if ((appt as Record<string, unknown>).modality === 'video') {
+              setBotDispatched(true);
+            } else if (Array.isArray(existing.transcript_raw) && existing.transcript_raw.length > 0) {
+              // In-person transcript is now autosaved periodically (see the
+              // effect below) instead of only at "End session" — restore it
+              // here so a reload shows what was already captured instead of
+              // silently losing it. Resume then appends new segments onto
+              // this instead of starting from an empty transcript.
+              restoreSegments(existing.transcript_raw as TranscriptSegment[]);
+            }
           }
         }
       }
@@ -601,6 +611,27 @@ export default function LiveSessionPage() {
     return () => clearTimeout(t);
   }, [manualNotes, sessionId]);
 
+  // In-person transcript_raw was previously written only once, at "End
+  // session" — the mic/WebSocket transcript lived only in this tab's memory
+  // until then, so a crash/reload mid-session silently lost everything
+  // captured so far with no way to recover it. Periodically autosaving here
+  // bounds that loss to the last ~15s instead of the whole session; the
+  // recovery effect above restores this on reload so it isn't just saved,
+  // it's actually shown again too. Online sessions don't need this — their
+  // transcript already lives server-side via the Recall webhook.
+  useEffect(() => {
+    if (isOnline || !sessionId || !isRecording) return;
+    const id = setInterval(() => {
+      if (segmentsRef.current.length === 0) return;
+      fetch(`/api/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript_raw: segmentsRef.current }),
+      }).catch(() => {});
+    }, TRANSCRIPT_AUTOSAVE_MS);
+    return () => clearInterval(id);
+  }, [isOnline, sessionId, isRecording]);
+
   // In-person only — stops the mic/WebSocket without ending the session, so a
   // doctor can step out for a break. Both timers above stop counting the
   // instant this fires (paused minutes aren't billed against the plan's
@@ -608,6 +639,17 @@ export default function LiveSessionPage() {
   const handlePause = () => {
     disconnect();
     setSessionStatus('paused');
+    // Flush immediately rather than waiting for the next autosave tick — a
+    // doctor who pauses and then closes the tab (without ever clicking
+    // Resume or End) shouldn't lose up to TRANSCRIPT_AUTOSAVE_MS of transcript
+    // to timing alone.
+    if (!isOnline && sessionId && segmentsRef.current.length > 0) {
+      fetch(`/api/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript_raw: segmentsRef.current }),
+      }).catch(() => {});
+    }
   };
 
   const handleResume = async () => {

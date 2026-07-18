@@ -402,5 +402,9 @@ export function useRealTimeTranscript() {
     setPartialText('');
   }, []);
 
-  return { segments, partialText, isConnected, connectionStatus, connect, disconnect };
+  // Exposes setSegments so the page can restore a transcript persisted before
+  // a reload (transcript_raw is now autosaved periodically — see
+  // app/(dashboard)/session/[id]/page.tsx) instead of every reconnect
+  // starting from a blank transcript.
+  return { segments, partialText, isConnected, connectionStatus, connect, disconnect, restoreSegments: setSegments };
 }
