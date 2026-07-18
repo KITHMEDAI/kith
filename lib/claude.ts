@@ -88,8 +88,10 @@ REPAIR LOW-CONFIDENCE WORDS FIRST:
 
 IDENTIFY ROLES:
 - CLINICIAN: opens session, asks structured/reflective questions, uses clinical language, references past sessions, assigns homework, names techniques (CBT/DBT/EMDR/ACT/MI), validates without advising.
-- PATIENT: shares lived experience, emotions, specific events, responds to clinician prompts, uses first-person language ("I feel", "I can't", "last week I").
+- PATIENT: the registered patient described below (age/gender/diagnosis should roughly match) — shares lived experience, emotions, specific events, uses first-person language ("I feel", "I can't", "last week I").
+- THIRD PARTY (only if a distinct third voice is present): a spouse, parent, or family member sitting in on this session. They also speak in first person about their own experience — do NOT default them into the PATIENT role just because they aren't the clinician. If their name is clearly stated aloud anywhere in the transcript, capture it in "third_party_name" below. If you cannot tell their name with confidence, leave it null — do not guess.
 - Use MAJORITY pattern per speaker across ALL their turns.
+- Attributing one person's statement, history, or quote to the other person is a serious documentation error, not a minor imprecision — when a third party is present, keep their material clearly separate from the patient's in every field below. If you are ever unsure which of two non-clinician speakers said something, say so explicitly rather than picking one.
 
 Patient context: Dx — ${(patient.diagnosis ?? []).join(', ')} | Modality: ${patient.therapy_modality ?? 'unspecified'}${speakerContext}
 
@@ -98,13 +100,14 @@ ${raw}
 
 Return ONLY valid JSON — be SPECIFIC to THIS session, not a template. Every field must reflect actual content:
 {
-  "speaker_roles": {"Speaker A": "clinician", "Speaker B": "patient"},
+  "speaker_roles": {"Speaker A": "clinician", "Speaker B": "patient", "Speaker C": "third_party (only if a distinct third voice exists, else omit this key entirely)"},
+  "third_party_name": "Their real name if clearly stated aloud in the transcript, else null. Never guess.",
   "role_confidence": "high|medium|low",
   "duration_estimate": "e.g. 45 min",
   "presenting_concerns": "Specific issues raised TODAY — name actual events/topics (e.g. 'conflict with mother on Sunday, sleep disruption, work deadline avoidance')",
   "emotional_tone": "calm|distressed|flat|anxious|tearful|mixed|guarded|hopeful",
   "key_themes": ["3-5 specific clinical themes — name real patterns, not generic words. E.g. 'catastrophising around job performance', 'anniversary grief re: father'"],
-  "significant_statements": ["2-4 near-verbatim patient quotes that reveal cognitions, self-image, or risk"],
+  "significant_statements": ["2-4 near-verbatim quotes that reveal cognitions, self-image, or risk. If a third party is present, prefix each quote with who said it, e.g. '[patient] ...' or '[third party] ...' — never attribute one person's quote to the other."],
   "clinician_interventions": ["specific techniques actually used — e.g. 'Socratic questioning re: cognitive distortion', 'behavioural activation plan for morning routine'"],
   "mood_indicators": "Observed affect, energy, engagement level, any flat affect or dissociation noted",
   "risk_signals": "List ANY SI/SH/HI or hopelessness statements verbatim. If none: 'No SI/SH/HI detected this session.'",
@@ -229,7 +232,8 @@ STRICT RULES:
 - HIGHLIGHTING (MANDATORY, no exceptions): every single point across soap_note, key_points, homework_assigned, and next_session_plan MUST wrap the one most clinically load-bearing word or short phrase in **double asterisks** — e.g. "Rumination re: **supervisor conflict** • Mood self-rated **4/10**". Before returning, check EACH point individually — if a point has zero ** markers, go back and add one. Exactly one per point, never more than one, never a generic connector word.
 - NEVER put a literal newline character inside any JSON string — it breaks parsing. Keep every value on ONE line; separate points with ' • '.
 - SOAP / homework / next_session_plan: multiple short points joined by ' • ' on a single line.
-- Use ${initials} always, never full name.
+- Use ${initials} always, never full name. This applies even if the patient's first name, nickname, or a mis-transcribed variant of it (e.g. a speech-recognition error) appears anywhere in the session brief or was spoken aloud in the room — never copy it into the note. Only ${initials}, in every field, with no exceptions.
+- THIRD PARTY IN THE ROOM: if the brief indicates a spouse/parent/family member was present and speaking (not just the clinician and ${initials}), refer to them by their real first name if the brief's "third_party_name" is non-null, or as "the other person present" if it is null. NEVER attribute their statements, history, or quotes to ${initials}, and never attribute ${initials}'s own statements to them. This mix-up is a serious clinical error, not a stylistic one — if the brief itself is ambiguous about who said something, write it as ambiguous rather than guessing a side.
 - risk_flags.level = high/critical if ANY SI, self-harm urges, harm to others, or psychotic symptoms present.
 - prescription_notes: you are NOT a prescriber — only flag medication themes for psychiatrist review.
 - resource_suggestions.exercises: ONLY include when clinically indicated by session content. If patient is stable/improving and no specific exercise is needed, OMIT the array entirely. Do not invent tasks to fill space.
@@ -466,22 +470,27 @@ export async function generateLiveNotesUpdate(params: {
     max_tokens: 700,
     messages: [{
       role: 'user',
-      content: `Therapy session in progress (single laptop mic, both in same room). Patient diagnosis: ${diagnosis}. Modality: ${modality}.
+      content: `Therapy session in progress (single laptop mic, everyone in same room). Registered patient diagnosis: ${diagnosis}. Modality: ${modality}.
 
-The speaker with MORE questions and clinical language = clinician. The speaker sharing personal experiences = patient. Use this to read the dialogue correctly.
+WHO'S TALKING: the speaker asking structured/reflective questions and introducing technique = clinician. The registered patient (matching the profile above) shares their own experience in first person. A THIRD voice may also be present — a spouse, parent, or family member sitting in on this session, also speaking in first person about their OWN experience. If a third voice exists, do not fold their words into the patient's — keep them distinct. Refer to them by their real name if it's been clearly said aloud in the dialogue; otherwise call them "the other person present" or "her partner"/"his father" etc. if that relationship is clear from context. NEVER write a raw diarization label like "Speaker C" in any output field — that's an internal identifier, not something a clinician reading the note should see. Attributing one person's statement to the other is a serious error, not a stylistic slip — if you're unsure which of two non-clinician speakers said something, describe it in a way that doesn't commit to either, rather than guessing.
 
 Recent dialogue:
 ${recent}
 
 Return ONLY valid JSON — no markdown:
 {
-  "key_points": ["0-4 specific real-time observations about the PATIENT's state — ONLY include one if grounded in something actually said/observed in the dialogue above. Name what was just said, e.g. 'Patient shifted to past tense when describing relationship — possible dissociation'. If the dialogue so far doesn't clearly support a real observation, return an empty array rather than guessing."],
+  "key_points": ["0-4 specific real-time observations, correctly attributed to whoever actually said/showed it — ONLY include one if grounded in something actually said/observed above. Name what was just said, e.g. 'Patient shifted to past tense when describing relationship — possible dissociation'. If the dialogue so far doesn't clearly support a real observation, return an empty array rather than guessing."],
   "risk_level": "low|moderate|high|critical",
-  "suggested_questions": ["0-3 follow-up questions the clinician should ask NEXT — ONLY if grounded in the last few exchanges. E.g. 'You mentioned feeling 'stuck' — can you say more about what that feels like in your body right now?'. If nothing specific to follow up on yet, return an empty array — never a generic question."],
-  "treatment_suggestions": ["0-2 in-session technique suggestions — ONLY if something concrete is emerging that clearly calls for one, e.g. 'Consider grounding exercise — patient's affect escalating'. Empty array if not confident."],
-  "mindfulness_suggestions": ["0-2 concrete exercises suited to patient's CURRENT emotional state — be specific, e.g. '4-7-8 breathing for the anxiety spike' not just 'breathing exercise'. Empty array if nothing specific fits yet."]
+  "suggested_questions": ["0-3 follow-up questions the clinician could ask NEXT, in the style of a specific, gentle, resolution-oriented clinician — not a textbook-101 reflex. Ground every one in an exact quote or detail from the dialogue above; never a question that would work in any session ('how does that make you feel', 'can you tell me more about that'). Use whichever of these actually fits what just happened — don't force all of them in:
+    (a) If someone stated a fact or behaviour about themselves (e.g. 'I don't cry'), ask about the belief or meaning underneath it using a concrete contrast that makes it easy to answer — e.g. 'does staying dry feel like relief, or like you're not allowed to' — not an open 'why'.
+    (b) If something disclosed earlier in this session plausibly explains what's happening now (a parent's own history, a stated household rule, an old pattern), connect the current moment back to it directly as a hypothesis to confirm or correct — don't ask as if starting from zero.
+    (c) If someone minimises or downplays something that clearly mattered ('sounds silly', 'it's nothing', a dismissive laugh) — that's a signal the topic isn't closed, not a cue to move on. Suggest asking them to say more right now.
+    (d) If two people reach agreement on something consequential unusually fast or easily, that ease can itself be worth naming (relief, avoidance, withdrawal) rather than taken at face value — ask what each person is actually seeking or moving away from.
+    Always forward/resolution-oriented — never a question that digs for regret or blame ('why didn't you', 'don't you wish you had'). If nothing in the last few exchanges clearly supports one of these, return an empty array — never a generic question just to fill the slot."],
+  "treatment_suggestions": ["0-2 in-session technique suggestions — ONLY if something concrete is emerging that clearly calls for one, naming the exact technique and why, e.g. 'Consider grounding exercise — affect escalating for [name/patient]'. Empty array if not confident."],
+  "mindfulness_suggestions": ["0-2 concrete exercises suited to whoever's CURRENT emotional state actually calls for one — be specific, e.g. '4-7-8 breathing for the anxiety spike' not just 'breathing exercise'. Empty array if nothing specific fits yet."]
 }
-Never pad any array to "have something to show" — an empty array is the correct answer when you're not confident.`,
+Never pad any array to "have something to show" — an empty array is the correct answer when you're not confident. Gentle tone throughout, never clinical-interrogation-style.`,
     }],
   });
 

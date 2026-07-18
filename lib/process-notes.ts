@@ -101,12 +101,15 @@ export async function runNoteGeneration(
       soap_note: notes.soap_note,
       key_points: notes.key_points,
       session_summary: notes.session_summary,
+      session_growth: notes.session_growth ?? null,
       ai_suggestions: notes.ai_suggestions,
+      prescription_notes: notes.prescription_notes ?? null,
       homework_assigned: notes.homework_assigned,
       next_session_plan: notes.next_session_plan,
       risk_level: riskLevel,
       risk_flags: notes.risk_flags,
       resource_suggestions: notes.resource_suggestions,
+      session_tags: notes.session_tags ?? [],
       notes_generated_at: new Date().toISOString(),
     }).eq('id', sessionId);
 

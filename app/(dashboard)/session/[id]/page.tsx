@@ -196,6 +196,20 @@ function patientKeyterms(patient: Patient | null): string[] {
   return [...diagnosisTerms, ...medTerms];
 }
 
+// Appends only genuinely new items onto a running list — each live-update
+// cycle only sees a recent window of the transcript, so without this an
+// insight from earlier in the session would simply disappear once it aged
+// out of that window instead of staying visible for the rest of the session.
+function mergeUniqueNotes(existing: string[], incoming: string[]): string[] {
+  const seen = new Set(existing.map(s => s.trim().toLowerCase()));
+  const merged = [...existing];
+  for (const item of incoming) {
+    const key = item.trim().toLowerCase();
+    if (key && !seen.has(key)) { seen.add(key); merged.push(item); }
+  }
+  return merged;
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 const LIVE_UPDATE_MS = 2 * 60 * 1000; // 2 minutes
 
@@ -427,12 +441,20 @@ export default function LiveSessionPage() {
       if (res.ok) {
         const d = await res.json();
         if (d.notes) {
-          setLiveNotes(d.notes);
-          setSuggestions({
-            questions:    d.notes.suggested_questions || [],
-            treatment:    d.notes.treatment_suggestions || [],
-            mindfulness:  d.notes.mindfulness_suggestions || [],
-          });
+          // Each 2-min cycle only sees the last ~20 segments, so an insight
+          // from ten minutes ago naturally drops out of that window. Merge
+          // into the running list instead of replacing it, so a real
+          // observation doesn't just vanish from the doctor's screen once
+          // the conversation moves on — only new/duplicate-free items are added.
+          setLiveNotes(prev => ({
+            ...d.notes,
+            key_points: mergeUniqueNotes((prev?.key_points as string[] | undefined) || [], d.notes.key_points || []),
+          }));
+          setSuggestions(prev => ({
+            questions:    mergeUniqueNotes(prev?.questions   || [], d.notes.suggested_questions   || []),
+            treatment:    mergeUniqueNotes(prev?.treatment   || [], d.notes.treatment_suggestions  || []),
+            mindfulness:  mergeUniqueNotes(prev?.mindfulness || [], d.notes.mindfulness_suggestions || []),
+          }));
           setLastUpdated(new Date());
         }
       }

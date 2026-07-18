@@ -155,6 +155,7 @@ export interface RiskFlags {
   indicators: string[];
   action_required: boolean;
   recommended_action: string | null;
+  safety_plan_needed?: boolean;
 }
 
 export interface ResourceSuggestions {

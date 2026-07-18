@@ -16,6 +16,21 @@ interface SOAPNote {
   plan?: string;
 }
 
+interface RiskFlags {
+  level: 'low' | 'moderate' | 'high' | 'critical';
+  indicators: string[];
+  action_required: boolean;
+  recommended_action: string | null;
+  safety_plan_needed?: boolean;
+}
+
+interface SessionGrowth {
+  compared_to_last: 'improved' | 'stable' | 'declined' | 'first_session';
+  areas_of_progress: string[];
+  areas_of_concern: string[];
+  narrative: string;
+}
+
 interface SessionDetail {
   id: string;
   session_number: number;
@@ -25,10 +40,14 @@ interface SessionDetail {
   soap_note: SOAPNote | null;
   key_points: string[] | null;
   session_summary: string | null;
+  session_growth: SessionGrowth | null;
   ai_suggestions: string[] | null;
   homework_assigned: string | null;
   next_session_plan: string | null;
   manual_notes: string | null;
+  risk_level: 'low' | 'moderate' | 'high' | 'critical' | null;
+  risk_flags: RiskFlags | null;
+  session_tags: string[] | null;
   resource_suggestions: {
     books?: { title: string; author: string; reason: string }[];
     movies?: { title: string; year: number; reason: string }[];
@@ -37,6 +56,19 @@ interface SessionDetail {
   } | null;
   patient: { id: string; display_name: string; diagnosis: string[]; date_of_birth: string | null; phone: string | null; whatsapp_number: string | null; email: string | null } | null;
 }
+
+const RISK_STYLES: Record<string, { bg: string; border: string; text: string; label: string }> = {
+  moderate: { bg: 'bg-amber-500/10', border: 'border-amber-500/40', text: 'text-amber-400', label: 'Moderate Risk' },
+  high: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-400', label: 'High Risk' },
+  critical: { bg: 'bg-red-600/15', border: 'border-red-500/60', text: 'text-red-400', label: 'Critical Risk' },
+};
+
+const TREND_STYLES: Record<string, { text: string; label: string }> = {
+  improved: { text: 'text-emerald-400', label: '↑ Improved since last session' },
+  stable: { text: 'text-gray-400', label: '→ Stable since last session' },
+  declined: { text: 'text-amber-400', label: '↓ Declined since last session' },
+  first_session: { text: 'text-gray-400', label: 'First session' },
+};
 
 // The AI wraps the single most clinically load-bearing word/phrase per bullet
 // in **term** — this renders those as bold instead of showing literal
@@ -318,6 +350,88 @@ export default function NoteDetailPage() {
       </div>
 
       <div className="max-w-4xl mx-auto p-6 space-y-6">
+
+        {/* Risk banner — deliberately the first thing on the page. A new
+            clinician scanning this note in seconds must not be able to miss
+            an active risk flag by only reading the SOAP tabs below. */}
+        {session.risk_flags && session.risk_flags.level !== 'low' && (() => {
+          const rf = session.risk_flags;
+          const style = RISK_STYLES[rf.level] ?? RISK_STYLES.moderate;
+          return (
+            <div className={`${style.bg} border ${style.border} rounded-xl p-5`}>
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className={`w-5 h-5 ${style.text}`} />
+                <h2 className={`text-sm font-bold uppercase tracking-wide ${style.text}`}>{style.label}</h2>
+                {rf.safety_plan_needed && (
+                  <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full bg-white/10 text-gray-300">
+                    Safety plan needed
+                  </span>
+                )}
+              </div>
+              {rf.indicators?.length > 0 && (
+                <ul className="space-y-1.5 mb-3">
+                  {rf.indicators.map((ind, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-200">
+                      <span className={`w-1.5 h-1.5 rounded-full ${style.text.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
+                      <Highlighted text={ind} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {rf.recommended_action && (
+                <p className="text-sm text-gray-300"><span className="font-semibold text-gray-200">Recommended action: </span>{rf.recommended_action}</p>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* At a glance — session summary + trajectory. Lets a clinician who
+            has never seen this patient before (covering, or picking up a
+            case) understand what happened without reading all four SOAP
+            sections first. */}
+        {(session.session_summary || session.session_growth) && (
+          <div className="bg-[#1a2332] border border-white/8 rounded-xl p-5">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold text-gray-300">At a Glance</h2>
+              {session.session_growth && (
+                <span className={`text-xs font-medium ${TREND_STYLES[session.session_growth.compared_to_last]?.text ?? 'text-gray-400'}`}>
+                  {TREND_STYLES[session.session_growth.compared_to_last]?.label ?? session.session_growth.compared_to_last}
+                </span>
+              )}
+            </div>
+            {session.session_summary && (
+              <p className="text-base text-gray-200 leading-relaxed">{session.session_summary}</p>
+            )}
+            {session.session_growth && (session.session_growth.areas_of_progress?.length > 0 || session.session_growth.areas_of_concern?.length > 0) && (
+              <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                {session.session_growth.areas_of_progress?.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-emerald-400/80 uppercase tracking-widest mb-1.5">Progress</h3>
+                    <ul className="space-y-1">
+                      {session.session_growth.areas_of_progress.map((p, i) => (
+                        <li key={i} className="text-sm text-gray-300 flex items-start gap-1.5">
+                          <span className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" /><Highlighted text={p} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {session.session_growth.areas_of_concern?.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold text-amber-400/80 uppercase tracking-widest mb-1.5">Concerns</h3>
+                    <ul className="space-y-1">
+                      {session.session_growth.areas_of_concern.map((c, i) => (
+                        <li key={i} className="text-sm text-gray-300 flex items-start gap-1.5">
+                          <span className="w-1 h-1 rounded-full bg-amber-400 mt-1.5 shrink-0" /><Highlighted text={c} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Key points */}
         {session.key_points?.length ? (
