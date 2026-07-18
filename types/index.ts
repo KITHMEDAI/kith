@@ -166,7 +166,7 @@ export interface ResourceSuggestions {
 }
 
 export interface SessionGrowth {
-  compared_to_last: 'improved' | 'stable' | 'declined' | 'first session';
+  compared_to_last: 'improved' | 'stable' | 'declined' | 'first_session';
   areas_of_progress: string[];
   areas_of_concern: string[];
   narrative: string;

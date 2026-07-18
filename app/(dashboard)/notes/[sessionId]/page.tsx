@@ -57,10 +57,15 @@ interface SessionDetail {
   patient: { id: string; display_name: string; diagnosis: string[]; date_of_birth: string | null; phone: string | null; whatsapp_number: string | null; email: string | null } | null;
 }
 
-const RISK_STYLES: Record<string, { bg: string; border: string; text: string; label: string }> = {
-  moderate: { bg: 'bg-amber-500/10', border: 'border-amber-500/40', text: 'text-amber-400', label: 'Moderate Risk' },
-  high: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-400', label: 'High Risk' },
-  critical: { bg: 'bg-red-600/15', border: 'border-red-500/60', text: 'text-red-400', label: 'Critical Risk' },
+// `dot` is a separate literal class rather than derived from `text` via
+// string replacement — Tailwind's JIT scanner needs a static class name to
+// find in source, so a runtime `.replace('text-', 'bg-')` produces a class
+// that never appears literally anywhere and can get purged from the built
+// CSS, leaving the indicator dot with no background color at all.
+const RISK_STYLES: Record<string, { bg: string; border: string; text: string; dot: string; label: string }> = {
+  moderate: { bg: 'bg-amber-500/10', border: 'border-amber-500/40', text: 'text-amber-400', dot: 'bg-amber-400', label: 'Moderate Risk' },
+  high: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-400', dot: 'bg-red-400', label: 'High Risk' },
+  critical: { bg: 'bg-red-600/15', border: 'border-red-500/60', text: 'text-red-400', dot: 'bg-red-400', label: 'Critical Risk' },
 };
 
 const TREND_STYLES: Record<string, { text: string; label: string }> = {
@@ -372,7 +377,7 @@ export default function NoteDetailPage() {
                 <ul className="space-y-1.5 mb-3">
                   {rf.indicators.map((ind, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-gray-200">
-                      <span className={`w-1.5 h-1.5 rounded-full ${style.text.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${style.dot} mt-1.5 shrink-0`} />
                       <Highlighted text={ind} />
                     </li>
                   ))}

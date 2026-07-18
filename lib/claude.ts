@@ -109,7 +109,7 @@ Return ONLY valid JSON — be SPECIFIC to THIS session, not a template. Every fi
   "key_themes": ["3-5 specific clinical themes — name real patterns, not generic words. E.g. 'catastrophising around job performance', 'anniversary grief re: father'"],
   "significant_statements": ["2-4 near-verbatim quotes that reveal cognitions, self-image, or risk. If a third party is present, prefix each quote with who said it, e.g. '[patient] ...' or '[third party] ...' — never attribute one person's quote to the other."],
   "clinician_interventions": ["specific techniques actually used — e.g. 'Socratic questioning re: cognitive distortion', 'behavioural activation plan for morning routine'"],
-  "mood_indicators": "Observed affect, energy, engagement level, any flat affect or dissociation noted",
+  "mood_indicators": "Engagement/energy/disclosure pattern as EVIDENCED BY THE TEXT ONLY (this is a transcript, not audio/video) — e.g. reluctant vs. spontaneous disclosure, response length, hesitation, topic avoidance, or affect the speaker explicitly named themselves. Do not assert facial affect, eye contact, posture, or psychomotor state as if observed — that requires visual/audio signal this transcript doesn't carry.",
   "risk_signals": "List ANY SI/SH/HI or hopelessness statements verbatim. If none: 'No SI/SH/HI detected this session.'",
   "homework_discussed": "Exact task assigned + review of previous homework, or 'None assigned'",
   "session_arc": "How state shifted start-to-end — e.g. 'Opened guarded; tearful mid-session on father topic; closed with relief after behavioural plan'"
@@ -179,7 +179,7 @@ Return ONLY valid JSON:
 {
   "soap_note": {
     "subjective": "2-4 short points separated by ' • ' on ONE line. Patient-reported issues/events/emotions. e.g. 'Rumination re: supervisor conflict • Mood self-rated 4/10 • 3 nights fragmented sleep'",
-    "objective": "2-4 short points separated by ' • '. Observed affect, engagement, shifts. e.g. 'Flat affect; tearful re: father • Speech organised, goal-directed'",
+    "objective": "2-4 short points separated by ' • '. This note is generated from a TEXT TRANSCRIPT ONLY — there is no video or audio observation. Base every point on what the transcript can actually evidence: engagement pattern (spontaneous vs. reluctant disclosure), coherence/organisation of what was said, response length or hesitation, topic avoidance, shifts over the session, or affect the patient explicitly self-described. NEVER assert facial affect, eye contact, posture, or psychomotor activity as directly observed (e.g. 'flat affect', 'no dissociation observed', 'appropriate eye contact') — a transcript cannot show these, and claiming to have seen them misrepresents what this system actually knows to whoever reads the chart. If nothing in the transcript evidences a genuine behavioural observation, write fewer points rather than filling the field with a boilerplate checklist line. e.g. 'Disclosed affair details only after direct questioning — reluctant, not spontaneous • Speech organised, no tangential shifts'",
     "assessment": "2-4 short points separated by ' • '. Formulation tied to dx + goals. e.g. 'Consistent with GAD: catastrophic appraisal of work stress • Limited progress on cognitive restructuring'",
     "plan": "2-4 short points separated by ' • '. Concrete next steps, techniques, referrals, frequency."
   },
@@ -248,26 +248,138 @@ STRICT RULES:
   // all, so a single bad generation (more likely here than in Layer 1 given
   // how much larger and more nested this output schema is) failed the whole
   // session outright with no second chance.
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  //
+  // A second failure mode showed up under adversarial testing across 10
+  // diverse sessions: the "exactly one **highlight** per bullet" rule is
+  // frequently violated (bullets with zero ** markers) even though the
+  // prompt already demands a self-check — the instruction alone isn't
+  // reliable enough. Since the UI renders **term** as bold and falls back to
+  // plain text otherwise, an unhighlighted bullet doesn't error, it just
+  // quietly looks unfinished. So this loop now retries on either invalid
+  // JSON OR highlighting non-compliance, telling the model exactly which
+  // fields failed on the retry attempt. If it's still non-compliant after
+  // every attempt, a deterministic fallback bolds a real word in the bullet
+  // rather than shipping a note with a silently broken visual contract.
+  let lastText = '';
+  // Carries the previous attempt's outcome forward so the retry message never
+  // has to re-parse `lastText` itself — re-parsing a response that already
+  // failed to parse cleanly (or was empty/non-JSON) was throwing uncaught
+  // (TypeError on a null regex match, or SyntaxError from a bare JSON.parse
+  // that skipped parseNotesJson's control-char repair), which crashed the
+  // whole note-generation call on exactly the failure modes this retry loop
+  // exists to recover from. Found via adversarial testing + independent
+  // confirmation across 5 code-review passes.
+  let lastViolations: string[] | null = null;
+  const maxAttempts = 3;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const feedback = lastViolations
+      ? `Some bullets in that response are missing their required **highlight** — every single point across soap_note, key_points, homework_assigned, and next_session_plan must have EXACTLY one **term** wrapped. Violations found:\n${lastViolations.join('\n')}\n\nReturn the CORRECTED full JSON object (same structure, same content, just add the missing ** markers), nothing else.`
+      : 'Your last response was not a single valid JSON object matching the schema. Return ONLY the valid JSON object, no markdown fences, no commentary before or after it.';
+
     const res = await client.messages.create({
       model: SONNET,
       max_tokens: 4096,   // headroom so long sessions don't truncate mid-JSON
-      messages: [{ role: 'user', content: prompt }],
+      messages: attempt === 1
+        ? [{ role: 'user', content: prompt }]
+        : [
+            { role: 'user', content: prompt },
+            { role: 'assistant', content: lastText },
+            { role: 'user', content: feedback },
+          ],
     });
 
     const text  = res.content[0]?.type === 'text' ? res.content[0].text : '';
+    lastText = text;
     const match = text.match(/\{[\s\S]*\}/);
     if (match) {
       try {
-        return parseNotesJson(match[0]);
+        const parsed = parseNotesJson(match[0]);
+        const { ok, violations } = validateHighlighting(parsed);
+        if (ok) return parsed;
+        if (attempt === maxAttempts) return repairHighlighting(parsed);
+        lastViolations = violations;
+        continue; // retry with corrective feedback
       } catch { /* fall through to retry */ }
     }
-    if (attempt === 2) {
-      throw new Error('Sonnet did not return valid JSON after retry');
+    lastViolations = null; // no valid JSON to derive violations from — generic retry prompt next
+    if (attempt === maxAttempts) {
+      throw new Error('Sonnet did not return valid JSON after retries');
     }
   }
   // Unreachable, but keeps TypeScript happy about the return type.
   throw new Error('Sonnet synthesis failed');
+}
+
+// Splits a "point1 • point2 • point3" field into individual bullets, same
+// convention the UI (ClinicalText) uses to render them.
+function splitPoints(text: string): string[] {
+  return text.split(/\s*•\s*|\n/).map(s => s.trim()).filter(Boolean);
+}
+
+function countHighlights(text: string): number {
+  return (text.match(/\*\*/g) || []).length / 2;
+}
+
+function validateHighlighting(notes: SessionNotes): { ok: boolean; violations: string[] } {
+  const violations: string[] = [];
+  const checkField = (label: string, text?: string) => {
+    if (!text) return;
+    for (const point of splitPoints(text)) {
+      if (countHighlights(point) !== 1) violations.push(`${label}: "${point}"`);
+    }
+  };
+  checkField('subjective', notes.soap_note?.subjective);
+  checkField('objective', notes.soap_note?.objective);
+  checkField('assessment', notes.soap_note?.assessment);
+  checkField('plan', notes.soap_note?.plan);
+  (notes.key_points || []).forEach(p => { if (countHighlights(p) !== 1) violations.push(`key_points: "${p}"`); });
+  checkField('homework_assigned', notes.homework_assigned);
+  checkField('next_session_plan', notes.next_session_plan);
+  return { ok: violations.length === 0, violations };
+}
+
+// Last-resort deterministic repair if the model still hasn't fixed every
+// bullet after all retries — bolds the longest non-trivial word so the note
+// never ships with a bullet that has zero visual emphasis. Not as good as
+// the model choosing the clinically load-bearing phrase, but strictly
+// better than silently rendering as an unformatted, unfinished-looking line.
+const STOPWORDS = new Set(['the','and','with','from','this','that','their','have','been','were','into','onto','than','then','also','some','more','less','both','only','once','over','still','when','what','while','after','before','about','which','without','during']);
+function autoBold(point: string): string {
+  if (countHighlights(point) === 1) return point;
+  const stripped = point.replace(/\*\*/g, '');
+  const words = stripped.match(/[A-Za-z][A-Za-z'-]{3,}/g) || [];
+  let target: string | undefined = words
+    .filter(w => !STOPWORDS.has(w.toLowerCase()))
+    .sort((a, b) => b.length - a.length)[0];
+  // Short bullets (e.g. "Mood 4/10, no SH") can have zero words ≥4 chars or
+  // have every word filtered as a stopword — falling through with nothing
+  // bolded would silently break the one guarantee this function exists to
+  // provide. Relax to any non-stopword alphanumeric token, then finally to
+  // literally the first token, so a bullet is never returned unhighlighted.
+  if (!target) {
+    const anyToken = stripped.match(/[A-Za-z0-9][A-Za-z0-9'/-]*/g) || [];
+    target = anyToken.filter(w => !STOPWORDS.has(w.toLowerCase()))[0] || anyToken[0];
+  }
+  if (!target) return stripped;
+  return stripped.replace(target, `**${target}**`);
+}
+function repairField(text?: string): string | undefined {
+  if (!text) return text;
+  return splitPoints(text).map(autoBold).join(' • ');
+}
+function repairHighlighting(notes: SessionNotes): SessionNotes {
+  return {
+    ...notes,
+    soap_note: {
+      subjective: repairField(notes.soap_note?.subjective),
+      objective: repairField(notes.soap_note?.objective),
+      assessment: repairField(notes.soap_note?.assessment),
+      plan: repairField(notes.soap_note?.plan),
+    },
+    key_points: (notes.key_points || []).map(autoBold),
+    homework_assigned: repairField(notes.homework_assigned) ?? notes.homework_assigned,
+    next_session_plan: repairField(notes.next_session_plan) ?? notes.next_session_plan,
+  };
 }
 
 // Robust JSON parse for model output: the common failure is a raw newline/tab

@@ -200,6 +200,14 @@ function patientKeyterms(patient: Patient | null): string[] {
 // cycle only sees a recent window of the transcript, so without this an
 // insight from earlier in the session would simply disappear once it aged
 // out of that window instead of staying visible for the rest of the session.
+// Caps how many accumulated items the live panel keeps. Without a cap, a long
+// session polling every 2 minutes merges in new items forever with nothing
+// ever removed — a 90-minute session could leave 40+ entries on screen,
+// including questions asked and resolved an hour ago. Keeping the most
+// recent MAX_MERGED items (oldest dropped first) keeps the panel usable
+// without losing the "don't silently discard a fresh insight" fix this
+// helper exists for.
+const MAX_MERGED_NOTES = 10;
 function mergeUniqueNotes(existing: string[], incoming: string[]): string[] {
   const seen = new Set(existing.map(s => s.trim().toLowerCase()));
   const merged = [...existing];
@@ -207,7 +215,7 @@ function mergeUniqueNotes(existing: string[], incoming: string[]): string[] {
     const key = item.trim().toLowerCase();
     if (key && !seen.has(key)) { seen.add(key); merged.push(item); }
   }
-  return merged;
+  return merged.length > MAX_MERGED_NOTES ? merged.slice(-MAX_MERGED_NOTES) : merged;
 }
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -228,6 +236,7 @@ export default function LiveSessionPage() {
   const transcriptEndRef = useRef<HTMLDivElement>(null);
   const liveTimerRef     = useRef<ReturnType<typeof setInterval> | null>(null);
   const segmentsRef      = useRef(segments);
+  const liveUpdateSeqRef = useRef(0);
 
   const [appointment, setAppointment]     = useState<Appointment | null>(null);
   const [patient, setPatient]             = useState<Patient | null>(null);
@@ -425,6 +434,14 @@ export default function LiveSessionPage() {
 
   const fetchLiveUpdate = useCallback(async () => {
     if (!patient || segmentsRef.current.length < 3) return;
+    // Nothing stops the 2-minute interval from firing again before a slow
+    // request resolves. Without this guard, an older request that happens to
+    // resolve AFTER a newer one would overwrite risk_level/soap_note with
+    // stale data — key_points/suggestions are merge-safe, but the rest of
+    // `d.notes` is applied wholesale, so a later-resolving-but-older response
+    // could silently regress e.g. risk_level from "critical" back to "low".
+    liveUpdateSeqRef.current += 1;
+    const mySeq = liveUpdateSeqRef.current;
     setIsUpdating(true);
     try {
       const res = await fetch('/api/generate-notes', {
@@ -440,7 +457,7 @@ export default function LiveSessionPage() {
       });
       if (res.ok) {
         const d = await res.json();
-        if (d.notes) {
+        if (d.notes && mySeq === liveUpdateSeqRef.current) {
           // Each 2-min cycle only sees the last ~20 segments, so an insight
           // from ten minutes ago naturally drops out of that window. Merge
           // into the running list instead of replacing it, so a real
