@@ -11,6 +11,19 @@ const twilioClient = process.env.TWILIO_ACCOUNT_SID
 // or your approved WhatsApp Business number in production.
 const WHATSAPP_FROM = process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886';
 
+// `message` is therapist-authored (or the caller's default text) and gets
+// interpolated straight into the email HTML — escape it first so a message
+// containing "<script>" or a stray tag can't inject markup into what the
+// patient's mail client renders.
+function escapeHtml(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export interface NotifyParams {
   to: { email?: string; phone?: string; whatsapp?: string };
   subject: string;
@@ -42,7 +55,7 @@ export async function sendNotification({ to, subject, message, channels, icsAtta
               <img src="https://kith.space/kith-logo-email.png" width="22" height="22" alt="Kith" style="display:block" />
               <span style="font-size:14px;font-weight:700;letter-spacing:0.02em;color:#7c3aed">KITH</span>
             </div>
-            <p style="margin:0;font-size:14px;line-height:1.65;color:#1e1b3a">${message.replace(/\n/g, '<br/>')}</p>
+            <p style="margin:0;font-size:14px;line-height:1.65;color:#1e1b3a">${escapeHtml(message).replace(/\n/g, '<br/>')}</p>
             <p style="margin:24px 0 0;padding-top:14px;border-top:1px solid #ece6ff;font-size:11px;color:#9992ad">Sent via Kith on behalf of your therapist.</p>
           </div>
         `,
