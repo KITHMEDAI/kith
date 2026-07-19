@@ -29,6 +29,15 @@ export async function POST(req: NextRequest) {
     if (!email || !password || !display_name) {
       return NextResponse.json({ error: 'Email, password and name are required' }, { status: 400 });
     }
+    // These were only enforced client-side (register/page.tsx) — a direct
+    // call to this API could create an account with a 1-character password
+    // or a malformed email, bypassing the UI entirely.
+    if (typeof password !== 'string' || password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    }
+    if (typeof email !== 'string' || !/\S+@\S+\.\S+/.test(email)) {
+      return NextResponse.json({ error: 'Enter a valid email' }, { status: 400 });
+    }
     if (!phone) {
       return NextResponse.json({ error: 'Business phone is required' }, { status: 400 });
     }
