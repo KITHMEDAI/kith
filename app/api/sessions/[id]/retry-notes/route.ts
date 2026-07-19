@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const service = createServiceRoleClient();
   const { data: session } = await service
     .from('sessions')
-    .select('id, therapist_id, status, transcript_raw')
+    .select('id, therapist_id, status, transcript_raw, updated_at')
     .eq('id', params.id)
     .single();
 
@@ -36,6 +36,27 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
   if (!session.transcript_raw || (Array.isArray(session.transcript_raw) && session.transcript_raw.length === 0)) {
     return NextResponse.json({ error: 'No transcript saved for this session — cannot regenerate.' }, { status: 422 });
+  }
+
+  // The client's "stuck" retry button appears after only 180s/360s
+  // (components/patients/ProcessingBanner.tsx), but generation now retries up
+  // to 3 times on validation failure (lib/claude.ts), each resending the full
+  // prior response as conversation context — legitimately can take longer
+  // than that. `updated_at` is only touched when status changes (set to
+  // 'processing' at start, 'completed'/'failed' at the end) — it stays frozen
+  // for the entire duration of a real, still-running generation. If it was
+  // set very recently, a second concurrent Claude run is almost certainly
+  // about to double up on the one already in flight — refuse instead of
+  // silently kicking off a second pipeline (wasted cost, last-writer-wins).
+  const RECENTLY_STARTED_MS = 5 * 60 * 1000; // generation worst-case ~4-5 min with retries
+  if (session.status === 'processing' && session.updated_at) {
+    const sinceUpdate = Date.now() - new Date(session.updated_at as string).getTime();
+    if (sinceUpdate < RECENTLY_STARTED_MS) {
+      return NextResponse.json(
+        { error: 'Note generation is still in progress — please wait a bit longer before retrying.' },
+        { status: 409 },
+      );
+    }
   }
 
   // Reset to processing so the (idempotent) processor will run — it guards on this state.

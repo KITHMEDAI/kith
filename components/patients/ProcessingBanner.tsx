@@ -119,7 +119,12 @@ export function ProcessingBanner({ patientId, initialStatus, sessionId, isOnline
   // reaching its own catch handler, the session can stay 'processing' in the
   // DB forever — polling alone never recovers that. Past a generous threshold,
   // offer a manual retry even though status hasn't flipped to 'failed' yet.
-  const stuckThresholdSec = isOnline ? 360 : 180;
+  // Note generation now retries up to 3x on validation failure (lib/claude.ts),
+  // each resending the full prior response — legitimately slower than before.
+  // Bumped so the manual retry button doesn't appear while a real run is
+  // still likely in progress (the server also refuses a too-early retry
+  // regardless — see app/api/sessions/[id]/retry-notes/route.ts).
+  const stuckThresholdSec = isOnline ? 420 : 300;
   const stuck = elapsedSec >= stuckThresholdSec;
 
   return (
