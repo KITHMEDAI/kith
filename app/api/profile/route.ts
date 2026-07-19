@@ -68,6 +68,21 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
+  // onboarding_completed=true skips the whole wizard straight to /dashboard
+  // (app/(dashboard)/onboarding/page.tsx redirects once it sees this flag) —
+  // nothing stopped a direct API call from setting it before the therapist
+  // ever filled in a name, same as the wizard's own "Name is required" gate
+  // but enforced server-side so it can't be bypassed.
+  if (updates.onboarding_completed === true) {
+    const effectiveName = 'display_name' in updates ? updates.display_name : undefined;
+    const nameToCheck = typeof effectiveName === 'string'
+      ? effectiveName
+      : (await supabase.from('therapists').select('display_name').eq('user_id', user.id).single()).data?.display_name;
+    if (!nameToCheck || !String(nameToCheck).trim()) {
+      return NextResponse.json({ error: 'Complete your profile name before finishing onboarding' }, { status: 422 });
+    }
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
   }
