@@ -105,13 +105,28 @@ export async function POST(req: NextRequest) {
     const windowStart = new Date(Math.min(...startMs) - 4 * 60 * 60 * 1000).toISOString();
     const windowEnd = new Date(Math.max(...startMs) + 4 * 60 * 60 * 1000).toISOString();
 
-    const { data: existing } = await supabase
+    // NOTE: '.not(col,'in',...)' needs PostgREST list syntax '(a,b,c)' — a
+    // JSON-array-shaped string here silently fails to parse. PostgREST then
+    // rejects the query, and since only `data` was ever destructured (not
+    // `error`), `existing` was always null and every booking "passed" the
+    // conflict check with zero exceptions — double-booking was never
+    // actually prevented. Also excludes no_show now: a missed appointment
+    // shouldn't permanently block its original slot from ever being rebooked.
+    const { data: existing, error: busyErr } = await supabase
       .from('appointments')
       .select('id, scheduled_at, duration_minutes, patient:patients(display_name)')
       .eq('therapist_id', therapist.id)
-      .not('status', 'in', '["cancelled","in_session","completed"]')
+      .not('status', 'in', '(cancelled,in_session,completed,no_show)')
       .gte('scheduled_at', windowStart)
       .lte('scheduled_at', windowEnd);
+
+    // Fail closed, not open: if the availability check itself is broken, we
+    // must not silently treat that as "nothing's busy" — that's exactly the
+    // bug above. Refuse the booking rather than risk a double-booking.
+    if (busyErr) {
+      console.error('[appointments] conflict-check query failed:', busyErr.message);
+      return NextResponse.json({ error: 'Could not verify availability — please try again.' }, { status: 500 });
+    }
 
     const busy = (existing || []) as BusyAppt[];
 
@@ -126,10 +141,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Single (non-recurring) booking that collides → hard 409 so the UI can warn.
-    if (!recurrence && toInsert.length === 0) {
+    // Every occurrence collided — single bookings already 409'd above this
+    // didn't exist for the recurring case, which fell through and silently
+    // returned 201 with created:0 (the UI showed a soft "booked 0 of N"
+    // toast as if it succeeded). Both cases now hard-fail identically.
+    if (toInsert.length === 0) {
       return NextResponse.json(
-        { error: 'time_conflict', conflict: skipped[0] },
+        { error: 'time_conflict', conflict: skipped[0], skipped },
         { status: 409 },
       );
     }
