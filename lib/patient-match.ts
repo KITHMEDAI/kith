@@ -50,6 +50,29 @@ function phoneDigits(p?: string | null): string {
   return (p || '').replace(/\D/g, '').slice(-10);
 }
 
+// Normalize a date-of-birth to YYYY-MM-DD for comparison across whatever
+// format it arrived in (spreadsheet imports vary: "12/04/1990", ISO, etc.).
+// Returns null for missing/unparseable input rather than throwing.
+//
+// Postgres `date` columns (existing.date_of_birth) always come back as
+// YYYY-MM-DD already, so that path is a direct passthrough. For non-ISO
+// input, `new Date(str)` parses in LOCAL time — reading it back out via
+// toISOString() (UTC) can shift the date by one day depending on the
+// server's timezone offset (e.g. IST midnight becomes the previous day in
+// UTC). Reading the LOCAL components back out instead keeps the round-trip
+// on the same calendar day it was parsed as.
+function normalizeDob(d?: string | null): string | null {
+  if (!d) return null;
+  const isoMatch = /^\d{4}-\d{2}-\d{2}/.exec(d);
+  if (isoMatch) return isoMatch[0];
+  const parsed = new Date(d);
+  if (Number.isNaN(parsed.getTime())) return null;
+  const y = parsed.getFullYear();
+  const m = String(parsed.getMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 // ── Schema-aware writes ───────────────────────────────────────────────────────
 // The AI maps a sheet's columns onto our patient fields, but the live `patients`
 // table may not have a column for every field. Rather than let one unknown column
@@ -80,14 +103,14 @@ function pickExistingColumns(
   return out;
 }
 
-interface ExistingPatient { id: string; diagnosis: string[] | null; icd_codes: string[] | null; therapy_goals: string[] | null }
+interface ExistingPatient { id: string; diagnosis: string[] | null; icd_codes: string[] | null; therapy_goals: string[] | null; date_of_birth?: string | null }
 
 async function findExisting(
   supabase: SupabaseClient,
   therapistId: string,
   fields: PatientFields,
 ): Promise<ExistingPatient | null> {
-  const SELECT = 'id, diagnosis, icd_codes, therapy_goals, phone';
+  const SELECT = 'id, diagnosis, icd_codes, therapy_goals, phone, date_of_birth';
   const base = supabase
     .from('patients')
     .select(SELECT)
@@ -111,15 +134,30 @@ async function findExisting(
     if (hit) return hit as unknown as ExistingPatient;
   }
 
-  // 3) exact name (case-insensitive)
+  // 3) exact name (case-insensitive) — a name match ALONE is not a reliable
+  // signal that this is the same person: shared/common names (or two family
+  // members sharing a surname search) happen. Without a corroborating date
+  // of birth, treating a name match as "found" silently merges two
+  // different people's records — their diagnoses and therapy goals get
+  // unioned together into one patient. Require DOB to also match before
+  // accepting a name-only match; otherwise fall through to creating a new
+  // patient (a possible duplicate a therapist can notice and merge manually
+  // is far safer than silently corrupted clinical data).
   if (fields.display_name) {
     const { data } = await supabase
       .from('patients')
       .select(SELECT)
       .eq('therapist_id', therapistId)
       .ilike('display_name', fields.display_name)
-      .limit(1);
-    if (data && data.length) return data[0] as unknown as ExistingPatient;
+      .limit(5);
+    const candidates = (data || []) as unknown as ExistingPatient[];
+    const incomingDob = normalizeDob(fields.date_of_birth);
+    if (incomingDob) {
+      const confirmed = candidates.find(c => normalizeDob(c.date_of_birth) === incomingDob);
+      if (confirmed) return confirmed;
+    }
+    // Name matched but DOB either wasn't provided or didn't corroborate it —
+    // don't guess. Falls through to create a new patient below.
   }
 
   return null;
