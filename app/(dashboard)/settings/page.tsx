@@ -268,7 +268,9 @@ export default function ProfilePage() {
       .then(r => r.json())
       .then(({ profile: p, stats: s }) => {
         if (p) {
-          setProfile(p);
+          // specializations is a nullable DB column — normalize so
+          // toggleSpec()'s .includes() call never hits a null.
+          setProfile({ ...p, specializations: p.specializations || [] });
           if (p.avatar_url) setAvatarPreview(p.avatar_url);
         }
         if (s) setStats(s);

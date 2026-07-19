@@ -58,6 +58,16 @@ export async function PATCH(req: NextRequest) {
     if (key in body) updates[key] = body[key];
   }
 
+  // specializations is a TEXT[] column with no NOT NULL constraint — an
+  // unvalidated PATCH could write null or a non-array value, which the
+  // client's toggleSpec() then crashes on (calls .includes() on it).
+  if ('specializations' in updates) {
+    const spec = updates.specializations;
+    if (!Array.isArray(spec) || !spec.every(s => typeof s === 'string')) {
+      return NextResponse.json({ error: 'specializations must be an array of strings' }, { status: 422 });
+    }
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
   }
