@@ -21,11 +21,22 @@ function deserializeTokens(stored: unknown): GoogleTokens {
   return stored as GoogleTokens;
 }
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
-);
+// A fresh client per call, not a shared module-level singleton — every
+// helper below calls setCredentials() right before an async Google API call,
+// and Node can interleave requests from two different therapists on the same
+// warm server instance. With one shared client, therapist A's in-flight
+// request could have its credentials overwritten by therapist B's
+// setCredentials() before A's own async call resolves, executing A's
+// request against Google using B's tokens — a real cross-tenant calendar
+// leak/write, not just a theoretical race. A fresh instance per call makes
+// that impossible since there's nothing shared left to interleave.
+function createOAuth2Client() {
+  return new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+  );
+}
 
 export function getAuthUrl(state: string, loginHint?: string): string {
   // Make consent auto-grant configurable: forcing `prompt: 'consent'` always shows
@@ -34,7 +45,7 @@ export function getAuthUrl(state: string, loginHint?: string): string {
   // for accounts that have already granted these scopes.
   const autoConsent = process.env.GOOGLE_AUTO_CONSENT === 'true';
 
-  return oauth2Client.generateAuthUrl({
+  return createOAuth2Client().generateAuthUrl({
     access_type: 'offline',
     scope: [
       'https://www.googleapis.com/auth/calendar.readonly',
@@ -51,7 +62,7 @@ export function getAuthUrl(state: string, loginHint?: string): string {
 }
 
 export async function exchangeCodeForTokens(code: string) {
-  const { tokens } = await oauth2Client.getToken(code);
+  const { tokens } = await createOAuth2Client().getToken(code);
   return tokens;
 }
 
@@ -106,8 +117,9 @@ export function getCalendarClient(tokens: {
   refresh_token: string;
   expiry_date: number;
 }) {
-  oauth2Client.setCredentials(tokens);
-  return google.calendar({ version: 'v3', auth: oauth2Client });
+  const client = createOAuth2Client();
+  client.setCredentials(tokens);
+  return google.calendar({ version: 'v3', auth: client });
 }
 
 export async function refreshTokenIfNeeded(tokens: {
@@ -118,8 +130,9 @@ export async function refreshTokenIfNeeded(tokens: {
   // Refresh if token expires within the next minute
   if (tokens.expiry_date > Date.now() + 60_000) return tokens;
 
-  oauth2Client.setCredentials(tokens);
-  const { credentials } = await oauth2Client.refreshAccessToken();
+  const client = createOAuth2Client();
+  client.setCredentials(tokens);
+  const { credentials } = await client.refreshAccessToken();
   return {
     access_token: credentials.access_token!,
     refresh_token: credentials.refresh_token || tokens.refresh_token,
