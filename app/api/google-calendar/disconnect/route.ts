@@ -16,7 +16,14 @@ export async function POST() {
   if (!therapist) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   if (therapist.google_calendar_vault_secret_id) {
-    await deleteTokensFromVault(therapist.google_calendar_vault_secret_id);
+    // deleteTokensFromVault does `.eq('id', therapistId)` against the
+    // therapists table — it needs the real UUID, not the `direct_<uuid>`
+    // sentinel string stored in google_calendar_vault_secret_id. Passing the
+    // sentinel meant this matched zero rows, so google_calendar_tokens (the
+    // actual access/refresh tokens) was never cleared — only the second
+    // update below (clearing the sentinel flag) ran, so the UI showed
+    // "disconnected" while Kith retained full working Calendar access.
+    await deleteTokensFromVault(therapist.id);
     const serviceClient = createServiceRoleClient();
     await serviceClient
       .from('therapists')
