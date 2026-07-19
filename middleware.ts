@@ -48,7 +48,11 @@ export async function middleware(request: NextRequest) {
   // opengraph-image/twitter-image are Next.js's dynamic metadata-image
   // routes — link-preview crawlers (WhatsApp, Slack, Twitter, etc.) fetch
   // these unauthenticated, so they must never redirect to /login either.
+  // /blog is public marketing content; /sitemap.xml and /robots.txt are
+  // fetched unauthenticated by crawlers (same reasoning as opengraph-image
+  // below) and must never redirect to /login.
   const isPublicPage = pathname.startsWith('/privacy') || pathname.startsWith('/terms')
+    || pathname.startsWith('/blog') || pathname === '/sitemap.xml' || pathname === '/robots.txt'
     || pathname.startsWith('/opengraph-image') || pathname.startsWith('/twitter-image');
 
   if (!user && !isAuthPage && !isResetPage && !isApiRoute && !isPublicPage) {
