@@ -112,14 +112,27 @@ export default async function InsightsPage() {
   const notesNow   = totalNotes ?? 0;
   const notesDelta = notesNow - (lastMonthNotes ?? 0);
 
-  // Average session duration in minutes
+  // Average session duration in minutes — a corrupt row (ended_at <= started_at,
+  // e.g. clock skew or a bad manual edit) used to get folded into the same sum
+  // and divided by the full count, so one bad row could drag the whole
+  // average to <= 0 and trip the `avgDurationMin > 0` check below, silently
+  // blanking out an otherwise-real stat for every other session that month.
   let avgDurationMin = 0;
   if (sessionDurations && sessionDurations.length > 0) {
-    const totalMs = sessionDurations.reduce((sum, s) => {
-      if (!s.ended_at || !s.started_at) return sum;
-      return sum + (new Date(s.ended_at).getTime() - new Date(s.started_at).getTime());
-    }, 0);
-    avgDurationMin = Math.round(totalMs / sessionDurations.length / 60000);
+    const validDurationsMs: number[] = [];
+    let corruptCount = 0;
+    for (const s of sessionDurations) {
+      if (!s.ended_at || !s.started_at) continue;
+      const ms = new Date(s.ended_at).getTime() - new Date(s.started_at).getTime();
+      if (ms <= 0) { corruptCount++; continue; }
+      validDurationsMs.push(ms);
+    }
+    if (corruptCount > 0) {
+      console.warn(`[Kith] insights: ${corruptCount} session(s) with ended_at <= started_at for therapist ${therapist.id} — excluded from avg duration`);
+    }
+    if (validDurationsMs.length > 0) {
+      avgDurationMin = Math.round(validDurationsMs.reduce((a, b) => a + b, 0) / validDurationsMs.length / 60000);
+    }
   }
 
   // ── Session trend — split last 30 days into 4 weekly buckets ─────────────────
