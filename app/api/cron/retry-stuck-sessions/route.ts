@@ -31,8 +31,10 @@ const AWAITING_TRANSCRIPT_STUCK_MINUTES = 45;
 const MAX_PER_RUN = 5; // keep one cron invocation bounded
 
 export async function GET(req: Request) {
-  const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get('authorization') !== `Bearer ${secret}`) {
+  // Fail closed if the secret isn't configured — an unset env var used to
+  // leave this endpoint wide open instead of blocking it.
+  const expected = process.env.CRON_SECRET;
+  if (!expected || req.headers.get('authorization') !== `Bearer ${expected}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

@@ -5,7 +5,7 @@
  * query so the FREE-tier Supabase project registers activity and never hits the
  * ~7-day idle auto-pause (which otherwise breaks login with "Failed to fetch").
  *
- * Protected by CRON_SECRET when set — Vercel Cron sends it as a Bearer token.
+ * Protected by CRON_SECRET — Vercel Cron sends it as a Bearer token.
  */
 import { NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
@@ -13,9 +13,10 @@ import { createServiceRoleClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
-  // If CRON_SECRET is configured, require it (Vercel Cron sends it automatically).
-  const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get('authorization') !== `Bearer ${secret}`) {
+  // Fail closed if the secret isn't configured — an unset env var used to
+  // leave this endpoint wide open instead of blocking it.
+  const expected = process.env.CRON_SECRET;
+  if (!expected || req.headers.get('authorization') !== `Bearer ${expected}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
