@@ -56,9 +56,10 @@ export async function PATCH(
 
   const service = createServiceRoleClient();
 
-  // Verify ownership
+  // Verify ownership — also fetch transcript_raw so a stale autosave write
+  // (see guard below) can be compared against what's already stored.
   const { data: existing } = await service
-    .from('sessions').select('therapist_id').eq('id', params.id).single();
+    .from('sessions').select('therapist_id, transcript_raw').eq('id', params.id).single();
   if (!existing || existing.therapist_id !== therapist.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
@@ -75,7 +76,19 @@ export async function PATCH(
   const updates: Record<string, unknown> = {};
   if (soap_note !== undefined) updates.soap_note = soap_note;
   if (manual_notes !== undefined) updates.manual_notes = manual_notes;
-  if (transcript_raw !== undefined) updates.transcript_raw = transcript_raw;
+  if (transcript_raw !== undefined) {
+    // Transcript segments only ever grow during a session — never shrink.
+    // The periodic autosave (every 15s) and "End session" (full final write)
+    // can race: a slow, stale autosave request carrying fewer segments can
+    // resolve AFTER End already wrote the complete transcript, silently
+    // truncating it back down. Refuse to overwrite a longer/equal stored
+    // transcript with a shorter one — the request is presumed stale.
+    const storedLen = Array.isArray(existing.transcript_raw) ? existing.transcript_raw.length : 0;
+    const incomingLen = Array.isArray(transcript_raw) ? transcript_raw.length : 0;
+    if (incomingLen >= storedLen) {
+      updates.transcript_raw = transcript_raw;
+    }
+  }
   if (Object.keys(updates).length === 0) return NextResponse.json({ ok: true });
 
   const { error } = await service.from('sessions').update(updates).eq('id', params.id);
