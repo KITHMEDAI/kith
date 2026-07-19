@@ -92,10 +92,13 @@ export async function POST(request: Request) {
       }
     }
 
-    // ── Patient consent check (soft — warn in logs, don't block) ──────────────
-    // Therapist is responsible for confirming verbal or written consent before
-    // clicking Start. Hard-blocking here creates a UX deadlock in cases where
-    // the consent flag wasn't set during registration.
+    // ── Patient consent check (hard block) ────────────────────────────────────
+    // This used to only console.warn — the actual UI (the in-session consent
+    // modal, session/[id]/page.tsx handleConfirmConsent) already sets
+    // consent_recording=true in the DB before ever calling this route, so
+    // hard-blocking here doesn't create the UX deadlock the old comment
+    // worried about — it only stops a DIRECT call to this endpoint (skipping
+    // the modal entirely) from recording a patient with no consent on file.
     if (patientId) {
       const { data: patient } = await supabase
         .from('patients')
@@ -104,7 +107,10 @@ export async function POST(request: Request) {
         .single();
 
       if (!patient?.consent_recording) {
-        console.warn(`[Kith] Session started without recorded consent for patient ${patientId}. Therapist must have verbal consent.`);
+        return NextResponse.json(
+          { error: 'This patient has not consented to session recording. Confirm consent before starting.' },
+          { status: 403 },
+        );
       }
     }
 

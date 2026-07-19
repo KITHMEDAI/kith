@@ -72,12 +72,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Soft consent check (mirrors /api/sessions/start — warn, don't block).
+  // Hard consent check (mirrors /api/sessions/start — see that file for why
+  // this is safe to block on: the in-session consent modal already sets
+  // consent_recording=true before this route is ever called in the real UI).
   if (appt.patient_id) {
     const { data: patient } = await service
       .from('patients').select('consent_recording').eq('id', appt.patient_id).single();
     if (!patient?.consent_recording) {
-      console.warn(`[Kith] Online session started without recorded consent for patient ${appt.patient_id}.`);
+      return NextResponse.json(
+        { error: 'This patient has not consented to session recording. Confirm consent before starting.' },
+        { status: 403 },
+      );
     }
   }
 

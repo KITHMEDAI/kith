@@ -55,7 +55,7 @@ export async function runNoteGeneration(
 
   const { data: patientRow } = await service
     .from('patients')
-    .select('id, display_name, diagnosis, therapy_modality, gender, date_of_birth, therapy_goals, risk_level')
+    .select('id, display_name, diagnosis, therapy_modality, gender, date_of_birth, therapy_goals, risk_level, consent_ai_notes')
     .eq('id', session.patient_id)
     .single();
 
@@ -64,6 +64,24 @@ export async function runNoteGeneration(
     display_name: 'Patient',
     diagnosis: [],
   } as unknown as Patient);
+
+  // consent_recording is checked before a session can even start (see
+  // app/api/sessions/start|bot/route.ts) — but a patient can consent to
+  // being recorded while separately declining AI processing of that
+  // recording (PatientFormPanel records these as independent flags). This
+  // was never actually checked anywhere: a session could be recorded and
+  // AI-processed regardless of consent_ai_notes being false. Skip the AI
+  // pipeline entirely here — the raw transcript and the therapist's own
+  // manual notes are still preserved, just no AI-generated note.
+  if (patientRow && (patientRow as { consent_ai_notes?: boolean }).consent_ai_notes === false) {
+    console.log(`[Kith] process-notes: skipping AI processing for session ${sessionId} — patient has not consented to AI notes`);
+    await service.from('sessions').update({
+      status: 'completed',
+      session_summary: 'AI note generation skipped — this patient has not consented to AI processing. Review the raw transcript and your own private notes.',
+      notes_generated_at: new Date().toISOString(),
+    }).eq('id', sessionId);
+    return { ok: true, skipped: true };
+  }
 
   const { data: prevSession } = await service
     .from('sessions')
