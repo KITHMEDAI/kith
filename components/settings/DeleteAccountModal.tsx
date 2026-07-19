@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 
@@ -11,10 +11,22 @@ interface Props {
 export default function DeleteAccountModal({ onClose }: Props) {
   const supabase = createClientSupabaseClient();
   const [typed, setTyped] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Google is a real sign-in method here too — some accounts have no
+  // password at all, so the server only requires it for accounts that
+  // actually have an email/password identity. Match that here so a
+  // Google-only user isn't stuck unable to fill in a field they can't have.
+  const [needsPassword, setNeedsPassword] = useState<boolean | null>(null);
 
-  const canDelete = typed === 'DELETE' && !loading;
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setNeedsPassword((data.user?.identities || []).some(i => i.provider === 'email'));
+    });
+  }, [supabase]);
+
+  const canDelete = typed === 'DELETE' && (!needsPassword || password.length > 0) && !loading;
 
   async function handleDelete() {
     setLoading(true);
@@ -23,7 +35,7 @@ export default function DeleteAccountModal({ onClose }: Props) {
       const res = await fetch('/api/account/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ confirm: typed }),
+        body: JSON.stringify({ confirm: typed, password }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -56,6 +68,21 @@ export default function DeleteAccountModal({ onClose }: Props) {
             transcript, clinical note, and appointment</strong> you&rsquo;ve created. There is no way to undo this or
             recover the data afterward. Your subscription (if any) will also be cancelled.
           </p>
+          {needsPassword && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                Your password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400"
+              />
+            </div>
+          )}
           <div>
             <label className="block text-xs font-semibold text-slate-500 mb-1.5">
               Type <span className="font-mono text-red-600">DELETE</span> to confirm

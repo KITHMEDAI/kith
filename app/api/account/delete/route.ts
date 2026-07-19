@@ -9,6 +9,7 @@
  * the avatar file in Storage, which we remove explicitly first.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 
 export async function POST(req: NextRequest) {
@@ -16,9 +17,39 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { confirm } = await req.json().catch(() => ({}));
+  const { confirm, password } = await req.json().catch(() => ({}));
   if (confirm !== 'DELETE') {
     return NextResponse.json({ error: 'Type DELETE to confirm.' }, { status: 400 });
+  }
+
+  // Typing "DELETE" alone was the only gate on this irreversible action —
+  // anyone who inherits a live session (stolen/shared device, XSS, a
+  // forgotten logged-in browser) could wipe the account and every patient's
+  // clinical data with no further check. Require the actual password too,
+  // verified against a throwaway client with no cookie/session persistence
+  // so it can't interfere with the real session being deleted right after.
+  //
+  // Google is also a real sign-in method here (not just Calendar connect),
+  // so some accounts have no password at all — only require this check for
+  // accounts that actually have an email/password identity, so a Google-only
+  // user isn't permanently locked out of deleting their own account.
+  const hasPasswordIdentity = (user.identities || []).some(i => i.provider === 'email');
+  if (hasPasswordIdentity) {
+    if (!password || typeof password !== 'string') {
+      return NextResponse.json({ error: 'Enter your password to confirm account deletion.' }, { status: 400 });
+    }
+    if (!user.email) {
+      return NextResponse.json({ error: 'Could not verify password for this account — contact support.' }, { status: 400 });
+    }
+    const verifyClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+    const { error: reauthErr } = await verifyClient.auth.signInWithPassword({ email: user.email, password });
+    if (reauthErr) {
+      return NextResponse.json({ error: 'Incorrect password.' }, { status: 401 });
+    }
   }
 
   const admin = createServiceRoleClient();
