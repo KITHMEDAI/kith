@@ -12,6 +12,7 @@ interface BillingInfo {
   subscription_status: string;
   billing_interval: 'monthly' | 'annual';
   trial_ends_at: string | null;
+  cancel_at: string | null;
   sessions_this_month: number;
 }
 
@@ -71,7 +72,7 @@ function BillingPageInner() {
 
     const { data: t, error: loadErr } = await supabase
       .from('therapists')
-      .select('id, subscription_plan, subscription_status, billing_interval, trial_ends_at')
+      .select('id, subscription_plan, subscription_status, billing_interval, trial_ends_at, cancel_at')
       .eq('user_id', user.id)
       .single();
     if (!t) {
@@ -95,6 +96,7 @@ function BillingPageInner() {
       subscription_status: t.subscription_status || 'trialing',
       billing_interval: (t.billing_interval as Interval) || 'monthly',
       trial_ends_at: t.trial_ends_at || null,
+      cancel_at: t.cancel_at || null,
       sessions_this_month: count || 0,
     });
     setLoading(false);
@@ -111,6 +113,13 @@ function BillingPageInner() {
 
   const isActivePaid = info?.subscription_status === 'active';
   const effectivePlan = isActivePaid ? (info?.subscription_plan ?? 'free') : 'free';
+  // A cancelled subscription keeps subscription_status='active' through the
+  // paid-through period (see app/api/billing/cancel/route.ts) — cancel_at is
+  // the actual lapse date. Still fully entitled until then, just scheduled
+  // to end, so the button below shouldn't offer to "cancel" something
+  // already cancelled.
+  const pendingCancellation = !!info?.cancel_at && new Date(info.cancel_at).getTime() > Date.now();
+  const cancelAtDate = info?.cancel_at ? new Date(info.cancel_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   async function handleSubscribe(tier: Tier) {
     if (!razorpayLoaded) { setError('Payment system still loading — try again in a moment.'); return; }
@@ -199,14 +208,17 @@ function BillingPageInner() {
             {effectivePlan} Plan
             {info?.subscription_status === 'past_due' && <span className="ml-2 text-xs font-medium text-red-600 bg-red-50 px-2 py-0.5 rounded-full">Payment failed</span>}
             {info?.subscription_status === 'cancelled' && <span className="ml-2 text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Cancelled</span>}
+            {pendingCancellation && <span className="ml-2 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Cancels {cancelAtDate}</span>}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {isActivePaid
-              ? `Billed ${info?.billing_interval}`
-              : 'No active subscription — capped at the Free plan limits'}
+            {pendingCancellation
+              ? `Full access continues until ${cancelAtDate}, then drops to the Free plan`
+              : isActivePaid
+                ? `Billed ${info?.billing_interval}`
+                : 'No active subscription — capped at the Free plan limits'}
           </p>
         </div>
-        {isActivePaid && (
+        {isActivePaid && !pendingCancellation && (
           <button onClick={handleCancel} disabled={busy === 'cancel'}
             className="flex-none rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60 transition-colors">
             {busy === 'cancel' ? 'Cancelling…' : 'Cancel subscription'}

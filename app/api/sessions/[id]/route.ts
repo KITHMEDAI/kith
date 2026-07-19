@@ -12,7 +12,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data: therapist } = await supabase
-    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
+    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at, cancel_at').eq('user_id', user.id).single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });
 
   // Use service role to fetch — bypasses any RLS edge-cases

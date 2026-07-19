@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('id, subscription_plan, subscription_status, trial_ends_at')
+    .select('id, subscription_plan, subscription_status, trial_ends_at, cancel_at')
     .eq('user_id', user.id)
     .single();
   if (!therapist) return NextResponse.json({ error: 'Therapist not found' }, { status: 404 });

@@ -50,7 +50,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
 
   // Get therapist ID for ownership verification
   const { data: therapist } = await supabase
-    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
+    .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at, cancel_at').eq('user_id', user.id).single();
   if (!therapist) redirect('/login');
   const canMessagePatients = getEntitlements(therapist).patientMessaging;
 

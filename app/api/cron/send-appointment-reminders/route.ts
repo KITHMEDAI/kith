@@ -63,7 +63,7 @@ export async function GET(req: Request) {
   for (const appt of appts ?? []) {
     try {
       const [{ data: therapist }, { data: patient }] = await Promise.all([
-        service.from('therapists').select('display_name, subscription_plan, subscription_status, trial_ends_at, email').eq('id', appt.therapist_id).single(),
+        service.from('therapists').select('display_name, subscription_plan, subscription_status, trial_ends_at, cancel_at, email').eq('id', appt.therapist_id).single(),
         service.from('patients').select('display_name, email').eq('id', appt.patient_id).single(),
       ]);
 

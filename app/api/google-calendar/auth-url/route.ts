@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   if (user) {
     const { data: therapist } = await supabase
-      .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at').eq('user_id', user.id).single();
+      .from('therapists').select('id, subscription_plan, subscription_status, trial_ends_at, cancel_at').eq('user_id', user.id).single();
     if (therapist) {
       state = from ? `${therapist.id}|${from}` : therapist.id;
       // Free-tier doctors connecting from Settings (not the registration/onboarding

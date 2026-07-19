@@ -39,6 +39,7 @@ interface BillingFields {
   subscription_plan: string | null;
   subscription_status: string | null;
   trial_ends_at: string | null;
+  cancel_at?: string | null; // set when the doctor cancels — access lapses at this timestamp, not immediately
 }
 
 // Session-count caps are sized around real per-session cost (Deepgram/Recall
@@ -69,7 +70,13 @@ export const SESSION_DURATION_CAPS: Record<PlanKey, number> = {
 };
 
 export function getEntitlements(t: BillingFields): Entitlements {
-  const paidActive = t.subscription_status === 'active';
+  // A cancelled subscription keeps subscription_status = 'active' through the
+  // paid-through period (see app/api/billing/cancel/route.ts) — cancel_at is
+  // the actual lapse point. Checking it here (not just relying on Razorpay's
+  // webhook to eventually flip subscription_status) means access lapses on
+  // time even if that webhook never fires.
+  const notLapsed = !t.cancel_at || new Date(t.cancel_at).getTime() > Date.now();
+  const paidActive = t.subscription_status === 'active' && notLapsed;
   const storedPlan = (t.subscription_plan as PlanKey) || 'free';
 
   // No taste-of-Ultra trial — you get exactly what you're paying for, and

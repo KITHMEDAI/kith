@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data: therapist } = await supabase
     .from('therapists')
-    .select('subscription_plan, subscription_status, trial_ends_at, google_calendar_vault_secret_id')
+    .select('subscription_plan, subscription_status, trial_ends_at, cancel_at, google_calendar_vault_secret_id')
     .eq('user_id', user.id)
     .single();
   if (!therapist) return NextResponse.json({ error: 'Not found' }, { status: 404 });
