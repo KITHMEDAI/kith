@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getTokensFromVault, deleteCalendarEvent } from '@/lib/google-calendar';
 
-const VALID_STATUSES = ['scheduled', 'confirmed', 'in_session', 'completed', 'cancelled', 'no_show', 'rescheduled'];
+// 'rescheduled' is NOT a valid value in the DB CHECK constraint
+// (supabase/migrations/001_full_schema.sql) — a direct PATCH with that
+// status used to pass this list then 500 at the DB. The real reschedule
+// route (reschedule/route.ts) correctly sets 'scheduled' instead.
+const VALID_STATUSES = ['scheduled', 'confirmed', 'in_session', 'completed', 'cancelled', 'no_show'];
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createServerSupabaseClient();

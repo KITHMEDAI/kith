@@ -5,7 +5,7 @@
 export type SubscriptionPlan = 'free' | 'pro' | 'ultra' | 'clinic';
 export type SubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'cancelled';
 export type RiskLevel = 'low' | 'moderate' | 'high' | 'critical';
-export type AppointmentStatus = 'scheduled' | 'confirmed' | 'in_session' | 'completed' | 'cancelled' | 'no_show' | 'rescheduled';
+export type AppointmentStatus = 'scheduled' | 'confirmed' | 'in_session' | 'completed' | 'cancelled' | 'no_show';
 export type SessionType = 'individual' | 'couples' | 'family' | 'group';
 export type Modality = 'in_person' | 'video';
 export type PatientStatus = 'active' | 'inactive' | 'discharged';
