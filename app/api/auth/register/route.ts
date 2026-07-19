@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       designation,     // highest degree
       booking_source,
       booking_url,
+      terms_accepted,
     } = body;
 
     if (!email || !password || !display_name) {
@@ -33,6 +34,13 @@ export async function POST(req: NextRequest) {
     }
     if (!clinic_name) {
       return NextResponse.json({ error: 'Clinic name is required' }, { status: 400 });
+    }
+    // The signup form's Terms/Privacy checkbox previously only gated the
+    // client-side "Continue" button — a direct call to this API skipped it
+    // entirely, and even through the real UI, acceptance was never actually
+    // recorded server-side. Now required and stamped with a timestamp.
+    if (terms_accepted !== true) {
+      return NextResponse.json({ error: 'You must accept the Terms of Service and Privacy Policy to create an account' }, { status: 400 });
     }
 
     const admin = createServiceRoleClient();
@@ -70,6 +78,7 @@ export async function POST(req: NextRequest) {
       booking_source:   booking_source || 'none',
       booking_url:      booking_url || null,
       onboarding_completed: false,
+      terms_accepted_at: new Date().toISOString(),
       // sensible defaults
       timezone:         'Asia/Kolkata',
       languages_spoken: ['English'],

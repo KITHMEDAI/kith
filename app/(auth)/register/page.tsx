@@ -194,6 +194,7 @@ export default function RegisterPage() {
           designation: form.degree || null,
           booking_source: bookingSource,
           onboarding_completed: false,
+          terms_accepted: consentChecked,
         }),
       });
       const data = await res.json();
