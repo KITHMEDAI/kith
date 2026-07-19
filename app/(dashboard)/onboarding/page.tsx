@@ -548,7 +548,7 @@ export default function OnboardingPage() {
                     <BadgeCheck className="h-6 w-6 text-emerald-500 flex-none"/>
                     <div>
                       <p className="text-sm font-bold text-emerald-700">Google Calendar connected</p>
-                      <p className="text-xs text-emerald-600">Read-only import is active — your events flow in automatically.</p>
+                      <p className="text-xs text-emerald-600">Import is active — your events flow in automatically, and Kith creates a Meet link for any session you book online.</p>
                     </div>
                   </div>
                 )}
@@ -563,7 +563,7 @@ export default function OnboardingPage() {
 
                 {/* Benefits card */}
                 <div className="rounded-2xl border border-violet-100 bg-white/70 backdrop-blur-sm p-4 space-y-2.5">
-                  {['Existing calendar events import as Kith appointments', 'No manual entry or spreadsheets needed', 'Read-only — Kith never creates, edits, or deletes anything on your calendar'].map(item => (
+                  {['Existing calendar events import as Kith appointments', 'No manual entry or spreadsheets needed', 'Kith only creates an event when you book an online session, for the Meet link — nothing else on your calendar is touched'].map(item => (
                     <div key={item} className="flex items-center gap-2.5 text-sm text-slate-600">
                       <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-emerald-100">
                         <Check className="h-3 w-3 text-emerald-600"/>
@@ -577,7 +577,7 @@ export default function OnboardingPage() {
                 {!calConnected && (
                   <div className="flex items-start gap-2 text-[11px] text-slate-400 leading-relaxed">
                     <ShieldCheck className="h-3.5 w-3.5 flex-none text-emerald-500 mt-0.5"/>
-                    Kith only reads your appointment times to create sessions — it never writes to your calendar, and you can disconnect anytime in Settings.
+                    Kith reads your existing events to create sessions, and creates one new event only when you book an online session (for the Meet link) — nothing else on your calendar is touched, and you can disconnect anytime in Settings.
                   </div>
                 )}
               </div>
@@ -769,7 +769,7 @@ export default function OnboardingPage() {
                   { done: true,                    text: 'Clinical profile created',    sub: therapist.display_name },
                   { done: true,                    text: 'AI note generation ready',    sub: 'SOAP notes + summaries' },
                   { done: completed.has('profile'), text: 'Practice details saved',     sub: therapist.clinic_name || 'Profile complete' },
-                  { done: completed.has('calendar'), text: 'Google Calendar',           sub: calConnected ? 'Read-only import active' : 'Connect anytime in Settings → Integrations' },
+                  { done: completed.has('calendar'), text: 'Google Calendar',           sub: calConnected ? 'Import active' : 'Connect anytime in Settings → Integrations' },
                   { done: completed.has('records'),  text: 'Patient records',           sub: completed.has('records') ? 'Import configured' : 'Add patients from the Patients tab' },
                   { done: completed.has('plan'),     text: 'Plan selected',              sub: `${selectedPlan[0].toUpperCase()}${selectedPlan.slice(1)}${selectedPlan === 'free' ? ' — upgrade anytime' : ''}` },
                 ].map((item, i) => (

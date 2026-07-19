@@ -234,7 +234,7 @@ function GoogleCalendarCard() {
 
       {connected && (
         <div className="mt-4 grid grid-cols-3 gap-3">
-          {['Appointments auto-synced', 'Video meeting links detected', 'Read-only — never edits your calendar'].map(f => (
+          {['Appointments auto-synced', 'Video meeting links detected', 'Creates a Meet link only for sessions you book online'].map(f => (
             <div key={f} className="flex items-center gap-2 text-[12px] text-emerald-400">
               <CheckCircle className="h-3.5 w-3.5 flex-none"/>{f}
             </div>
