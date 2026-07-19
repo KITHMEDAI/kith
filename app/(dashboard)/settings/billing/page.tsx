@@ -56,6 +56,7 @@ function BillingPageInner() {
   const [interval, setInterval_] = useState<Interval>('monthly');
   const [busy, setBusy] = useState<string | null>(null);   // 'starter' | 'pro' | 'cancel' | null
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [billingConfigured, setBillingConfigured] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -64,6 +65,13 @@ function BillingPageInner() {
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.onload = () => setRazorpayLoaded(true);
     document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/billing/config')
+      .then(r => r.json())
+      .then(d => setBillingConfigured(!!d.configured))
+      .catch(() => setBillingConfigured(false));
   }, []);
 
   async function load() {
@@ -122,6 +130,7 @@ function BillingPageInner() {
   const cancelAtDate = info?.cancel_at ? new Date(info.cancel_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   async function handleSubscribe(tier: Tier) {
+    if (billingConfigured === false) { setError('Payments aren’t set up yet — contact support.'); return; }
     if (!razorpayLoaded) { setError('Payment system still loading — try again in a moment.'); return; }
     setBusy(tier); setError(null);
     try {
@@ -249,6 +258,12 @@ function BillingPageInner() {
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
+      {billingConfigured === false && (
+        <p className="text-xs text-center text-amber-600 bg-amber-50 border border-amber-200 rounded-lg py-2 px-3">
+          Paid plans aren’t available to subscribe to yet — check back soon.
+        </p>
+      )}
+
       {/* Monthly / annual segmented toggle */}
       <div className="flex justify-center">
         <div className="inline-flex items-center rounded-full bg-muted p-1 gap-1">
@@ -326,14 +341,16 @@ function BillingPageInner() {
                 ))}
               </ul>
               <button onClick={() => !isCurrent && handleSubscribe(plan.key)}
-                disabled={isCurrent || busy === plan.key}
+                disabled={isCurrent || busy === plan.key || billingConfigured === false}
+                title={billingConfigured === false ? 'Payments aren’t set up yet' : undefined}
                 className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2 ${
                   isCurrent ? 'bg-muted text-muted-foreground cursor-default'
+                  : billingConfigured === false ? 'bg-muted text-muted-foreground cursor-not-allowed'
                   : plan.recommended ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-sm'
                   : 'bg-slate-800 hover:bg-slate-700 text-white'
                 }`}>
                 {busy === plan.key && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {isCurrent ? '✓ Current plan' : 'Subscribe'}
+                {isCurrent ? '✓ Current plan' : billingConfigured === false ? 'Coming soon' : 'Subscribe'}
               </button>
             </div>
           );
