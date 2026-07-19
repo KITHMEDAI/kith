@@ -16,7 +16,8 @@
  */
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { generateSessionNotes } from '@/lib/claude';
-import type { Patient } from '@/types';
+import { getEntitlements } from '@/lib/entitlements';
+import type { Patient, TranscriptSegment } from '@/types';
 
 export interface RunNoteGenerationResult {
   ok: boolean;
@@ -93,12 +94,35 @@ export async function runNoteGeneration(
     .limit(1)
     .maybeSingle();
 
-  const transcript = (session.transcript_raw as import('@/types').TranscriptSegment[]) || [];
+  let transcript = (session.transcript_raw as TranscriptSegment[]) || [];
   const notesManual = (session.manual_notes as string) || manualNotes || '';
   const sessionNumber = (session.session_number as number) || 1;
   const durationMinutes = session.ended_at
     ? Math.round((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 60000)
     : 0;
+
+  // sessionDurationCapMinutes was only ever enforced client-side (auto-end
+  // the recording when reached) — a modified client, or a direct call to
+  // this pipeline, could run a session arbitrarily long on any tier with no
+  // server-side check, undercutting the per-tier AI-cost margin the caps
+  // exist for. Truncate the TRANSCRIPT actually sent to Claude at the plan's
+  // cap rather than rejecting the session outright — the doctor still gets
+  // a note for the portion of the session their plan covers, and the AI
+  // processing cost is bounded regardless of how long the client recorded.
+  const { data: therapistBilling } = await service
+    .from('therapists')
+    .select('subscription_plan, subscription_status, trial_ends_at, cancel_at')
+    .eq('id', session.therapist_id)
+    .single();
+  if (therapistBilling) {
+    const capMinutes = getEntitlements(therapistBilling).sessionDurationCapMinutes;
+    const capMs = capMinutes * 60 * 1000;
+    const overCap = transcript.some(s => s.start_ms > capMs);
+    if (overCap) {
+      console.warn(`[Kith] process-notes: session ${sessionId} exceeded the ${capMinutes}-min plan cap — truncating transcript before generation`);
+      transcript = transcript.filter(s => s.start_ms <= capMs);
+    }
+  }
 
   console.log(`[Kith] process-notes: generating notes for session ${sessionId}, ${transcript.length} segments, ${durationMinutes} min`);
 
