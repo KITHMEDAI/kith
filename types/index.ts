@@ -198,8 +198,6 @@ export interface DashboardStats {
   patientsThisMonth: number;
   sessionsToday: number;
   notesGenerated: number;
-  timeSavedMinutes: number;
-  avgMoodScore?: number | null;
 }
 
 // ---- Patient Metrics ----
