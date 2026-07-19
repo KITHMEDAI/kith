@@ -62,14 +62,25 @@ export async function POST(req: NextRequest) {
   // Conflict check — the new slot must not overlap another active appointment.
   const windowStart = new Date(newMs - 4 * 60 * 60 * 1000).toISOString();
   const windowEnd = new Date(newMs + 4 * 60 * 60 * 1000).toISOString();
-  const { data: nearby } = await supabase
+  // Same exclusion list as create (app/api/appointments/route.ts) — this
+  // used to only exclude 'cancelled', so rescheduling into a slot that
+  // overlapped a 'completed' or 'no_show' appointment got a false 409 that a
+  // fresh booking at the same slot wouldn't (create excludes both). Also now
+  // fails closed on a query error instead of silently treating it as "no
+  // conflicts" (same class of bug already fixed in the create route).
+  const { data: nearby, error: nearbyErr } = await supabase
     .from('appointments')
     .select('id, scheduled_at, duration_minutes, patient:patients(display_name)')
     .eq('therapist_id', therapist.id)
-    .neq('status', 'cancelled')
+    .not('status', 'in', '(cancelled,in_session,completed,no_show)')
     .neq('id', appointment_id!)
     .gte('scheduled_at', windowStart)
     .lte('scheduled_at', windowEnd);
+
+  if (nearbyErr) {
+    console.error('[appointments/reschedule] conflict-check query failed:', nearbyErr.message);
+    return NextResponse.json({ error: 'Could not verify availability — please try again.' }, { status: 500 });
+  }
 
   const clash = (nearby || []).find(b =>
     overlaps(newMs, dur, new Date(b.scheduled_at).getTime(), b.duration_minutes || 50),
