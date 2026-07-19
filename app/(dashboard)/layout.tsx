@@ -31,7 +31,7 @@ const MOCK_THERAPIST: Therapist = {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let therapist: Therapist | null = MOCK_THERAPIST;
 
-  // x-pathname is injected by the middleware (lib/supabase/middleware.ts) on every request
+  // x-pathname is injected by the middleware (middleware.ts) on every request
   // so layouts can detect the active route and avoid redirect loops.
   const headersList = await headers();
   const pathname = headersList.get('x-pathname') ?? '';
