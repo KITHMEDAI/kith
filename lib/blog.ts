@@ -16,6 +16,10 @@ export interface BlogPostMeta {
   description: string;
   date: string;
   keyword?: string;
+  /** Source key into lib/lead-magnets.ts — if set, the post page shows a
+   *  LeadCaptureForm instead of the generic "try Kith" CTA. */
+  leadMagnet?: string;
+  leadMagnetLabel?: string;
 }
 
 export interface BlogPost extends BlogPostMeta {
@@ -57,6 +61,8 @@ function readPost(slug: string): BlogPost | null {
     description: data.description,
     date: data.date,
     keyword: data.keyword,
+    leadMagnet: data.leadMagnet,
+    leadMagnetLabel: data.leadMagnetLabel,
     html: marked.parse(content, { async: false }) as string,
   };
 }
@@ -65,7 +71,7 @@ export function getAllPosts(): BlogPostMeta[] {
   return readSlugs()
     .map(readPost)
     .filter((p): p is BlogPost => p !== null)
-    .map(({ slug, title, description, date, keyword }) => ({ slug, title, description, date, keyword }))
+    .map(({ slug, title, description, date, keyword, leadMagnet, leadMagnetLabel }) => ({ slug, title, description, date, keyword, leadMagnet, leadMagnetLabel }))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 

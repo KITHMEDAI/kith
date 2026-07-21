@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import KithLockup from '@/components/brand/KithLockup';
+import LeadCaptureForm from '@/components/marketing/LeadCaptureForm';
 import { getAllPosts, getPostBySlug } from '@/lib/blog';
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
@@ -65,13 +66,19 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           dangerouslySetInnerHTML={{ __html: post.html }}
         />
 
-        <div className="mt-12 rounded-2xl border border-violet-200 bg-violet-50/50 p-6 text-center">
-          <p className="text-sm font-semibold text-foreground">Want to try Kith in your own practice?</p>
-          <p className="text-xs text-muted-foreground mt-1">Free to start — no card required.</p>
-          <Link href="/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 transition-colors mt-4">
-            Get started free <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+        <div className="mt-12">
+          {post.leadMagnet ? (
+            <LeadCaptureForm source={post.leadMagnet} label={post.leadMagnetLabel || 'Get this as an email'} />
+          ) : (
+            <div className="rounded-2xl border border-violet-200 bg-violet-50/50 p-6 text-center">
+              <p className="text-sm font-semibold text-foreground">Want to try Kith in your own practice?</p>
+              <p className="text-xs text-muted-foreground mt-1">Free to start — no card required.</p>
+              <Link href="/register"
+                className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 transition-colors mt-4">
+                Get started free <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>
