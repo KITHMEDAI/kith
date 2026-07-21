@@ -3,7 +3,6 @@ title: "DPDP 2023: What It Means for Indian Therapists' Session Notes"
 description: "A plain-language walkthrough of India's Digital Personal Data Protection Act, 2023 — and what it actually requires from a private therapy practice."
 date: "2026-08-02"
 keyword: "DPDP compliant therapy software"
-draft: true
 ---
 
 *This is a general explainer, not legal advice. The DPDP Act's subordinate rules have continued to evolve since the Act was passed, and how they apply to your specific practice can depend on details a blog post can't account for. If compliance decisions carry real weight for your practice, have them reviewed by someone qualified to advise on Indian data protection law.*
