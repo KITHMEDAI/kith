@@ -5,10 +5,16 @@ import KithLockup from '@/components/brand/KithLockup';
 import { getAllPosts } from '@/lib/blog';
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
+const TITLE = 'Blog — Kith';
+const DESCRIPTION = 'Practical guides on AI clinical documentation, running a private therapy practice, and clinical note-writing — from the team behind Kith.';
 
 export const metadata: Metadata = {
-  title: 'Blog — Kith',
-  description: 'Practical guides on AI clinical documentation, running a private therapy practice, and clinical note-writing — from the team behind Kith.',
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: `${BASE_URL}/blog` },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `${BASE_URL}/blog`, type: 'website' },
+  twitter: { card: 'summary', title: TITLE, description: DESCRIPTION },
 };
 
 export default function BlogIndexPage() {

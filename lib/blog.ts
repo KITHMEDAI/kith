@@ -42,6 +42,15 @@ function readPost(slug: string): BlogPost | null {
     return null;
   }
 
+  // Soft SEO nudges — doesn't block the post, just surfaces at build/dev time in
+  // case the agent's own self-check (docs/seo-content-agent.md) missed it.
+  if (data.title.length > 65) {
+    console.warn(`[Kith] blog post "${slug}": title is ${data.title.length} chars, over the ~60 char guideline`);
+  }
+  if (data.description.length > 160) {
+    console.warn(`[Kith] blog post "${slug}": description is ${data.description.length} chars, over the ~160 char guideline`);
+  }
+
   return {
     slug,
     title: data.title,

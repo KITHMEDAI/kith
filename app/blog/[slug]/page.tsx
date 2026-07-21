@@ -6,6 +6,7 @@ import KithLockup from '@/components/brand/KithLockup';
 import { getAllPosts, getPostBySlug } from '@/lib/blog';
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
 
 export function generateStaticParams() {
   return getAllPosts().map(post => ({ slug: post.slug }));
@@ -14,10 +15,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const post = getPostBySlug(params.slug);
   if (!post) return {};
+  const url = `${BASE_URL}/blog/${post.slug}`;
   return {
     title: `${post.title} — Kith`,
     description: post.description,
-    openGraph: { title: post.title, description: post.description, type: 'article', publishedTime: post.date },
+    alternates: { canonical: url },
+    openGraph: { title: post.title, description: post.description, url, type: 'article', publishedTime: post.date },
+    twitter: { card: 'summary', title: post.title, description: post.description },
   };
 }
 

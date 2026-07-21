@@ -1,0 +1,98 @@
+{
+  "_comment": "Content backlog for the SEO/content agent. status: published | drafted | pending. researchNeeded: true means the agent must live-verify competitor claims (WebSearch/WebFetch) before drafting — never write comparison content from memory alone. The agent picks the highest-priority 'pending' item each run, drafts it, sets status to 'drafted', and stops. A human flips status to 'published' (and removes draft:true from the post) when ready to ship.",
+  "items": [
+    {
+      "slug": "ambient-session-transcription",
+      "title": "What Is Ambient Session Transcription? A Guide for Therapists",
+      "keyword": "ambient transcription therapy",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "published"
+    },
+    {
+      "slug": "dpdp-2023-therapist-notes",
+      "title": "DPDP 2023: What It Means for Indian Therapists' Session Notes",
+      "keyword": "DPDP compliant therapy software",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "published"
+    },
+    {
+      "slug": "soap-note-templates",
+      "title": "SOAP Note Templates for Therapists (Free)",
+      "keyword": "soap note template therapy",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "drafted"
+    },
+    {
+      "slug": "reduce-no-shows-scheduling",
+      "title": "How to Reduce No-Shows With Better Scheduling",
+      "keyword": "therapy scheduling software",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "google-meet-therapy-sessions",
+      "title": "Running Therapy Sessions on Google Meet: A Practical Setup Guide",
+      "keyword": "online therapy sessions google meet",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "gdpr-ai-notetaking-uk",
+      "title": "GDPR and AI Notetaking: What UK Therapists Need to Know",
+      "keyword": "gdpr compliant therapy software",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "kith-vs-simplepractice",
+      "title": "Kith vs SimplePractice: Which Fits a Solo Indian/UK Practice?",
+      "keyword": "simplepractice alternative india",
+      "intent": "commercial",
+      "priority": "big-bet",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "kith-vs-upheal",
+      "title": "Kith vs Upheal: Comparing AI Notes for Therapists",
+      "keyword": "upheal alternative",
+      "intent": "commercial",
+      "priority": "big-bet",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "kith-vs-mentalyc",
+      "title": "Kith vs Mentalyc: Comparing AI Progress Notes",
+      "keyword": "mentalyc alternative",
+      "intent": "commercial",
+      "priority": "big-bet",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "best-practice-management-software-india",
+      "title": "Best Practice Management Software for Therapists in India (2026)",
+      "keyword": "practice management software india",
+      "intent": "commercial",
+      "priority": "big-bet",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "best-practice-management-software-uk",
+      "title": "Best Practice Management Software for UK Counsellors (2026)",
+      "keyword": "private practice software uk",
+      "intent": "commercial",
+      "priority": "big-bet",
+      "status": "pending",
+      "researchNeeded": true
+    }
+  ]
+}
