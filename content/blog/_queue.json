@@ -23,7 +23,7 @@
       "keyword": "soap note template therapy",
       "intent": "informational",
       "priority": "quick-win",
-      "status": "drafted"
+      "status": "published"
     },
     {
       "slug": "reduce-no-shows-scheduling",
@@ -47,7 +47,7 @@
       "keyword": "gdpr compliant therapy software",
       "intent": "informational",
       "priority": "quick-win",
-      "status": "drafted"
+      "status": "published"
     },
     {
       "slug": "kith-vs-simplepractice",

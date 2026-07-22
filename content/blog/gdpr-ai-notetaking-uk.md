@@ -3,7 +3,6 @@ title: "GDPR and AI Notetaking: What UK Therapists Need to Know"
 description: "How UK GDPR actually applies to AI-assisted session notes — special category data, who's the controller, and the cross-border question AI tools raise."
 date: "2026-08-16"
 keyword: "gdpr compliant therapy software"
-draft: true
 ---
 
 *This is a general explainer, not legal advice. Data protection guidance — particularly around AI — continues to evolve, including specific guidance from the ICO. If compliance decisions carry real weight for your practice, have them reviewed by someone qualified to advise on UK data protection law.*

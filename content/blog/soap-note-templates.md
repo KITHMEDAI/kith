@@ -5,7 +5,6 @@ date: "2026-08-09"
 keyword: "soap note template therapy"
 leadMagnet: "guide-soap-templates"
 leadMagnetLabel: "Get this template pack by email"
-draft: true
 ---
 
 SOAP notes have been the default clinical documentation format for decades, and they've stayed the default for a reason: the structure forces a separation between what the patient reported, what you observed, what you concluded, and what happens next. That separation is what makes a note useful to read later — by you, by a colleague covering for you, or by anyone else who needs to understand the session without having been in the room.
