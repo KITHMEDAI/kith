@@ -1,0 +1,6 @@
+{
+  "_comment": "Tracks social post topics already drafted, so the influencer agent doesn't repeat itself. Each entry: { date, slug, topic }. The agent reads this before picking a new topic — avoid anything covered in the last 14 days.",
+  "entries": [
+    { "date": "2026-07-22", "slug": "ambient-transcription-paperwork-tax", "topic": "ambient transcription reduces the paperwork tax" }
+  ]
+}
