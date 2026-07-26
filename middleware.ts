@@ -53,7 +53,8 @@ export async function middleware(request: NextRequest) {
   // below) and must never redirect to /login.
   const isPublicPage = pathname.startsWith('/privacy') || pathname.startsWith('/terms')
     || pathname.startsWith('/blog') || pathname === '/sitemap.xml' || pathname === '/robots.txt'
-    || pathname.startsWith('/opengraph-image') || pathname.startsWith('/twitter-image');
+    || pathname.startsWith('/opengraph-image') || pathname.startsWith('/twitter-image')
+    || pathname.startsWith('/soap-formatter');
 
   if (!user && !isAuthPage && !isResetPage && !isApiRoute && !isPublicPage) {
     const url = request.nextUrl.clone();

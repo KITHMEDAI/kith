@@ -15,7 +15,7 @@ import { USE_MOCK, mockSessionNotes, mockLiveUpdate } from './mock';
 import type { TranscriptSegment, Patient, SessionNotes } from '@/types';
 import { getInitials } from './utils';
 
-function anthropic() {
+export function anthropic() {
   if (!process.env.ANTHROPIC_API_KEY) return null;
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const Anthropic = require('@anthropic-ai/sdk').default;
@@ -24,7 +24,7 @@ function anthropic() {
 
 // Model routing
 const HAIKU  = 'claude-haiku-4-5-20251001';   // Layer 1 — transcript repair + compression
-const SONNET = 'claude-sonnet-4-6';            // Layer 2 — final clinical synthesis
+export const SONNET = 'claude-sonnet-4-6';     // Layer 2 — final clinical synthesis
 
 // ─── Public: plain-English rewrite for sending clinical text to a patient ─────
 // Homework/suggestions are written for a clinician (jargon, ' • ' bullets,
