@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { formatAsSoapNote } from '@/lib/soap-formatter';
+import { formatNote, type NoteFormat } from '@/lib/soap-formatter';
 
 const MAX_INPUT_CHARS = 4000;
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { text } = await req.json().catch(() => ({ text: undefined }));
+  const { text, format } = await req.json().catch(() => ({ text: undefined, format: undefined }));
   if (typeof text !== 'string' || !text.trim()) {
     return NextResponse.json({ error: 'Paste some session notes first.' }, { status: 422 });
   }
@@ -32,10 +32,11 @@ export async function POST(req: NextRequest) {
       { status: 422 },
     );
   }
+  const noteFormat: NoteFormat = format === 'emdr' ? 'emdr' : 'soap';
 
   try {
-    const note = await formatAsSoapNote(text.trim());
-    return NextResponse.json({ note });
+    const note = await formatNote(text.trim(), noteFormat);
+    return NextResponse.json({ note, format: noteFormat });
   } catch (err) {
     console.error('[soap-formatter] failed:', err);
     return NextResponse.json(

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import KithLockup from '@/components/brand/KithLockup';
 import SoapFormatterTool from '@/components/tools/SoapFormatterTool';
 
-const title = 'Free SOAP Note Formatter — Kith';
+const title = 'Free SOAP & EMDR Note Formatter — Kith';
 const description =
-  'Paste rough session notes or a transcript excerpt and get back a structured SOAP note instantly. Free, no signup required.';
+  'Paste rough session notes or a transcript excerpt and get back a structured SOAP or EMDR note instantly. Free, no signup required.';
 
 export const metadata: Metadata = {
   title,
@@ -39,11 +39,11 @@ export default function SoapFormatterPage() {
           Free tool · No signup
         </span>
         <h1 className="text-3xl sm:text-4xl font-bold text-white text-center leading-tight mb-4 max-w-xl text-balance">
-          Turn rough notes into a clean SOAP note
+          Turn rough notes into a clean SOAP or EMDR note
         </h1>
         <p className="text-center text-sm sm:text-base text-purple-200/70 mb-10 max-w-lg">
           Paste what you jotted down (or a rough transcript excerpt) and see it structured
-          into Subjective, Objective, Assessment, and Plan — the same AI that runs inside Kith.
+          into SOAP, or into target/SUD/VOC/phase for EMDR — the same AI that runs inside Kith.
         </p>
 
         <SoapFormatterTool />
