@@ -112,6 +112,7 @@ export default function RegisterPage() {
     name: '',
     business_phone: '', personal_phone: '',
     clinic_name: '', clinic_address: '', degree: '',
+    note_format: 'soap' as 'soap' | 'emdr',
   });
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
@@ -192,6 +193,7 @@ export default function RegisterPage() {
           clinic_name: form.clinic_name || null,
           clinic_address: form.clinic_address || null,
           designation: form.degree || null,
+          note_format: form.note_format,
           booking_source: bookingSource,
           onboarding_completed: false,
           terms_accepted: consentChecked,
@@ -383,6 +385,24 @@ export default function RegisterPage() {
                   <option value="">Select…</option>
                   {DEGREES.map(d => <option key={d}>{d}</option>)}
                 </select>
+              </div>
+
+              {/* Note format */}
+              <div>
+                <label className={LABEL}>How do you document sessions?</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => setForm(p => ({ ...p, note_format: 'soap' }))}
+                    className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${form.note_format === 'soap' ? 'border-violet-500 bg-violet-50' : 'border-purple-200 bg-white/80 hover:bg-white'}`}>
+                    <p className="text-sm font-bold text-slate-900">SOAP notes</p>
+                    <p className="mt-0.5 text-xs text-slate-500">Subjective, Objective, Assessment, Plan — general practice</p>
+                  </button>
+                  <button type="button" onClick={() => setForm(p => ({ ...p, note_format: 'emdr' }))}
+                    className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${form.note_format === 'emdr' ? 'border-violet-500 bg-violet-50' : 'border-purple-200 bg-white/80 hover:bg-white'}`}>
+                    <p className="text-sm font-bold text-slate-900">EMDR notes</p>
+                    <p className="mt-0.5 text-xs text-slate-500">Target, SUD/VOC, cognitions, phase — EMDR-trained practice</p>
+                  </button>
+                </div>
+                <p className="mt-1.5 text-xs text-slate-400">Change this anytime later in Settings.</p>
               </div>
 
               {/* Business phone */}

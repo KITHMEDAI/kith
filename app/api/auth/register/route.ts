@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       clinic_name,
       clinic_address,
       designation,     // highest degree
+      note_format,     // 'soap' | 'emdr' — which format their session notes generate in
       booking_source,
       booking_url,
       terms_accepted,
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
       clinic_name:      clinic_name || null,
       clinic_address:   clinic_address || null,
       designation:      designation || null,
+      note_format:      note_format === 'emdr' ? 'emdr' : 'soap',
       booking_source:   booking_source || 'none',
       booking_url:      booking_url || null,
       onboarding_completed: false,

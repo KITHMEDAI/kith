@@ -24,6 +24,7 @@ interface Profile {
   bio: string;
   timezone: string;
   avatar_url: string | null;
+  note_format?: 'soap' | 'emdr';
   subscription_plan?: 'free' | 'pro' | 'ultra' | 'clinic';
   subscription_status?: string;
 }
@@ -252,12 +253,13 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>({
     display_name: '', designation: '', license_number: '', license_council: '',
     clinic_name: '', clinic_address: '', phone: '', email: '', specializations: [], bio: '',
-    timezone: 'Asia/Kolkata', avatar_url: null,
+    timezone: 'Asia/Kolkata', avatar_url: null, note_format: 'soap',
   });
   const [stats, setStats]         = useState<Stats | null>(null);
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
   const [saved, setSaved]         = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [uploading, setUploading]   = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [editMode, setEditMode]     = useState(false);
@@ -281,6 +283,7 @@ export default function ProfilePage() {
 
   async function handleSave() {
     setSaving(true);
+    setSaveError('');
     try {
       const res = await fetch('/api/profile', {
         method: 'PATCH',
@@ -291,7 +294,11 @@ export default function ProfilePage() {
       setSaved(true); setEditMode(false);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
+      // Previously only console.error'd — a failed save looked identical to
+      // a successful one (button just went back to idle), so a real error
+      // (schema mismatch, network failure, etc.) was invisible to the user.
       console.error(err);
+      setSaveError(err instanceof Error && err.message ? err.message : 'Could not save — please try again.');
     } finally {
       setSaving(false);
     }
@@ -560,6 +567,34 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Note format */}
+        {editMode && (
+          <div>
+            <label className="block text-xs text-slate-400 mb-2">Session note format</label>
+            <div className="grid grid-cols-2 gap-3">
+              {(['soap', 'emdr'] as const).map(f => (
+                <button key={f} type="button" onClick={() => setProfile(p => ({ ...p, note_format: f }))}
+                  className="rounded-xl px-4 py-3 text-left transition-colors"
+                  style={{
+                    background: profile.note_format === f ? 'rgba(124,58,237,0.18)' : 'rgba(255,255,255,0.05)',
+                    border: profile.note_format === f ? '1px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                  }}>
+                  <p className="text-sm font-semibold text-white">{f === 'soap' ? 'SOAP notes' : 'EMDR notes'}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-400">
+                    {f === 'soap' ? 'Subjective, Objective, Assessment, Plan' : 'Target, SUD/VOC, cognitions, phase'}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {editMode && saveError && (
+          <p className="text-[13px] text-red-400 bg-red-900/30 border border-red-800/40 rounded-lg px-3 py-2">
+            {saveError}
+          </p>
+        )}
+
         {editMode && (
           <div className="flex gap-3 pt-1">
             <button onClick={handleSave} disabled={saving}
@@ -568,7 +603,7 @@ export default function ProfilePage() {
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saved ? 'Saved!' : saving ? 'Saving…' : 'Save changes'}
             </button>
-            <button onClick={() => setEditMode(false)}
+            <button onClick={() => { setEditMode(false); setSaveError(''); }}
               className="rounded-xl px-5 py-2.5 text-[14px] text-slate-400 hover:text-white transition-colors"
               style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
               Cancel

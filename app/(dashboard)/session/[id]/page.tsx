@@ -12,6 +12,7 @@ import {
 import Nebula from '@/components/session/Nebula';
 import type { Appointment, Patient, TranscriptSegment } from '@/types';
 import type { SpeakerMap } from '@/app/api/identify-speakers/route';
+import { NOTE_FIELDS, detectNoteFormat } from '@/lib/note-fields';
 
 // ─── Pulsing waveform bar ─────────────────────────────────────────────────────
 function WaveBar({ active }: { active: boolean }) {
@@ -1171,11 +1172,13 @@ export default function LiveSessionPage() {
 
                     {soapNote && (
                       <div className="rounded-xl p-4 space-y-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">SOAP Note</p>
-                        {(['subjective','objective','assessment','plan'] as const).map(f => (
-                          <div key={f}>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">{f}</p>
-                            <p className="text-base text-slate-400 leading-relaxed">{soapNote[f]}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                          {detectNoteFormat(soapNote) === 'emdr' ? 'EMDR Note' : 'SOAP Note'}
+                        </p>
+                        {NOTE_FIELDS[detectNoteFormat(soapNote)].map(({ key, label }) => (
+                          <div key={key}>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-1">{label}</p>
+                            <p className="text-base text-slate-400 leading-relaxed">{soapNote[key]}</p>
                           </div>
                         ))}
                       </div>

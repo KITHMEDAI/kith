@@ -9,7 +9,7 @@ export async function GET() {
 
   const { data: therapist, error } = await supabase
     .from('therapists')
-    .select('id, display_name, designation, license_number, license_council, clinic_name, clinic_address, phone, email, specializations, bio, timezone, avatar_url, created_at, subscription_plan, subscription_status')
+    .select('id, display_name, designation, license_number, license_council, clinic_name, clinic_address, phone, email, specializations, bio, timezone, avatar_url, note_format, created_at, subscription_plan, subscription_status')
     .eq('user_id', user.id)
     .single();
 
@@ -52,7 +52,7 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
 
   // Whitelist editable fields — prevent overwriting sensitive columns
-  const allowed = ['display_name','designation','license_number','license_council','clinic_name','clinic_address','phone','email','specializations','bio','timezone','avatar_url','onboarding_completed','booking_source','booking_url','consultation_fee_inr','working_hours','languages_spoken','default_session_duration'];
+  const allowed = ['display_name','designation','license_number','license_council','clinic_name','clinic_address','phone','email','specializations','bio','timezone','avatar_url','onboarding_completed','booking_source','booking_url','consultation_fee_inr','working_hours','languages_spoken','default_session_duration','note_format'];
   const updates: Record<string, unknown> = {};
   for (const key of allowed) {
     if (key in body) updates[key] = body[key];
@@ -66,6 +66,12 @@ export async function PATCH(req: NextRequest) {
     if (!Array.isArray(spec) || !spec.every(s => typeof s === 'string')) {
       return NextResponse.json({ error: 'specializations must be an array of strings' }, { status: 422 });
     }
+  }
+
+  // note_format has a DB CHECK constraint (soap|emdr) — reject early with a
+  // clear message instead of letting an invalid value fail as an opaque 500.
+  if ('note_format' in updates && updates.note_format !== 'soap' && updates.note_format !== 'emdr') {
+    return NextResponse.json({ error: "note_format must be 'soap' or 'emdr'" }, { status: 422 });
   }
 
   // onboarding_completed=true skips the whole wizard straight to /dashboard

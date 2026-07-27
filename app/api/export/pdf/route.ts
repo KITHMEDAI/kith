@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { NOTE_FIELDS, detectNoteFormat } from '@/lib/note-fields';
 
-interface SOAPNote {
-  subjective?: string;
-  objective?: string;
-  assessment?: string;
-  plan?: string;
-}
+// Either SOAP or EMDR shape — see lib/note-fields.ts.
+type SOAPNote = Record<string, string | undefined>;
 
 interface SessionGrowth {
   compared_to_last?: string;
@@ -63,6 +60,7 @@ export async function POST(req: NextRequest) {
   const t = therapist!;
   const p = s.patient;
   const soap = s.soap_note || {};
+  const noteFormat = detectNoteFormat(s.soap_note);
   const sessionDate = new Date(s.started_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
   // Escape first (this is AI-/transcript-derived text going straight into an
@@ -120,10 +118,9 @@ export async function POST(req: NextRequest) {
     <div class="meta-item"><div class="meta-label">Diagnosis</div><div class="meta-value">${p?.diagnosis?.join(', ') || '—'}</div></div>
   </div>
 
-  ${soap.subjective ? `<div class="section"><div class="section-title">Subjective</div>${body(soap.subjective)}</div>` : ''}
-  ${soap.objective ? `<div class="section"><div class="section-title">Objective</div>${body(soap.objective)}</div>` : ''}
-  ${soap.assessment ? `<div class="section"><div class="section-title">Assessment</div>${body(soap.assessment)}</div>` : ''}
-  ${soap.plan ? `<div class="section"><div class="section-title">Plan</div>${body(soap.plan)}</div>` : ''}
+  ${NOTE_FIELDS[noteFormat].map(({ key, label }) =>
+    soap[key] ? `<div class="section"><div class="section-title">${label}</div>${body(soap[key])}</div>` : ''
+  ).join('')}
 
   ${s.key_points?.length ? `
   <div class="section">

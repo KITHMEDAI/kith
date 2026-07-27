@@ -8,7 +8,7 @@
  * you add the API keys to .env.local.
  */
 
-import type { SessionNotes, TranscriptSegment } from '@/types';
+import type { SessionNotes, TranscriptSegment, NoteFormat } from '@/types';
 
 export const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK === 'true';
@@ -38,17 +38,25 @@ export function mockTranscript(): TranscriptSegment[] {
 
 // ── Claude / Notes Generation ───────────────────────────────────────────────
 
-export function mockSessionNotes(patientName: string, diagnosis: string[]): SessionNotes {
+export function mockSessionNotes(patientName: string, diagnosis: string[], noteFormat: NoteFormat = 'soap'): SessionNotes {
   const initials = patientName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   const dx = diagnosis.join(', ') || 'GAD';
 
+  const soapShape = {
+    subjective: `${initials}. reports improvement in panic episode frequency (2 this week vs 5 last week). Breathing exercises described as effective. Ongoing cognitive distortions related to workplace performance noted. Patient acknowledges successful presentation outcome despite anticipatory anxiety.`,
+    objective: `Affect: calm, engaged. Speech: clear, organised. Thought process: linear. No psychotic features. Eye contact maintained throughout. Posture relaxed. Demonstrated insight into cognitive patterns when questioned.`,
+    assessment: `${initials}. continues to make measurable progress with ${dx}. Panic frequency reduced 60% week-on-week. Homework compliance high. Catastrophising remains active in occupational contexts. CBT interventions are producing positive outcomes. Session quality: good therapeutic alliance.`,
+    plan: `1. Continue diaphragmatic breathing — daily 10-minute practice. 2. Introduce thought record worksheet for work-related cognitions. 3. Cognitive restructuring exercise: evidence-for / evidence-against. 4. Review progress on panic diary at next session. 5. Schedule follow-up in 7 days.`,
+  };
+  const emdrShape = {
+    target: `${initials}. — recurring memory tied to ${dx}, second processing session on this target.`,
+    sud_voc: `SUD 7 → 3 by end of session. VOC on positive cognition rated 5/7, up from 2/7 at start.`,
+    cognitions: `Negative cognition "I'm not in control" → positive cognition "I can handle this now".`,
+    phase_plan: `Desensitization phase, several sets of eye movements with check-ins. Next: installation phase if SUD stable ≤3.`,
+  };
+
   return {
-    soap_note: {
-      subjective: `${initials}. reports improvement in panic episode frequency (2 this week vs 5 last week). Breathing exercises described as effective. Ongoing cognitive distortions related to workplace performance noted. Patient acknowledges successful presentation outcome despite anticipatory anxiety.`,
-      objective: `Affect: calm, engaged. Speech: clear, organised. Thought process: linear. No psychotic features. Eye contact maintained throughout. Posture relaxed. Demonstrated insight into cognitive patterns when questioned.`,
-      assessment: `${initials}. continues to make measurable progress with ${dx}. Panic frequency reduced 60% week-on-week. Homework compliance high. Catastrophising remains active in occupational contexts. CBT interventions are producing positive outcomes. Session quality: good therapeutic alliance.`,
-      plan: `1. Continue diaphragmatic breathing — daily 10-minute practice. 2. Introduce thought record worksheet for work-related cognitions. 3. Cognitive restructuring exercise: evidence-for / evidence-against. 4. Review progress on panic diary at next session. 5. Schedule follow-up in 7 days.`,
-    },
+    soap_note: noteFormat === 'emdr' ? emdrShape : soapShape,
     key_points: [
       'Panic episodes reduced from 5 to 2 this week — 60% improvement',
       'Breathing techniques working effectively in acute moments',

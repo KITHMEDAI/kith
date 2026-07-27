@@ -111,7 +111,7 @@ export async function runNoteGeneration(
   // processing cost is bounded regardless of how long the client recorded.
   const { data: therapistBilling } = await service
     .from('therapists')
-    .select('subscription_plan, subscription_status, trial_ends_at, cancel_at')
+    .select('subscription_plan, subscription_status, trial_ends_at, cancel_at, note_format')
     .eq('id', session.therapist_id)
     .single();
   if (therapistBilling) {
@@ -134,6 +134,7 @@ export async function runNoteGeneration(
       previousSessionSummary: prevSession?.session_summary ?? undefined,
       manualNotes: notesManual,
       speakerMap,
+      noteFormat: therapistBilling?.note_format === 'emdr' ? 'emdr' : 'soap',
     });
 
     const riskLevel = notes.risk_flags?.level || 'low';

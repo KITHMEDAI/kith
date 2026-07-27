@@ -12,7 +12,7 @@
  */
 
 import { USE_MOCK, mockSessionNotes, mockLiveUpdate } from './mock';
-import type { TranscriptSegment, Patient, SessionNotes } from '@/types';
+import type { TranscriptSegment, Patient, SessionNotes, NoteFormat } from '@/types';
 import { getInitials } from './utils';
 
 export function anthropic() {
@@ -146,6 +146,25 @@ Return ONLY valid JSON — be SPECIFIC to THIS session, not a template. Every fi
 }
 
 // ─── Stage 2: Sonnet clinical synthesis ───────────────────────────────────────
+// The two note formats a therapist can pick at signup (types/index.ts
+// NoteFormat). Only the "soap_note" JSON block's internal shape differs —
+// everything else in the prompt (risk flags, resources, growth, homework)
+// is format-independent and stays identical either way.
+const NOTE_SCHEMAS: Record<NoteFormat, string> = {
+  soap: `  "soap_note": {
+    "subjective": "2-4 short points separated by ' • ' on ONE line. Patient-reported issues/events/emotions. e.g. 'Rumination re: supervisor conflict • Mood self-rated 4/10 • 3 nights fragmented sleep'",
+    "objective": "2-4 short points separated by ' • '. This note is generated from a TEXT TRANSCRIPT ONLY — there is no video or audio observation. Base every point on what the transcript can actually evidence: engagement pattern (spontaneous vs. reluctant disclosure), coherence/organisation of what was said, response length or hesitation, topic avoidance, shifts over the session, or affect the patient explicitly self-described. NEVER assert facial affect, eye contact, posture, or psychomotor activity as directly observed (e.g. 'flat affect', 'no dissociation observed', 'appropriate eye contact') — a transcript cannot show these, and claiming to have seen them misrepresents what this system actually knows to whoever reads the chart. If nothing in the transcript evidences a genuine behavioural observation, write fewer points rather than filling the field with a boilerplate checklist line. e.g. 'Disclosed affair details only after direct questioning — reluctant, not spontaneous • Speech organised, no tangential shifts'",
+    "assessment": "2-4 short points separated by ' • '. Formulation tied to dx + goals. e.g. 'Consistent with GAD: catastrophic appraisal of work stress • Limited progress on cognitive restructuring'",
+    "plan": "2-4 short points separated by ' • '. Concrete next steps, techniques, referrals, frequency."
+  },`,
+  emdr: `  "soap_note": {
+    "target": "1-2 short points separated by ' • '. The specific memory, image, or belief being processed this session. e.g. 'Car accident memory, third processing session • Self-blame belief still activated at start'",
+    "sud_voc": "1-2 short points separated by ' • '. SUD (Subjective Units of Distress, 0-10) and VOC (Validity of Cognition, 1-7), before → after, ONLY if the brief indicates them — if not mentioned, write 'Not rated this session' rather than inventing a number. e.g. 'SUD 8 → 3 by session end • VOC not formally rated'",
+    "cognitions": "1-2 short points separated by ' • '. The negative cognition (NC) worked with, and the positive cognition (PC) installed or strengthening, grounded only in what's in the brief.",
+    "phase_plan": "1-2 short points separated by ' • '. Which phase of the EMDR protocol was addressed (assessment, desensitization, installation, body scan, closure) and the focus for next session — same target or move on."
+  },`,
+};
+
 async function synthesiseClinicalNotes(
   client: any,
   brief: string,
@@ -153,6 +172,7 @@ async function synthesiseClinicalNotes(
   sessionNumber: number,
   previousSummary?: string,
   manualNotes?: string,
+  noteFormat: NoteFormat = 'soap',
 ): Promise<SessionNotes> {
   const initials = getInitials(patient.display_name);
 
@@ -177,12 +197,7 @@ Use SHORT bullet points. Each point telegraphic, specific to THIS session, ideal
 No filler, no preamble, no restating the field name. Every point a real observation, not a category.
 Return ONLY valid JSON:
 {
-  "soap_note": {
-    "subjective": "2-4 short points separated by ' • ' on ONE line. Patient-reported issues/events/emotions. e.g. 'Rumination re: supervisor conflict • Mood self-rated 4/10 • 3 nights fragmented sleep'",
-    "objective": "2-4 short points separated by ' • '. This note is generated from a TEXT TRANSCRIPT ONLY — there is no video or audio observation. Base every point on what the transcript can actually evidence: engagement pattern (spontaneous vs. reluctant disclosure), coherence/organisation of what was said, response length or hesitation, topic avoidance, shifts over the session, or affect the patient explicitly self-described. NEVER assert facial affect, eye contact, posture, or psychomotor activity as directly observed (e.g. 'flat affect', 'no dissociation observed', 'appropriate eye contact') — a transcript cannot show these, and claiming to have seen them misrepresents what this system actually knows to whoever reads the chart. If nothing in the transcript evidences a genuine behavioural observation, write fewer points rather than filling the field with a boilerplate checklist line. e.g. 'Disclosed affair details only after direct questioning — reluctant, not spontaneous • Speech organised, no tangential shifts'",
-    "assessment": "2-4 short points separated by ' • '. Formulation tied to dx + goals. e.g. 'Consistent with GAD: catastrophic appraisal of work stress • Limited progress on cognitive restructuring'",
-    "plan": "2-4 short points separated by ' • '. Concrete next steps, techniques, referrals, frequency."
-  },
+${NOTE_SCHEMAS[noteFormat]}
   "key_points": ["3-5 points, ≤ 12 words each, concrete observations not categories"],
   "session_summary": "≤ 2 short sentences using ${initials}: key theme, emotional trajectory, outcome.",
   "session_growth": {
@@ -328,10 +343,13 @@ function validateHighlighting(notes: SessionNotes): { ok: boolean; violations: s
       if (countHighlights(point) !== 1) violations.push(`${label}: "${point}"`);
     }
   };
-  checkField('subjective', notes.soap_note?.subjective);
-  checkField('objective', notes.soap_note?.objective);
-  checkField('assessment', notes.soap_note?.assessment);
-  checkField('plan', notes.soap_note?.plan);
+  // Iterate whichever keys the stored note actually has (SOAP's
+  // subjective/objective/assessment/plan, or EMDR's
+  // target/sud_voc/cognitions/phase_plan) rather than a hardcoded SOAP list,
+  // so this validates either format the same way.
+  for (const [key, text] of Object.entries(notes.soap_note || {})) {
+    checkField(key, text as string | undefined);
+  }
   (notes.key_points || []).forEach(p => { if (countHighlights(p) !== 1) violations.push(`key_points: "${p}"`); });
   checkField('homework_assigned', notes.homework_assigned);
   checkField('next_session_plan', notes.next_session_plan);
@@ -368,14 +386,16 @@ function repairField(text?: string): string | undefined {
   return splitPoints(text).map(autoBold).join(' • ');
 }
 function repairHighlighting(notes: SessionNotes): SessionNotes {
+  // Same "iterate whatever keys are present" approach as validateHighlighting
+  // — repairs SOAP or EMDR fields identically without knowing which shape
+  // it's looking at.
+  const repairedNote: Record<string, string | undefined> = {};
+  for (const [key, text] of Object.entries(notes.soap_note || {})) {
+    repairedNote[key] = repairField(text as string | undefined);
+  }
   return {
     ...notes,
-    soap_note: {
-      subjective: repairField(notes.soap_note?.subjective),
-      objective: repairField(notes.soap_note?.objective),
-      assessment: repairField(notes.soap_note?.assessment),
-      plan: repairField(notes.soap_note?.plan),
-    },
+    soap_note: repairedNote,
     key_points: (notes.key_points || []).map(autoBold),
     homework_assigned: repairField(notes.homework_assigned) ?? notes.homework_assigned,
     next_session_plan: repairField(notes.next_session_plan) ?? notes.next_session_plan,
@@ -533,11 +553,12 @@ export async function generateSessionNotes(params: {
   previousSessionSummary?: string;
   manualNotes?: string;
   speakerMap?: Record<string, { role: string; name: string | null; display: string }>;
+  noteFormat?: NoteFormat;
 }): Promise<SessionNotes> {
-  if (USE_MOCK) return mockSessionNotes(params.patient.display_name, params.patient.diagnosis ?? []);
+  if (USE_MOCK) return mockSessionNotes(params.patient.display_name, params.patient.diagnosis ?? [], params.noteFormat);
 
   const client = anthropic();
-  if (!client) return mockSessionNotes(params.patient.display_name, params.patient.diagnosis ?? []);
+  if (!client) return mockSessionNotes(params.patient.display_name, params.patient.diagnosis ?? [], params.noteFormat);
 
   // Stage 1: Haiku compresses the long transcript (handles 30-60 min sessions cheaply)
   const brief = await compressTranscript(client, params.transcript, params.patient, params.speakerMap);
@@ -550,6 +571,7 @@ export async function generateSessionNotes(params: {
     params.sessionNumber,
     params.previousSessionSummary,
     params.manualNotes,
+    params.noteFormat ?? 'soap',
   );
 }
 

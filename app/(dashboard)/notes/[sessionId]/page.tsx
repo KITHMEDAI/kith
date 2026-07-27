@@ -8,13 +8,11 @@ import {
   Film, User, Calendar, Clock, RefreshCw,
 } from 'lucide-react';
 import SendToPatientAction from '@/components/patients/SendToPatientAction';
+import { NOTE_FIELDS, detectNoteFormat } from '@/lib/note-fields';
 
-interface SOAPNote {
-  subjective?: string;
-  objective?: string;
-  assessment?: string;
-  plan?: string;
-}
+// Either SOAP (subjective/objective/assessment/plan) or EMDR
+// (target/sud_voc/cognitions/phase_plan) shape — see lib/note-fields.ts.
+type SOAPNote = Record<string, string | undefined>;
 
 interface RiskFlags {
   level: 'low' | 'moderate' | 'high' | 'critical';
@@ -187,19 +185,15 @@ export default function NoteDetailPage() {
 
   const handleCopy = useCallback(async () => {
     if (!session?.soap_note) return;
-    const text = [
-      `SOAP NOTE — ${session.patient?.display_name} — Session #${session.session_number}`,
+    const format = detectNoteFormat(session.soap_note);
+    const lines = [
+      `${format === 'emdr' ? 'EMDR NOTE' : 'SOAP NOTE'} — ${session.patient?.display_name} — Session #${session.session_number}`,
       `Date: ${new Date(session.started_at).toLocaleDateString('en-IN')}`,
-      '',
-      'SUBJECTIVE:', session.soap_note.subjective || '',
-      '',
-      'OBJECTIVE:', session.soap_note.objective || '',
-      '',
-      'ASSESSMENT:', session.soap_note.assessment || '',
-      '',
-      'PLAN:', session.soap_note.plan || '',
-    ].join('\n');
-    await navigator.clipboard.writeText(text);
+    ];
+    for (const f of NOTE_FIELDS[format]) {
+      lines.push('', `${f.label.toUpperCase()}:`, session.soap_note[f.key] || '');
+    }
+    await navigator.clipboard.writeText(lines.join('\n'));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [session]);
@@ -289,6 +283,7 @@ export default function NoteDetailPage() {
   }
 
   const soap = isEditing ? editedSOAP : (session.soap_note || {});
+  const noteFormat = detectNoteFormat(session.soap_note);
   const duration = session.ended_at
     ? Math.round((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 60000)
     : null;
@@ -463,7 +458,7 @@ export default function NoteDetailPage() {
                 activeTab === tab ? 'bg-[#1a2332] text-white' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              {tab === 'soap' ? 'SOAP Note' : tab === 'resources' ? 'Resources' : 'Next Session'}
+              {tab === 'soap' ? (noteFormat === 'emdr' ? 'EMDR Note' : 'SOAP Note') : tab === 'resources' ? 'Resources' : 'Next Session'}
             </button>
           ))}
         </div>
@@ -471,23 +466,23 @@ export default function NoteDetailPage() {
         {/* SOAP tab */}
         {activeTab === 'soap' && (
           <div className="space-y-4">
-            {(['subjective', 'objective', 'assessment', 'plan'] as const).map(field => (
-              <div key={field} className="bg-[#1a2332] border border-white/8 rounded-xl overflow-hidden">
+            {NOTE_FIELDS[noteFormat].map(({ key, label }) => (
+              <div key={key} className="bg-[#1a2332] border border-white/8 rounded-xl overflow-hidden">
                 <div className="px-4 py-2.5 border-b border-white/8 bg-white/3">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{field}</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{label}</h3>
                 </div>
                 <div className="p-4">
                   {isEditing ? (
                     <textarea
-                      value={editedSOAP[field] || ''}
-                      onChange={e => setEditedSOAP(s => ({ ...s, [field]: e.target.value }))}
+                      value={editedSOAP[key] || ''}
+                      onChange={e => setEditedSOAP(s => ({ ...s, [key]: e.target.value }))}
                       rows={4}
                       className="w-full bg-transparent text-base text-gray-200 resize-none focus:outline-none placeholder-gray-600"
-                      placeholder={`Enter ${field} notes...`}
+                      placeholder={`Enter ${label.toLowerCase()} notes...`}
                     />
                   ) : (
-                    soap[field]
-                      ? <ClinicalText text={soap[field] as string} />
+                    soap[key]
+                      ? <ClinicalText text={soap[key] as string} />
                       : <p className="text-base"><span className="text-gray-600 italic">Not recorded</span></p>
                   )}
                 </div>
