@@ -131,7 +131,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
       )}
 
       {/* Body grid */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         {/* Left column */}
         <div className="space-y-4">
@@ -226,7 +226,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
         </div>
 
         {/* Right — 2 cols */}
-        <div className="col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
 
           {/* Presenting concern */}
           {p.presenting_concerns && (

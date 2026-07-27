@@ -2,11 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import { getInitials } from '@/lib/utils';
 import type { Therapist } from '@/types';
 
-export default function Topbar({ therapist }: { therapist: Therapist | null }) {
+export default function Topbar({ therapist, onMenuClick }: { therapist: Therapist | null; onMenuClick: () => void }) {
   const router = useRouter();
   const supabase = createClient();
   const name = therapist?.display_name || '';
@@ -26,7 +26,16 @@ export default function Topbar({ therapist }: { therapist: Therapist | null }) {
       className="sticky top-0 z-30 flex h-12 items-center justify-between px-6"
       style={{ background: '#1e0d4e', borderBottom: '1px solid #2d1760' }}
     >
-      <p className="text-[13px] text-purple-200/70">{today}</p>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden flex h-7 w-7 items-center justify-center rounded-md text-purple-200/70 hover:text-white hover:bg-white/10 transition-colors -ml-1.5"
+          aria-label="Open menu"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+        <p className="text-[13px] text-purple-200/70 truncate">{today}</p>
+      </div>
       <div className="flex items-center gap-1">
         <button
           onClick={handleLogout}

@@ -158,7 +158,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Stats row ── */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           { label: 'Active patients',   value: totalPatients ?? 0,  icon: Users,      sub: 'in your caseload',     href: '/patients' },
           { label: "Today's sessions",  value: appointments.length, icon: Calendar,   sub: `${sessionsDone} completed`, href: '/appointments' },
@@ -181,10 +181,10 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Main grid ── */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         {/* Today's schedule */}
-        <div className="col-span-2 rounded-lg border border-white/40 bg-white/60 backdrop-blur-md overflow-hidden shadow-sm">
+        <div className="lg:col-span-2 rounded-lg border border-white/40 bg-white/60 backdrop-blur-md overflow-hidden shadow-sm">
           <div className="flex items-center justify-between px-5 py-3.5 border-b border-purple-200/50">
             <h2 className="text-[13px] font-semibold text-foreground">Today&apos;s schedule</h2>
             <Link href="/appointments" className="flex items-center gap-0.5 text-[12px] text-violet-600 hover:text-violet-700">

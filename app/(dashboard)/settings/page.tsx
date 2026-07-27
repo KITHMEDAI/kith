@@ -480,7 +480,7 @@ export default function ProfilePage() {
       <GoogleCalendarCard />
 
       {/* ── Stats row ──────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { icon: <Calendar className="h-5 w-5" />, label: 'Sessions completed', value: stats?.total_sessions ?? 0, color: '#3b82f6' },
           { icon: <Clock className="h-5 w-5" />, label: 'Hours of therapy', value: stats?.total_hours ?? 0, color: '#8b5cf6' },
@@ -514,7 +514,7 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {field('display_name',    'Full name',          'Dr. Priya Sharma')}
           {field('designation',     'Designation',        'Clinical Psychologist')}
           {field('license_number',  'License number',     'RCI/MH/12345')}
@@ -571,7 +571,7 @@ export default function ProfilePage() {
         {editMode && (
           <div>
             <label className="block text-xs text-slate-400 mb-2">Session note format</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(['soap', 'emdr'] as const).map(f => (
                 <button key={f} type="button" onClick={() => setProfile(p => ({ ...p, note_format: f }))}
                   className="rounded-xl px-4 py-3 text-left transition-colors"

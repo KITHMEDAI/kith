@@ -1,5 +1,4 @@
-import Sidebar from '@/components/layout/Sidebar';
-import Topbar from '@/components/layout/Topbar';
+import DashboardShell from '@/components/layout/DashboardShell';
 import AppointmentReminder from '@/components/notifications/AppointmentReminder';
 import type { Therapist } from '@/types';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -60,13 +59,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="flex min-h-screen bg-transparent">
-      <Sidebar therapist={therapist} />
-      <div className="flex-1 pl-[22rem] flex flex-col min-h-screen">
-        <Topbar therapist={therapist} />
-        <main className="flex-1">{children}</main>
-      </div>
+    <>
+      <DashboardShell therapist={therapist}>{children}</DashboardShell>
       {!isOnboardingPath && <AppointmentReminder />}
-    </div>
+    </>
   );
 }

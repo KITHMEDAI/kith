@@ -181,7 +181,7 @@ export default function ImportPage() {
               <h2 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-teal-400" /> Columns the AI detected
               </h2>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                 {Object.entries(result.mapping).map(([field, col]) => (
                   <div key={field} className="flex items-center justify-between text-sm gap-2">
                     <span className="text-gray-500 shrink-0">{FIELD_LABELS[field] || field}</span>

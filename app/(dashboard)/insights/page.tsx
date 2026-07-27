@@ -220,7 +220,7 @@ export default async function InsightsPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {stats.map(({ label, value, change, up, icon: Icon }) => (
           <div key={label} className="rounded-lg border border-white/40 bg-white/60 backdrop-blur-md p-4 shadow-sm">
             <div className="flex items-start justify-between">
@@ -241,10 +241,10 @@ export default async function InsightsPage() {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         {/* Session trend */}
-        <div className="col-span-2 rounded-lg border border-white/40 bg-white/60 backdrop-blur-md p-5 shadow-sm">
+        <div className="lg:col-span-2 rounded-lg border border-white/40 bg-white/60 backdrop-blur-md p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-foreground mb-4">Sessions completed — last 4 weeks</h2>
           {sessionsThisMonth === 0 ? (
             <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
