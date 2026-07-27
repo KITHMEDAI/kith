@@ -2,6 +2,7 @@
   "_comment": "Tracks social post topics already drafted, so the influencer agent doesn't repeat itself. Each entry: { date, slug, topic }. The agent reads this before picking a new topic — avoid anything covered in the last 14 days.",
   "entries": [
     { "date": "2026-07-22", "slug": "ambient-transcription-paperwork-tax", "topic": "ambient transcription reduces the paperwork tax" },
-    { "date": "2026-07-24", "slug": "soap-notes-vague-plans", "topic": "a vague Plan section is the same as no plan at all" }
+    { "date": "2026-07-24", "slug": "soap-notes-vague-plans", "topic": "a vague Plan section is the same as no plan at all" },
+    { "date": "2026-07-27", "slug": "free-soap-formatter-tool", "topic": "a free tool that turns rough session notes into a structured SOAP or EMDR note, no signup" }
   ]
 }
