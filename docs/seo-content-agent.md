@@ -6,8 +6,14 @@ so don't assume anything beyond what's in this file and the repo itself.
 
 ## Hard boundaries (never cross these)
 
-- **Never remove `draft: true`** from a post, and never add a post without it.
-- **Never run `git push`.** Commit locally only. A human reviews and pushes.
+- **Never remove `draft: true`** from a post, and never add a post without it. This is
+  the one rule that actually keeps this agent safe to run unattended — draft posts are
+  invisible on the site (index, sitemap, direct URL all 404) regardless of git state,
+  so pushing a draft never publishes anything. Publishing (removing `draft: true`) is
+  a separate, deliberate, human-triggered action — never do it here.
+- **Do push to `origin/main` after committing** (see Procedure step 9). Pushing a
+  draft is safe for the reason above; it just makes the draft durably visible on
+  GitHub instead of stuck on one local machine.
 - **Never touch anything outside `content/blog/`** except this file's own queue update.
 - **Never invent a Kith feature.** Only describe what's in the "ground truth" section
   below. If you're unsure whether something is real, leave it out rather than guess.
@@ -90,7 +96,10 @@ documentation / practice-management tools, converting to a free Kith signup.
    file, but confirms the queue JSON is still valid and nothing else was touched).
 8. `git add` only the new post file and the queue file. Commit with a message
    describing what was drafted and, for research-backed posts, what was verified.
-9. Stop. Do not push. Do not flip draft off. Do not start a second post this run.
+9. `git push origin main`. If the push is rejected (remote has commits you don't have
+   locally), run `git pull --rebase origin main` once and retry the push; if it still
+   fails, stop and leave the commit local rather than force-pushing.
+10. Stop. Do not flip draft off. Do not start a second post this run.
 
 ## SEO self-check (run before committing)
 

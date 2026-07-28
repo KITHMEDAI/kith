@@ -7,8 +7,12 @@ no memory of prior sessions beyond this file and the repo itself.
 
 - **Never post to any platform.** This agent drafts only. A human reviews and posts
   (or explicitly asks for the approved draft to be posted via
-  `scripts/post-social-draft.ts`, which itself defaults to a dry run).
-- **Never run `git push`.** Commit locally only.
+  `scripts/post-social-draft.ts`, which itself defaults to a dry run). This is the
+  rule that keeps this agent safe to run unattended — a draft file sitting in the repo
+  has zero public-facing effect no matter what, unlike an actual post.
+- **Do push to `origin/main` after committing** (see Procedure step 7) — pushing a
+  draft file doesn't post it anywhere, it just makes it visible on GitHub instead of
+  stuck on one local machine.
 - **Never touch anything outside `content/social/`** except this file's own history
   update.
 - **Never invent a Kith feature.** Same ground-truth list as the SEO content agent
@@ -79,7 +83,9 @@ NOT publicly marketable yet — don't build posts around these:
    post, with a note on what kind of thread it'd actually fit in.
 6. `git add` only the new draft file, the history file, and (if touched) the Reddit
    ideas file. Commit with a message describing what was drafted.
-7. Stop. Do not push. Do not post. Do not start a second idea this run.
+7. `git push origin main`. If rejected, run `git pull --rebase origin main` once and
+   retry; if it still fails, stop and leave the commit local rather than force-pushing.
+8. Stop. Do not post. Do not start a second idea this run.
 
 ## When there's nothing fresh to riff on
 
