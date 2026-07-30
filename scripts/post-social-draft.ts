@@ -10,6 +10,13 @@
  *   npx tsx scripts/post-social-draft.ts content/social/drafts/<file>.md --confirm   (posts for real)
  */
 import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
+// This script runs standalone via `npx tsx`, not through Next.js's dev/build
+// process — Next.js auto-loads .env.local for the app itself, but a bare
+// script needs to load it explicitly or every env var reads as undefined.
+dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+
 import matter from 'gray-matter';
 import { twitterConfigured, postTweet } from '../lib/social/twitter';
 
