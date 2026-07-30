@@ -50,11 +50,13 @@ export default async function OpengraphImage() {
 
         {/* Logo mark */}
         <svg width="120" height="120" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="512" height="512" rx="112" fill="#1e0d4e" />
-          <rect x="82" y="72" width="46" height="200" rx="20" fill="#c4b5fd" />
-          <line x1="122" y1="185" x2="248" y2="270" stroke="#c4b5fd" strokeWidth="44" strokeLinecap="round" />
-          <g transform="rotate(45 168 110)">
-            <rect x="148" y="46" width="48" height="118" rx="24" fill="#c4b5fd" />
+          <rect width="512" height="512" rx="112" fill="#7c3aed" />
+          <g transform="translate(256 256) scale(1.3) translate(-176 -171.5)">
+            <rect x="82" y="72" width="46" height="200" rx="20" fill="white" />
+            <line x1="122" y1="185" x2="248" y2="270" stroke="white" strokeWidth="44" strokeLinecap="round" />
+            <g transform="rotate(45 168 110)">
+              <rect x="148" y="46" width="48" height="118" rx="24" fill="white" />
+            </g>
           </g>
         </svg>
 
