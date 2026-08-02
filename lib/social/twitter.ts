@@ -28,3 +28,16 @@ export async function postTweet(text: string): Promise<{ id: string; url: string
   const { data } = await client.v2.tweet(text);
   return { id: data.id, url: `https://x.com/i/web/status/${data.id}` };
 }
+
+export async function postReply(text: string, inReplyToTweetId: string): Promise<{ id: string; url: string }> {
+  const client = getTwitterClient();
+  const { data } = await client.v2.reply(text, inReplyToTweetId);
+  return { id: data.id, url: `https://x.com/i/web/status/${data.id}` };
+}
+
+// Extracts the numeric tweet ID from a status URL, e.g.
+// https://x.com/someone/status/1234567890 -> "1234567890"
+export function tweetIdFromUrl(url: string): string | null {
+  const match = url.match(/status\/(\d+)/);
+  return match ? match[1] : null;
+}
