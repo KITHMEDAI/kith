@@ -255,6 +255,8 @@ STRICT RULES:
 - resource_suggestions.books: only REAL published books, only when directly relevant. Omit if nothing fits precisely.
 - resource_suggestions.apps: omit entirely if nothing is genuinely helpful — do not pad with generic apps.
 - ai_suggestions: never judge patient behaviour or choices. State observations clinically and neutrally. If things are going well, say so directly.
+- PRECISION ON COUNTS: never state a specific number (sets, repetitions, sessions, minutes) unless the brief lets you actually count it. If the brief doesn't make the count explicit, describe it qualitatively instead (e.g. "several sets" not "7 sets") rather than guessing a number that sounds plausible.
+- PRECISION ON NAMED TECHNIQUES: only name a formal technique/protocol (e.g. "5-4-3-2-1 grounding", "TIPP", "PMR") if the brief shows the FULL protocol was actually used. If only part of it was taught (e.g. just the visual-naming step, not all five senses), describe the concrete steps given instead of naming the full protocol — naming it implies more was done than actually happened.
 - Return ONLY JSON, no markdown fences.`;
 
   // One retry on invalid/missing JSON — same reasoning as Layer 1's retry:
