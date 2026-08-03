@@ -5,6 +5,7 @@
     { "date": "2026-07-24", "slug": "soap-notes-vague-plans", "topic": "a vague Plan section is the same as no plan at all" },
     { "date": "2026-07-27", "slug": "free-soap-formatter-tool", "topic": "a free tool that turns rough session notes into a structured SOAP or EMDR note, no signup" },
     { "date": "2026-07-29", "slug": "no-show-causes-scheduling", "topic": "not every no-show has the same cause - separating logistics failures (double-booking, a missing Meet link) from genuine forgetting or ambivalence" },
-    { "date": "2026-07-31", "slug": "consent-gates-recording-vs-ai", "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still treat them as one checkbox" }
+    { "date": "2026-07-31", "slug": "consent-gates-recording-vs-ai", "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still treat them as one checkbox" },
+    { "date": "2026-08-03", "slug": "notetaker-bot-joins-quietly", "topic": "the online notetaker bot joins a Google Meet call like a silent observer - no camera, no chat, just audio - and feeds the same note pipeline as in-person sessions" }
   ]
 }
