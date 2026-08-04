@@ -31,7 +31,7 @@
       "keyword": "therapy scheduling software",
       "intent": "informational",
       "priority": "fill-in",
-      "status": "drafted"
+      "status": "published"
     },
     {
       "slug": "google-meet-therapy-sessions",
@@ -39,7 +39,7 @@
       "keyword": "online therapy sessions google meet",
       "intent": "informational",
       "priority": "fill-in",
-      "status": "pending"
+      "status": "drafted"
     },
     {
       "slug": "gdpr-ai-notetaking-uk",
