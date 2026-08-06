@@ -6,6 +6,35 @@ where it's actually relevant to the discussion already happening — never as a
 standalone promotional post. See docs/influencer-agent-runbook.md for why this
 list exists instead of scheduled Reddit posts.
 
+## Being uncomfortable with a client recording sessions while using an AI scribe yourself - the two consents aren't actually the same ask
+
+Thread: [r/therapists - "Client requested to record session."](https://www.reddit.com/r/therapists/comments/1vc9ywu/client_requested_to_record_session/)
+(posted 6 days ago, active into the last 2 days - a therapist whose client asked
+to record sessions to take notes later; the therapist feels uncomfortable but
+also uses an AI scribe to transcribe the same sessions for progress notes, and
+worries the client will reasonably ask "why is your recording fine but mine
+isn't?"). The top comments push hard on the hypocrisy angle - several argue
+there's no principled difference, since the AI scribe is also recording and
+sending audio to a third party. A few commenters (jleonardbc, DrJocelyn1) get
+closer to the actual distinguishing question: did the client affirmatively
+consent to the AI-scribe processing specifically, as its own thing, or are
+they just assumed to be fine with it because they haven't objected? That's
+the real discussion angle - not "AI transcription vs. client recording are
+the same," but that most practices never actually separate the two asks in
+their consent paperwork ("you may be recorded for note-taking/AI processing"
+as one bundled line) versus a client's request to keep their own recording,
+which is a different retention and purpose entirely (a therapist controlling
+a transient processing pipeline vs. a client holding a permanent personal
+copy). Worth engaging with the specific gap several commenters are circling -
+what would it actually mean to get explicit, separate, informed consent for
+AI processing (not just default it in) rather than resolving the discomfort
+by asserting the two requests are morally different. Mention field-level
+handling of session audio/consent structure only if someone asks what a tool
+that separates those two consents in the UI actually looks like - the OCD/
+hypocrisy self-reflection OP is already deep in is the real conversation and
+deserves engaging on its own terms first. Thread is a week old but still
+getting comments as of 2 days ago, so likely still live enough to reply into.
+
 ## Consent paperwork that bundles recording + AI processing into one checkbox
 
 A genuine, common complaint on r/therapists is intake paperwork feeling like

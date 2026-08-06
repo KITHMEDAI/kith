@@ -7,6 +7,7 @@
     { "date": "2026-07-29", "slug": "no-show-causes-scheduling", "topic": "not every no-show has the same cause - separating logistics failures (double-booking, a missing Meet link) from genuine forgetting or ambivalence" },
     { "date": "2026-07-31", "slug": "consent-gates-recording-vs-ai", "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still treat them as one checkbox" },
     { "date": "2026-08-03", "slug": "notetaker-bot-joins-quietly", "topic": "the online notetaker bot joins a Google Meet call like a silent observer - no camera, no chat, just audio - and feeds the same note pipeline as in-person sessions" },
-    { "date": "2026-08-05", "slug": "field-encryption-row-level-security", "topic": "\"encrypted\" in a privacy policy usually just means the connection - field-level encryption at rest and per-therapist row-level security are a different claim" }
+    { "date": "2026-08-05", "slug": "field-encryption-row-level-security", "topic": "\"encrypted\" in a privacy policy usually just means the connection - field-level encryption at rest and per-therapist row-level security are a different claim" },
+    { "date": "2026-08-06", "slug": "import-patients-csv", "topic": "switching practice management tools usually means retyping every existing patient by hand - Kith imports patients straight from a CSV or Excel export instead" }
   ]
 }
