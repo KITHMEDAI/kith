@@ -1,6 +1,21 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import type { Metadata } from 'next';
 import KithLockup from '@/components/brand/KithLockup';
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
+const TITLE = 'Terms of Service — Kith';
+const DESCRIPTION = 'The terms governing use of Kith’s AI clinical workspace — who can use it, account responsibilities, and what AI-generated notes are (and aren’t).';
+
+const OG_IMAGE = `${BASE_URL}/opengraph-image`;
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: `${BASE_URL}/terms` },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `${BASE_URL}/terms`, siteName: 'Kith', type: 'website', images: [OG_IMAGE] },
+  twitter: { card: 'summary', title: TITLE, description: DESCRIPTION, images: [OG_IMAGE] },
+};
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
 const LAST_UPDATED = 'July 8, 2026';

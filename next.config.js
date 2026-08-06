@@ -6,6 +6,7 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
   },
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {

@@ -9,18 +9,20 @@ const inter = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
 const title = 'Kith — AI Clinical Workspace for Therapists';
 const description =
   'Private clinical workspace with AI-assisted SOAP notes and real-time session transcription.';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://kith.space'),
+  metadataBase: new URL(BASE_URL),
   title,
   description,
+  alternates: { canonical: BASE_URL },
   openGraph: {
     title,
     description,
-    url: 'https://kith.space',
+    url: BASE_URL,
     siteName: 'Kith',
     type: 'website',
   },
@@ -31,6 +33,18 @@ export const metadata: Metadata = {
   },
 };
 
+// Site-wide identity signal for Google (knowledge panel / brand search
+// eligibility) — harmless to render on authenticated pages too, since those
+// are already disallowed in robots.ts and never crawled.
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Kith',
+  url: BASE_URL,
+  logo: `${BASE_URL}/icon.svg`,
+  description,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -39,6 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
         {children}
       </body>
     </html>

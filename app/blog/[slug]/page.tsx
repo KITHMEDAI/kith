@@ -17,12 +17,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const post = getPostBySlug(params.slug);
   if (!post) return {};
   const url = `${BASE_URL}/blog/${post.slug}`;
+  const ogImage = `${BASE_URL}/opengraph-image`;
   return {
     title: `${post.title} — Kith`,
     description: post.description,
     alternates: { canonical: url },
-    openGraph: { title: post.title, description: post.description, url, type: 'article', publishedTime: post.date },
-    twitter: { card: 'summary', title: post.title, description: post.description },
+    openGraph: { title: post.title, description: post.description, url, type: 'article', publishedTime: post.date, images: [ogImage] },
+    twitter: { card: 'summary_large_image', title: post.title, description: post.description, images: [ogImage] },
   };
 }
 
@@ -38,7 +39,12 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     '@type': 'Article',
     headline: post.title,
     description: post.description,
+    image: `${BASE_URL}/opengraph-image`,
     datePublished: post.date,
+    // No separate "updated" field is tracked per post, so publish date
+    // doubles as dateModified — same convention already used for the
+    // sitemap's <lastmod> (see app/sitemap.ts).
+    dateModified: post.date,
     author: { '@type': 'Organization', name: 'Kith' },
     publisher: { '@type': 'Organization', name: 'Kith' },
   };

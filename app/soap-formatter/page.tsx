@@ -3,15 +3,19 @@ import Link from 'next/link';
 import KithLockup from '@/components/brand/KithLockup';
 import SoapFormatterTool from '@/components/tools/SoapFormatterTool';
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
 const title = 'Free SOAP & EMDR Note Formatter — Kith';
 const description =
   'Paste rough session notes or a transcript excerpt and get back a structured SOAP or EMDR note instantly. Free, no signup required.';
 
+const OG_IMAGE = `${BASE_URL}/opengraph-image`;
+
 export const metadata: Metadata = {
   title,
   description,
-  openGraph: { title, description, url: 'https://kith.space/soap-formatter', siteName: 'Kith', type: 'website' },
-  twitter: { card: 'summary_large_image', title, description },
+  alternates: { canonical: `${BASE_URL}/soap-formatter` },
+  openGraph: { title, description, url: `${BASE_URL}/soap-formatter`, siteName: 'Kith', type: 'website', images: [OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title, description, images: [OG_IMAGE] },
 };
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';

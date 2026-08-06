@@ -7,7 +7,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: ['/', '/blog'],
-      disallow: ['/dashboard', '/api', '/settings', '/patients', '/session', '/notes', '/appointments', '/insights', '/onboarding'],
+      disallow: [
+        '/dashboard', '/api', '/settings', '/patients', '/session', '/notes', '/appointments', '/insights', '/onboarding',
+        // Thin, no-search-intent auth utility pages — /register is deliberately
+        // left crawlable since it's a legitimate landing page for branded
+        // "kith sign up" queries.
+        '/login', '/forgot-password', '/reset-password',
+      ],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,
   };

@@ -1,6 +1,21 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import type { Metadata } from 'next';
 import KithLockup from '@/components/brand/KithLockup';
+
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
+const TITLE = 'Privacy Policy — Kith';
+const DESCRIPTION = "How Kith collects, stores, and protects therapist and patient data, including encryption, retention, and DPDP 2023 alignment.";
+
+const OG_IMAGE = `${BASE_URL}/opengraph-image`;
+
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: `${BASE_URL}/privacy` },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `${BASE_URL}/privacy`, siteName: 'Kith', type: 'website', images: [OG_IMAGE] },
+  twitter: { card: 'summary', title: TITLE, description: DESCRIPTION, images: [OG_IMAGE] },
+};
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
 const LAST_UPDATED = 'July 8, 2026';

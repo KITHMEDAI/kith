@@ -1,7 +1,5 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { Mic, FileText, CalendarClock, ShieldCheck, Video, Bell, Languages, Lock, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
 import KithLockup from '@/components/brand/KithLockup';
 import DemoShowcase from '@/components/home/DemoShowcase';
 import HomeAuth from '@/components/home/HomeAuth';
@@ -18,11 +16,13 @@ const FEATURES = [
   { icon: Languages,   title: 'Clinical accuracy',          desc: 'Context-aware transcription — medication names and clinical terms come through correctly.' },
 ];
 
-export default async function HomePage() {
-  const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect('/dashboard');
-
+// Logged-in users are redirected to /dashboard by middleware.ts (isAuthPage
+// check) before this ever renders — no auth check needed here. Keeping this
+// page free of per-request data fetching lets it stay statically generated
+// and edge-cached (it was previously forced dynamic/uncached by a redundant
+// getUser() call, giving the homepage a ~400-600ms TTFB vs near-instant for
+// the statically generated blog pages).
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
 

@@ -9,12 +9,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
 const TITLE = 'Blog — Kith';
 const DESCRIPTION = 'Practical guides on AI clinical documentation, running a private therapy practice, and clinical note-writing — from the team behind Kith.';
 
+const OG_IMAGE = `${BASE_URL}/opengraph-image`;
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: `${BASE_URL}/blog` },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `${BASE_URL}/blog`, type: 'website' },
-  twitter: { card: 'summary', title: TITLE, description: DESCRIPTION },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `${BASE_URL}/blog`, type: 'website', images: [OG_IMAGE] },
+  twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION, images: [OG_IMAGE] },
 };
 
 export default function BlogIndexPage() {
