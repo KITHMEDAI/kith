@@ -2,7 +2,9 @@
 topic: "\"encrypted\" in a privacy policy usually just means the connection - field-level encryption at rest and per-therapist row-level security are a different claim"
 sourcePost: "dpdp-2023-therapist-notes"
 platforms: ["twitter", "instagram"]
-status: "pending"
+status: "posted"
+posted_at: "2026-08-06T16:12:00.000Z"
+tweet_url: "https://x.com/kithMedAi/status/2085415929069130046"
 ---
 
 ## Twitter/X
