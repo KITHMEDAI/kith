@@ -65,6 +65,30 @@ requires verified professional flair before non-mod comments stick. Best
 engaged from your own account with real practice history, in a thread that's
 still active (days old, not months) — not as a scripted drop-in.
 
+## Who actually owns the notes when you leave a panel/insurance platform
+
+Thread: [r/therapists - "Notes Question"](https://www.reddit.com/r/therapists/comments/1vg847t/notes_question/)
+(posted 2 days ago, active - a therapist transitioning off Grow Therapy asking
+how to write notes once they're not using that platform's built-in EHR
+anymore). Small thread so far (4 comments), but one reply raises the actual
+interesting point better than the "just use Simple Practice" answers: notes
+written inside a panel platform (Grow, Headway, etc.) are arguably that
+platform's property, not yours, and if they ever cut you off or go under
+you're at their mercy to get records back - which is why that commenter
+moved everything to a platform they control directly and only touches the
+panel platform for billing. That's a genuinely good discussion angle for any
+thread about switching EHRs, leaving an insurance panel, or "what do you wish
+you'd set up differently from day one" - the real question isn't which
+platform has the nicest templates, it's whether you can get your own patient
+records out in a usable form if you ever need to leave. Worth engaging with
+the ownership/portability point directly (and general practice-independence
+advice) rather than dropping a specific tool - the OP already got two
+platform-name answers (one with a referral link, so the thread's already a
+little primed for "just use X"; don't add a third unless someone explicitly
+asks what CSV/PDF export actually looks like in practice). Thread is small
+and recent enough that a genuine, non-promotional reply on the ownership
+angle would likely still land.
+
 ## Perfectionistic over-writing of notes: a template that still requires re-deciding everything isn't actually saving you
 
 Thread: [r/therapists - "Obsessive compulsive progress note writing"](https://www.reddit.com/r/therapists/comments/1vbbiab/obsessive_compulsive_progress_note_writing/)
