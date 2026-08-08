@@ -54,9 +54,26 @@ export function mockSessionNotes(patientName: string, diagnosis: string[], noteF
     cognitions: `Negative cognition "I'm not in control" → positive cognition "I can handle this now".`,
     phase_plan: `Desensitization phase, several sets of eye movements with check-ins. Next: installation phase if SUD stable ≤3.`,
   };
+  const dapShape = {
+    data: `${initials}. reports improvement in panic episode frequency (2 this week vs 5 last week). Breathing exercises described as effective. Ongoing cognitive distortions related to workplace performance noted.`,
+    assessment: `${initials}. continues to make measurable progress with ${dx}. Panic frequency reduced 60% week-on-week. Catastrophising remains active in occupational contexts.`,
+    plan: `Continue diaphragmatic breathing daily. Introduce thought record worksheet for work-related cognitions. Review progress at next session.`,
+  };
+  const birpShape = {
+    behavior: `${initials}. reports improvement in panic episode frequency (2 this week vs 5 last week). Ongoing cognitive distortions related to workplace performance noted.`,
+    intervention: `Socratic questioning re: catastrophic workplace thoughts • Diaphragmatic breathing technique reviewed and reinforced.`,
+    response: `Engaged readily, generated own counter-evidence for catastrophic prediction • Some resistance to reframing at first, softened by session end.`,
+    plan: `Continue diaphragmatic breathing daily. Introduce thought record worksheet for work-related cognitions. Review progress at next session.`,
+  };
+  const soapNoteByFormat: Record<NoteFormat, Record<string, string>> = {
+    soap: soapShape,
+    emdr: emdrShape,
+    dap: dapShape,
+    birp: birpShape,
+  };
 
   return {
-    soap_note: noteFormat === 'emdr' ? emdrShape : soapShape,
+    soap_note: soapNoteByFormat[noteFormat],
     key_points: [
       'Panic episodes reduced from 5 to 2 this week — 60% improvement',
       'Breathing techniques working effectively in acute moments',

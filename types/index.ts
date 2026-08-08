@@ -150,10 +150,17 @@ export interface DAPNote {
   plan?: string;
 }
 
+export interface BIRPNote {
+  behavior?: string;
+  intervention?: string;
+  response?: string;
+  plan?: string;
+}
+
 // EMDR-format session note — target/SUD-VOC/cognitions/phase, the structured
 // documentation EMDR-trained therapists use instead of generic SOAP. Stored
 // in the same `soap_note` column as SOAPNote; consumers tell the two apart
-// by checking for the `target` key (see lib/claude.ts NOTE_FIELD_SETS).
+// by checking for a format-unique key (see lib/note-fields.ts detectNoteFormat).
 export interface EMDRNote {
   target?: string;
   sud_voc?: string;
@@ -161,7 +168,7 @@ export interface EMDRNote {
   phase_plan?: string;
 }
 
-export type NoteFormat = 'soap' | 'emdr';
+export type NoteFormat = 'soap' | 'emdr' | 'dap' | 'birp';
 
 export interface RiskFlags {
   level: RiskLevel;
@@ -192,8 +199,7 @@ export interface PrescriptionNotes {
 }
 
 export interface SessionNotes {
-  soap_note: SOAPNote | EMDRNote;
-  dap_note?: DAPNote;
+  soap_note: SOAPNote | EMDRNote | DAPNote | BIRPNote;
   key_points: string[];
   session_summary: string;
   session_growth?: SessionGrowth;

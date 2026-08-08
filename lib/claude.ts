@@ -146,10 +146,10 @@ Return ONLY valid JSON — be SPECIFIC to THIS session, not a template. Every fi
 }
 
 // ─── Stage 2: Sonnet clinical synthesis ───────────────────────────────────────
-// The two note formats a therapist can pick at signup (types/index.ts
-// NoteFormat). Only the "soap_note" JSON block's internal shape differs —
-// everything else in the prompt (risk flags, resources, growth, homework)
-// is format-independent and stays identical either way.
+// The note formats a therapist can pick at signup (lib/note-fields.ts
+// NOTE_FORMAT_META). Only the "soap_note" JSON block's internal shape
+// differs — everything else in the prompt (risk flags, resources, growth,
+// homework) is format-independent and stays identical either way.
 const NOTE_SCHEMAS: Record<NoteFormat, string> = {
   soap: `  "soap_note": {
     "subjective": "2-4 short points separated by ' • ' on ONE line. Patient-reported issues/events/emotions. e.g. 'Rumination re: supervisor conflict • Mood self-rated 4/10 • 3 nights fragmented sleep'",
@@ -162,6 +162,17 @@ const NOTE_SCHEMAS: Record<NoteFormat, string> = {
     "sud_voc": "1-2 short points separated by ' • '. SUD (Subjective Units of Distress, 0-10) and VOC (Validity of Cognition, 1-7), before → after, ONLY if the brief indicates them — if not mentioned, write 'Not rated this session' rather than inventing a number. e.g. 'SUD 8 → 3 by session end • VOC not formally rated'",
     "cognitions": "1-2 short points separated by ' • '. The negative cognition (NC) worked with, and the positive cognition (PC) installed or strengthening, grounded only in what's in the brief.",
     "phase_plan": "1-2 short points separated by ' • '. Which phase of the EMDR protocol was addressed (assessment, desensitization, installation, body scan, closure) and the focus for next session — same target or move on."
+  },`,
+  dap: `  "soap_note": {
+    "data": "2-5 short points separated by ' • '. Combines what was reported AND what the session can actually evidence — patient-reported issues/events/emotions plus observable engagement pattern (spontaneous vs. reluctant disclosure, coherence, hesitation, topic avoidance). This note is generated from a TEXT TRANSCRIPT ONLY — never assert facial affect, eye contact, posture, or psychomotor activity as directly observed; a transcript cannot show these. e.g. 'Rumination re: supervisor conflict • Mood self-rated 4/10 • Disclosed detail only after direct questioning — reluctant, not spontaneous'",
+    "assessment": "2-4 short points separated by ' • '. Formulation tied to dx + goals. e.g. 'Consistent with GAD: catastrophic appraisal of work stress • Limited progress on cognitive restructuring'",
+    "plan": "2-4 short points separated by ' • '. Concrete next steps, techniques, referrals, frequency."
+  },`,
+  birp: `  "soap_note": {
+    "behavior": "2-4 short points separated by ' • '. What the patient presented, reported, or did this session — same transcript-only evidence discipline as SOAP's objective field, never asserting unobservable affect/posture. e.g. 'Rumination re: supervisor conflict • Mood self-rated 4/10 • Disclosed detail only after direct questioning'",
+    "intervention": "1-3 short points separated by ' • '. The specific technique(s) the CLINICIAN used this session — name what was actually done, not a generic modality label. e.g. 'Socratic questioning re: catastrophic thought • Behavioural activation plan drafted for weekend'",
+    "response": "1-3 short points separated by ' • '. How the patient responded to that intervention — engagement, insight gained, resistance, affect shift. If the brief doesn't show a clear response to the intervention, say so briefly rather than inventing one. e.g. 'Engaged readily, generated own counter-evidence • Some resistance to reframing at first, softened by session end'",
+    "plan": "2-4 short points separated by ' • '. Concrete next steps, techniques, referrals, frequency."
   },`,
 };
 
@@ -273,7 +284,7 @@ STRICT RULES:
 - NEVER write a vague/templated line ("patient reports some concerns", "continue monitoring progress"). If the brief has no specific detail for a field, write the shortest TRUE statement instead (e.g. "No new subjective concerns reported") — never invent specifics to sound complete.
 - HIGHLIGHTING (MANDATORY, no exceptions): every single point across soap_note, key_points, homework_assigned, and next_session_plan MUST wrap the one most clinically load-bearing word or short phrase in **double asterisks** — e.g. "Rumination re: **supervisor conflict** • Mood self-rated **4/10**". Before returning, check EACH point individually — if a point has zero ** markers, go back and add one. Exactly one per point, never more than one, never a generic connector word.
 - NEVER put a literal newline character inside any JSON string — it breaks parsing. Keep every value on ONE line; separate points with ' • '.
-- SOAP / homework / next_session_plan: multiple short points joined by ' • ' on a single line.
+- soap_note fields / homework / next_session_plan: multiple short points joined by ' • ' on a single line.
 - Use ${initials} always, never full name. This applies even if the patient's first name, nickname, or a mis-transcribed variant of it (e.g. a speech-recognition error) appears anywhere in the session brief or was spoken aloud in the room — never copy it into the note. Only ${initials}, in every field, with no exceptions.
 - THIRD PARTY IN THE ROOM: if the brief indicates a spouse/parent/family member was present and speaking (not just the clinician and ${initials}), refer to them by their real first name if the brief's "third_party_name" is non-null, or as "the other person present" if it is null. NEVER attribute their statements, history, or quotes to ${initials}, and never attribute ${initials}'s own statements to them. This mix-up is a serious clinical error, not a stylistic one — if the brief itself is ambiguous about who said something, write it as ambiguous rather than guessing a side.
 - risk_flags.level = high/critical if ANY SI, self-harm urges, harm to others, or psychotic symptoms present.

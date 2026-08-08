@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { NOTE_FORMAT_META } from '@/lib/note-fields';
 
 const USE_MOCK =
   process.env.NEXT_PUBLIC_USE_MOCK === 'true' ||
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
       clinic_name,
       clinic_address,
       designation,     // highest degree
-      note_format,     // 'soap' | 'emdr' — which format their session notes generate in
+      note_format,     // NoteFormat — which format their session notes generate in
       booking_source,
       booking_url,
       terms_accepted,
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
       clinic_name:      clinic_name || null,
       clinic_address:   clinic_address || null,
       designation:      designation || null,
-      note_format:      note_format === 'emdr' ? 'emdr' : 'soap',
+      note_format:      note_format in NOTE_FORMAT_META ? note_format : 'soap',
       booking_source:   booking_source || 'none',
       booking_url:      booking_url || null,
       onboarding_completed: false,

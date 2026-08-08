@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import DeleteAccountModal from '@/components/settings/DeleteAccountModal';
+import { NOTE_FORMAT_META, type NoteFormat } from '@/lib/note-fields';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Profile {
@@ -24,7 +25,7 @@ interface Profile {
   bio: string;
   timezone: string;
   avatar_url: string | null;
-  note_format?: 'soap' | 'emdr';
+  note_format?: NoteFormat;
   subscription_plan?: 'free' | 'pro' | 'ultra' | 'clinic';
   subscription_status?: string;
 }
@@ -572,17 +573,15 @@ export default function ProfilePage() {
           <div>
             <label className="block text-xs text-slate-400 mb-2">Session note format</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {(['soap', 'emdr'] as const).map(f => (
+              {(Object.keys(NOTE_FORMAT_META) as NoteFormat[]).map(f => (
                 <button key={f} type="button" onClick={() => setProfile(p => ({ ...p, note_format: f }))}
                   className="rounded-xl px-4 py-3 text-left transition-colors"
                   style={{
                     background: profile.note_format === f ? 'rgba(124,58,237,0.18)' : 'rgba(255,255,255,0.05)',
                     border: profile.note_format === f ? '1px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.1)',
                   }}>
-                  <p className="text-sm font-semibold text-white">{f === 'soap' ? 'SOAP notes' : 'EMDR notes'}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-400">
-                    {f === 'soap' ? 'Subjective, Objective, Assessment, Plan' : 'Target, SUD/VOC, cognitions, phase'}
-                  </p>
+                  <p className="text-sm font-semibold text-white">{NOTE_FORMAT_META[f].label}</p>
+                  <p className="mt-0.5 text-[11px] text-slate-400">{NOTE_FORMAT_META[f].description}</p>
                 </button>
               ))}
             </div>

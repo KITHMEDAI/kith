@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { NOTE_FORMAT_META } from '@/lib/note-fields';
 
 // ── GET /api/profile ─────────────────────────────────────────────────────────
 export async function GET() {
@@ -68,10 +69,13 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
-  // note_format has a DB CHECK constraint (soap|emdr) — reject early with a
-  // clear message instead of letting an invalid value fail as an opaque 500.
-  if ('note_format' in updates && updates.note_format !== 'soap' && updates.note_format !== 'emdr') {
-    return NextResponse.json({ error: "note_format must be 'soap' or 'emdr'" }, { status: 422 });
+  // note_format has a matching DB CHECK constraint (017_more_note_formats.sql)
+  // — reject early with a clear message instead of letting an invalid value
+  // fail as an opaque 500. Validated against the same registry the format
+  // picker UI renders from, so a new format only needs adding in one place.
+  const validNoteFormats = Object.keys(NOTE_FORMAT_META);
+  if ('note_format' in updates && !validNoteFormats.includes(updates.note_format as string)) {
+    return NextResponse.json({ error: `note_format must be one of: ${validNoteFormats.join(', ')}` }, { status: 422 });
   }
 
   // onboarding_completed=true skips the whole wizard straight to /dashboard

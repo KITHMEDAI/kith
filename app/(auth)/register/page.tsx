@@ -9,6 +9,7 @@ import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { parsePatientFile } from '@/lib/parse-patient-file';
 import KithLockup from '@/components/brand/KithLockup';
 import GoogleButton from '@/components/auth/GoogleButton';
+import { NOTE_FORMAT_META, type NoteFormat } from '@/lib/note-fields';
 
 const INPUT = 'w-full rounded-xl border border-purple-200 bg-white/80 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-colors';
 const LABEL = 'block text-sm font-semibold text-slate-700 mb-1.5';
@@ -112,7 +113,7 @@ export default function RegisterPage() {
     name: '',
     business_phone: '', personal_phone: '',
     clinic_name: '', clinic_address: '', degree: '',
-    note_format: 'soap' as 'soap' | 'emdr',
+    note_format: 'soap' as NoteFormat,
   });
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
@@ -391,16 +392,13 @@ export default function RegisterPage() {
               <div>
                 <label className={LABEL}>How do you document sessions?</label>
                 <div className="grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => setForm(p => ({ ...p, note_format: 'soap' }))}
-                    className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${form.note_format === 'soap' ? 'border-violet-500 bg-violet-50' : 'border-purple-200 bg-white/80 hover:bg-white'}`}>
-                    <p className="text-sm font-bold text-slate-900">SOAP notes</p>
-                    <p className="mt-0.5 text-xs text-slate-500">Subjective, Objective, Assessment, Plan — general practice</p>
-                  </button>
-                  <button type="button" onClick={() => setForm(p => ({ ...p, note_format: 'emdr' }))}
-                    className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${form.note_format === 'emdr' ? 'border-violet-500 bg-violet-50' : 'border-purple-200 bg-white/80 hover:bg-white'}`}>
-                    <p className="text-sm font-bold text-slate-900">EMDR notes</p>
-                    <p className="mt-0.5 text-xs text-slate-500">Target, SUD/VOC, cognitions, phase — EMDR-trained practice</p>
-                  </button>
+                  {(Object.keys(NOTE_FORMAT_META) as NoteFormat[]).map(f => (
+                    <button key={f} type="button" onClick={() => setForm(p => ({ ...p, note_format: f }))}
+                      className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${form.note_format === f ? 'border-violet-500 bg-violet-50' : 'border-purple-200 bg-white/80 hover:bg-white'}`}>
+                      <p className="text-sm font-bold text-slate-900">{NOTE_FORMAT_META[f].label}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">{NOTE_FORMAT_META[f].description}</p>
+                    </button>
+                  ))}
                 </div>
                 <p className="mt-1.5 text-xs text-slate-400">Change this anytime later in Settings.</p>
               </div>
