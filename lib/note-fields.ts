@@ -43,13 +43,16 @@ export const NOTE_FIELDS: Record<NoteFormat, { key: string; label: string }[]> =
   ],
 };
 
-// Label + one-line description for the format-picker UI (register + settings
-// pages both map over this instead of hardcoding buttons per format).
-export const NOTE_FORMAT_META: Record<NoteFormat, { label: string; description: string }> = {
-  soap: { label: 'SOAP notes', description: 'Subjective, Objective, Assessment, Plan' },
-  emdr: { label: 'EMDR notes', description: 'Target, SUD/VOC, cognitions, phase — EMDR-trained practice' },
-  dap: { label: 'DAP notes', description: 'Data, Assessment, Plan — simpler, high-volume practices' },
-  birp: { label: 'BIRP notes', description: 'Behavior, Intervention, Response, Plan — common insurance/agency requirement' },
+// label/description are for the format-picker UI (register + settings pages
+// map over this instead of hardcoding buttons per format); shortLabel is for
+// inline headers referring to a single already-generated note (e.g. "SOAP
+// Note" above that note's fields, or a copy/export header) — singular,
+// Title Case, distinct from label's plural picker-button phrasing.
+export const NOTE_FORMAT_META: Record<NoteFormat, { label: string; shortLabel: string; description: string }> = {
+  soap: { label: 'SOAP notes', shortLabel: 'SOAP Note', description: 'Subjective, Objective, Assessment, Plan' },
+  emdr: { label: 'EMDR notes', shortLabel: 'EMDR Note', description: 'Target, SUD/VOC, cognitions, phase — EMDR-trained practice' },
+  dap: { label: 'DAP notes', shortLabel: 'DAP Note', description: 'Data, Assessment, Plan — simpler, high-volume practices' },
+  birp: { label: 'BIRP notes', shortLabel: 'BIRP Note', description: 'Behavior, Intervention, Response, Plan — common insurance/agency requirement' },
 };
 
 // Ordered so the most format-specific keys are checked first — DAP's

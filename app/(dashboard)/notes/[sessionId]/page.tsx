@@ -8,7 +8,7 @@ import {
   Film, User, Calendar, Clock, RefreshCw,
 } from 'lucide-react';
 import SendToPatientAction from '@/components/patients/SendToPatientAction';
-import { NOTE_FIELDS, detectNoteFormat } from '@/lib/note-fields';
+import { NOTE_FIELDS, NOTE_FORMAT_META, detectNoteFormat } from '@/lib/note-fields';
 
 // Either SOAP (subjective/objective/assessment/plan) or EMDR
 // (target/sud_voc/cognitions/phase_plan) shape — see lib/note-fields.ts.
@@ -187,7 +187,7 @@ export default function NoteDetailPage() {
     if (!session?.soap_note) return;
     const format = detectNoteFormat(session.soap_note);
     const lines = [
-      `${format === 'emdr' ? 'EMDR NOTE' : 'SOAP NOTE'} — ${session.patient?.display_name} — Session #${session.session_number}`,
+      `${NOTE_FORMAT_META[format].shortLabel.toUpperCase()} — ${session.patient?.display_name} — Session #${session.session_number}`,
       `Date: ${new Date(session.started_at).toLocaleDateString('en-IN')}`,
     ];
     for (const f of NOTE_FIELDS[format]) {
@@ -458,7 +458,7 @@ export default function NoteDetailPage() {
                 activeTab === tab ? 'bg-[#1a2332] text-white' : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              {tab === 'soap' ? (noteFormat === 'emdr' ? 'EMDR Note' : 'SOAP Note') : tab === 'resources' ? 'Resources' : 'Next Session'}
+              {tab === 'soap' ? NOTE_FORMAT_META[noteFormat].shortLabel : tab === 'resources' ? 'Resources' : 'Next Session'}
             </button>
           ))}
         </div>

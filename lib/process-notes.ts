@@ -17,6 +17,7 @@
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { generateSessionNotes } from '@/lib/claude';
 import { embedAndStoreNote } from '@/lib/embeddings';
+import { NOTE_FORMAT_META } from '@/lib/note-fields';
 import { getEntitlements } from '@/lib/entitlements';
 import type { Patient, TranscriptSegment } from '@/types';
 
@@ -145,7 +146,9 @@ export async function runNoteGeneration(
       })),
       manualNotes: notesManual,
       speakerMap,
-      noteFormat: therapistBilling?.note_format === 'emdr' ? 'emdr' : 'soap',
+      noteFormat: therapistBilling?.note_format && therapistBilling.note_format in NOTE_FORMAT_META
+        ? therapistBilling.note_format
+        : 'soap',
     });
 
     const riskLevel = notes.risk_flags?.level || 'low';

@@ -14,6 +14,7 @@
 import { USE_MOCK, mockSessionNotes, mockLiveUpdate } from './mock';
 import type { TranscriptSegment, Patient, SessionNotes, NoteFormat } from '@/types';
 import { getInitials } from './utils';
+import { NOTE_FIELDS } from './note-fields';
 
 export function anthropic() {
   if (!process.env.ANTHROPIC_API_KEY) return null;
@@ -310,11 +311,19 @@ STRICT RULES:
   // prompt already demands a self-check — the instruction alone isn't
   // reliable enough. Since the UI renders **term** as bold and falls back to
   // plain text otherwise, an unhighlighted bullet doesn't error, it just
-  // quietly looks unfinished. So this loop now retries on either invalid
-  // JSON OR highlighting non-compliance, telling the model exactly which
-  // fields failed on the retry attempt. If it's still non-compliant after
-  // every attempt, a deterministic fallback bolds a real word in the bullet
-  // rather than shipping a note with a silently broken visual contract.
+  // quietly looks unfinished.
+  //
+  // A third failure mode showed up in production integration testing on the
+  // BIRP format: a response can be valid JSON with perfect highlighting and
+  // still be missing an entire required field (e.g. behavior/intervention/
+  // response present, "plan" just absent) — validateHighlighting only checks
+  // whatever keys ARE present, so this passed through completely undetected
+  // before validateFieldsPresent existed. Unlike the highlighting fallback,
+  // a missing field isn't safe to paper over deterministically — there's no
+  // content to repair it with — so if it's still missing after every retry,
+  // this throws rather than silently shipping a chart with a blank section;
+  // the caller (process-notes.ts) already treats a thrown error as a normal
+  // "generation failed, offer retry" case.
   let lastText = '';
   // Carries the previous attempt's outcome forward so the retry message never
   // has to re-parse `lastText` itself — re-parsing a response that already
@@ -324,11 +333,11 @@ STRICT RULES:
   // whole note-generation call on exactly the failure modes this retry loop
   // exists to recover from. Found via adversarial testing + independent
   // confirmation across 5 code-review passes.
-  let lastViolations: string[] | null = null;
+  let lastIssues: string[] | null = null;
   const maxAttempts = 3;
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const feedback = lastViolations
-      ? `Some bullets in that response are missing their required **highlight** — every single point across soap_note, key_points, homework_assigned, and next_session_plan must have EXACTLY one **term** wrapped. Violations found:\n${lastViolations.join('\n')}\n\nReturn the CORRECTED full JSON object (same structure, same content, just add the missing ** markers), nothing else.`
+    const feedback = lastIssues
+      ? `Issues with that response:\n${lastIssues.join('\n\n')}\n\nReturn the CORRECTED full JSON object (same structure, same content, fixing only what's listed above), nothing else.`
       : 'Your last response was not a single valid JSON object matching the schema. Return ONLY the valid JSON object, no markdown fences, no commentary before or after it.';
 
     const res = await client.messages.create({
@@ -346,17 +355,34 @@ STRICT RULES:
     const text  = res.content[0]?.type === 'text' ? res.content[0].text : '';
     lastText = text;
     const match = text.match(/\{[\s\S]*\}/);
+
+    let parsed: SessionNotes | null = null;
     if (match) {
       try {
-        const parsed = parseNotesJson(match[0]);
-        const { ok, violations } = validateHighlighting(parsed);
-        if (ok) return parsed;
-        if (attempt === maxAttempts) return repairHighlighting(parsed);
-        lastViolations = violations;
-        continue; // retry with corrective feedback
-      } catch { /* fall through to retry */ }
+        parsed = parseNotesJson(match[0]);
+      } catch { /* invalid JSON — parsed stays null, handled below */ }
     }
-    lastViolations = null; // no valid JSON to derive violations from — generic retry prompt next
+
+    if (parsed) {
+      const { ok: fieldsOk, missing } = validateFieldsPresent(parsed, noteFormat);
+      const { ok: highlightOk, violations } = validateHighlighting(parsed);
+      if (fieldsOk && highlightOk) return parsed;
+
+      if (attempt === maxAttempts) {
+        if (!fieldsOk) {
+          throw new Error(`Sonnet note synthesis is missing required field(s) after ${maxAttempts} attempts: ${missing.join(', ')}`);
+        }
+        return repairHighlighting(parsed); // only highlighting issues remain — safe to deterministically fix
+      }
+
+      lastIssues = [
+        ...(!fieldsOk ? [`MISSING REQUIRED FIELD(S) in soap_note: ${missing.join(', ')}. Every one of these keys must be present with real, substantive content — never omit one or leave it empty.`] : []),
+        ...(!highlightOk ? [`Bullets missing their required **highlight** — every point across soap_note, key_points, homework_assigned, and next_session_plan must have EXACTLY one **term** wrapped. Violations:\n${violations.join('\n')}`] : []),
+      ];
+      continue; // retry with corrective feedback
+    }
+
+    lastIssues = null; // no valid JSON to derive issues from — generic retry prompt next
     if (attempt === maxAttempts) {
       throw new Error('Sonnet did not return valid JSON after retries');
     }
@@ -394,6 +420,18 @@ function validateHighlighting(notes: SessionNotes): { ok: boolean; violations: s
   checkField('homework_assigned', notes.homework_assigned);
   checkField('next_session_plan', notes.next_session_plan);
   return { ok: violations.length === 0, violations };
+}
+
+// Catches a real failure mode observed in production testing: the model can
+// return valid, well-highlighted JSON that's simply missing an entire
+// required field (e.g. a BIRP note with behavior/intervention/response but
+// no plan) — validateHighlighting only checks whatever keys ARE present, so
+// a missing key silently passed through undetected before this existed.
+function validateFieldsPresent(notes: SessionNotes, noteFormat: NoteFormat): { ok: boolean; missing: string[] } {
+  const required = NOTE_FIELDS[noteFormat].map(f => f.key);
+  const present = notes.soap_note || {};
+  const missing = required.filter(key => !(present as Record<string, unknown>)[key]);
+  return { ok: missing.length === 0, missing };
 }
 
 // Last-resort deterministic repair if the model still hasn't fixed every
