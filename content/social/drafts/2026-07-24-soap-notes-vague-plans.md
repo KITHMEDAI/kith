@@ -17,4 +17,4 @@ A Plan section only earns its place in the note if it says something specific - 
 
 Same goes for Objective sections that describe things nobody actually observed that day, or Subjective notes that quietly drift into your own interpretation instead of the patient's words. Small habits, but they're the difference between a chart that tells the story of someone's treatment and one that just fills a requirement.
 
-We put together a full SOAP note template and the common mistakes worth avoiding - link in bio.
+We put together a full SOAP note template and the common mistakes worth avoiding: kith.space/blog/soap-note-templates

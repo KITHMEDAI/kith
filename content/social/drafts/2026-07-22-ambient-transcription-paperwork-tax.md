@@ -17,4 +17,4 @@ It's that by the time you sit down to write notes, the session's over — and yo
 
 Ambient transcription closes that gap. The session gets transcribed as it happens — in person or over a video call — and the note gets built from a real transcript instead of a memory of one.
 
-We wrote up how it actually works (and what it doesn't replace) on the blog — link in bio.
+We wrote up how it actually works (and what it doesn't replace) on the blog: kith.space/blog/ambient-session-transcription

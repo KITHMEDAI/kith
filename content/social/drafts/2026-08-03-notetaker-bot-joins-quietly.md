@@ -15,4 +15,4 @@ In-person, ambient transcription is simple: a mic in the room picks up the sessi
 
 The way this actually works for telehealth is a "notetaker bot": a participant that joins the Google Meet the same way a human observer would. You admit it into the call, and it does nothing else - no camera, no messages in the chat, just capturing audio. It leaves once the session ends.
 
-Same consent rules apply either way, and the transcript feeds into the same note pipeline as an in-person session - so the format of the session doesn't change how the notes get written. We wrote up the full mechanics on the blog - link in bio.
+Same consent rules apply either way, and the transcript feeds into the same note pipeline as an in-person session - so the format of the session doesn't change how the notes get written. We wrote up the full mechanics on the blog: kith.space/blog/ambient-session-transcription
