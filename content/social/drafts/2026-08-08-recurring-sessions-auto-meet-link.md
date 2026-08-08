@@ -1,7 +1,14 @@
 ---
-topic: "recurring appointments in Kith generate a fresh Google Meet link for every occurrence automatically - not one reused link that gets copied, lost, or goes stale over weeks of sessions"
-platforms: ["twitter", "instagram"]
-status: "pending"
+topic: >-
+  recurring appointments in Kith generate a fresh Google Meet link for every
+  occurrence automatically - not one reused link that gets copied, lost, or goes
+  stale over weeks of sessions
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-08T20:06:34.801Z'
+tweet_url: 'https://x.com/i/web/status/2086182310572159293'
 ---
 
 ## Twitter/X
