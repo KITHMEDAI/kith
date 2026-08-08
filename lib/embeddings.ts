@@ -157,6 +157,13 @@ export async function embedAndStoreNote(sessionId: string, service: any): Promis
   const text = composeNoteText(session as NoteTextSource);
   if (!text) return;
 
+  // Mock and real embedding both succeed silently otherwise — this is the
+  // one signal in production logs that says which one actually ran. Cheap
+  // way to confirm a Vercel env var change actually took effect: after
+  // redeploying, complete/retry one session and grep the function logs for
+  // this line.
+  console.log(`[Kith] embedding note ${sessionId} — ${EMBEDDINGS_MOCK ? 'MOCK (no VOYAGE_API_KEY)' : `real (${VOYAGE_MODEL})`}`);
+
   const vector = await embedDocument(text);
   const { error } = await service
     .from('sessions')
