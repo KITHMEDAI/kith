@@ -89,6 +89,53 @@ asks what CSV/PDF export actually looks like in practice). Thread is small
 and recent enough that a genuine, non-promotional reply on the ownership
 angle would likely still land.
 
+## Booking the next session before the current one ends beats any self-scheduling feature
+
+Thread: [r/therapists - "Tell me your systems for scheduling!!!"](https://www.reddit.com/r/therapists/comments/1vg7ruk/tell_me_your_systems_for_scheduling/)
+(posted 3 days ago, active - a year-7 solo-practice therapist using SimplePractice
+describing too much time spent emailing/texting clients to schedule the next
+session, considering turning on self-scheduling but worried it'll cause
+low-motivation clients to quietly drop off). Every substantive reply so far
+converges on the same fix, and it isn't a tool - it's a habit: schedule the
+next session with the client before the current one ends, every time. Three
+separate commenters describe this as close to a complete solution on its own
+(one still gets occasional reschedule texts but says it "helps" a lot; another
+says it "always works well"). That's the genuinely useful angle for this
+thread or any similar "how do I stop the scheduling back-and-forth" post -
+not which EHR has self-scheduling, but that the real leak is ending sessions
+without locking in the next slot, and self-scheduling is really a workaround
+for skipping that habit rather than a replacement for it. Worth engaging with
+that distinction directly. If tooling comes up, the only honest addition is
+that conflict-checked recurring booking removes the practical friction that
+makes end-of-session booking annoying in the first place (no double-booking
+risk, Meet link auto-attached) - but the habit point stands on its own and
+should be made first, not as a pretext for a product mention. OP's own anxiety
+about losing clients to self-scheduling is also worth validating directly
+(reasonable concern, not neurotic) rather than glossing over.
+
+## Note-writing speed varies wildly, and immediacy explains more of it than templates do
+
+Thread: [r/therapists - "How do you do your notes?"](https://www.reddit.com/r/therapists/comments/1vf6oze/how_do_you_do_your_notes/)
+(posted 4 days ago, active - a therapist asking how others get notes done
+faster, reporting their own notes take too long). Replies range from 3
+minutes to 15+ minutes per note, and the fast end isn't explained by fancier
+templates - it's explained by writing the note immediately, before the
+detail fades, rather than batching or reconstructing later (one therapist
+bangs out notes same-day on a treadmill "while it's fresh," another writes
+theirs inside the 10-minute gap right after each session using a short
+bullet-point template). The slow end tends to describe procrastination and
+writing from memory hours or days later. That's a sharper version of the
+"templates only help if they remove decisions" angle already noted elsewhere
+in this file - immediacy is the bigger lever, and a template just makes the
+immediate version faster to fill in. One commenter (DrJocelyn1) mentioned
+using an AI scribe "customised to your style" to save time and got no
+pushback in this thread as of the last check, so a low-key, honest mention
+of ambient transcription (the note gets structured automatically right after
+the session, so there's no gap where detail has to be held in memory) would
+fit naturally if engaging here - but the immediacy insight itself, not the
+tool, is the actually useful thing to add to this specific conversation.
+Thread is active with new replies as recently as 2 days ago.
+
 ## Perfectionistic over-writing of notes: a template that still requires re-deciding everything isn't actually saving you
 
 Thread: [r/therapists - "Obsessive compulsive progress note writing"](https://www.reddit.com/r/therapists/comments/1vbbiab/obsessive_compulsive_progress_note_writing/)
