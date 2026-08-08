@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
-const LAST_UPDATED = 'July 8, 2026';
+const LAST_UPDATED = 'August 8, 2026';
 
 function H2({ children }: { children: React.ReactNode }) {
   return <h2 className="text-xl font-bold text-foreground mt-10 mb-3">{children}</h2>;
@@ -45,10 +45,6 @@ export default function PrivacyPolicyPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <div className="rounded-xl px-4 py-3 mb-8 text-xs text-amber-800 bg-amber-50 border border-amber-200">
-          <strong>Draft notice:</strong> this policy was prepared to accurately describe how Kith actually works today. It has not yet been reviewed by a lawyer. Do not treat it as final legal advice — have it reviewed before relying on it for compliance purposes.
-        </div>
-
         <P>
           This Privacy Policy explains how Kith (&ldquo;<strong>Kith</strong>&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) collects, uses, stores, and
           shares information through the Kith clinical workspace application (the &ldquo;Service&rdquo;). Kith is operated by
