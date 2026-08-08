@@ -165,16 +165,43 @@ const NOTE_SCHEMAS: Record<NoteFormat, string> = {
   },`,
 };
 
+export interface RecentSessionHistoryEntry {
+  sessionNumber: number;
+  date: string;
+  summary: string;
+  homeworkAssigned: string | null;
+  nextSessionPlan: string | null;
+  riskLevel: string | null;
+}
+
+// Renders the last few completed sessions (most-recent-first) as a compact
+// block so Sonnet can track trajectory across sessions rather than just
+// against the single most recent one, and check whether homework or the
+// previously planned focus was actually followed up on today.
+function buildRecentHistoryBlock(history?: RecentSessionHistoryEntry[]): string {
+  if (!history || history.length === 0) return '';
+  const lines = history.map(h => {
+    const date = h.date ? new Date(h.date).toISOString().slice(0, 10) : 'unknown date';
+    const parts = [`Session #${h.sessionNumber} (${date}): ${h.summary || 'no summary recorded'}`];
+    if (h.homeworkAssigned) parts.push(`Homework assigned: ${h.homeworkAssigned}`);
+    if (h.nextSessionPlan) parts.push(`Planned focus for next session: ${h.nextSessionPlan}`);
+    if (h.riskLevel) parts.push(`Risk level: ${h.riskLevel}`);
+    return `  - ${parts.join(' | ')}`;
+  });
+  return `\nRECENT TREATMENT HISTORY (most recent first — use this to track trajectory across sessions, not just vs. the last one, and to check whether homework or the previously planned focus was actually addressed TODAY):\n${lines.join('\n')}`;
+}
+
 async function synthesiseClinicalNotes(
   client: any,
   brief: string,
   patient: Patient,
   sessionNumber: number,
-  previousSummary?: string,
+  recentHistory?: RecentSessionHistoryEntry[],
   manualNotes?: string,
   noteFormat: NoteFormat = 'soap',
 ): Promise<SessionNotes> {
   const initials = getInitials(patient.display_name);
+  const historyBlock = buildRecentHistoryBlock(recentHistory);
 
   const prompt = `You are a senior clinical psychologist (15+ years, ${patient.therapy_modality ?? 'CBT/psychodynamic'} trained) producing post-session clinical documentation from an AI-compressed session brief. Your notes must be SPECIFIC to this session — no generic placeholders.
 
@@ -186,7 +213,7 @@ PATIENT PROFILE:
   Modality: ${patient.therapy_modality ?? 'Not specified'}
   Session #: ${sessionNumber}
   Treatment goals: ${patient.therapy_goals?.join('; ') ?? 'Not documented'}
-${previousSummary ? `\nPREVIOUS SESSION SUMMARY (for continuity):\n${previousSummary}` : ''}
+${historyBlock}
 ${manualNotes ? `\nCLINICIAN\'S OWN NOTES (take as ground truth):\n${manualNotes}` : ''}
 
 SESSION BRIEF (extracted from transcript by AI):
@@ -204,9 +231,9 @@ ${NOTE_SCHEMAS[noteFormat]}
     "compared_to_last": "improved|stable|declined|first_session",
     "areas_of_progress": ["short points, ≤ 12 words — cite actual behaviours/cognitions that improved"],
     "areas_of_concern": ["short points, ≤ 12 words — cite actual risk signals, avoidance, regression"],
-    "narrative": "1 short sentence on trajectory toward goals"
+    "narrative": "1 short sentence on trajectory toward goals — if RECENT TREATMENT HISTORY spans multiple sessions, ground this in the pattern across them, not just today vs. last time"
   },
-  "ai_suggestions": ["0-3 observations — ONLY ones you are genuinely confident are clinically useful and specific to what happened THIS session. If nothing in the brief clearly warrants a suggestion, or you're not confident, return an EMPTY array. NEVER pad with a generic or filler entry (e.g. 'continue monitoring', 'session trajectory positive') just to have something to show. ACTION-FIRST verb, ≤ 14 words each. Never judge the patient or their choices. Phrase every point as a forward-looking next step for the clinician to consider — never as a critique of what the clinician did or didn't do this session."],
+  "ai_suggestions": ["0-3 observations — ONLY ones you are genuinely confident are clinically useful and specific to what happened THIS session. If RECENT TREATMENT HISTORY is provided, this is also the place to flag a genuinely notable continuity gap — e.g. the last session's planned focus was never touched today, or homework assigned last time was never reviewed — but only if the brief actually shows this, never assume absence of mention means it didn't happen. If nothing in the brief clearly warrants a suggestion, or you're not confident, return an EMPTY array. NEVER pad with a generic or filler entry (e.g. 'continue monitoring', 'session trajectory positive') just to have something to show. ACTION-FIRST verb, ≤ 14 words each. Never judge the patient or their choices. Phrase every point as a forward-looking next step for the clinician to consider — never as a critique of what the clinician did or didn't do this session."],
   "prescription_notes": {
     "medication_relevant": false,
     "note": null,
@@ -552,7 +579,7 @@ export async function generateSessionNotes(params: {
   transcript: TranscriptSegment[];
   patient: Patient;
   sessionNumber: number;
-  previousSessionSummary?: string;
+  recentSessionHistory?: RecentSessionHistoryEntry[];
   manualNotes?: string;
   speakerMap?: Record<string, { role: string; name: string | null; display: string }>;
   noteFormat?: NoteFormat;
@@ -571,7 +598,7 @@ export async function generateSessionNotes(params: {
     brief,
     params.patient,
     params.sessionNumber,
-    params.previousSessionSummary,
+    params.recentSessionHistory,
     params.manualNotes,
     params.noteFormat ?? 'soap',
   );

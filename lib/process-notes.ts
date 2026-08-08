@@ -84,15 +84,18 @@ export async function runNoteGeneration(
     return { ok: true, skipped: true };
   }
 
-  const { data: prevSession } = await service
+  // Last 4 completed sessions (most-recent-first) give Claude enough
+  // treatment-trajectory context to notice patterns across sessions — not
+  // just versus the single prior one — and to check whether homework or the
+  // previously stated next-session plan actually got followed up on.
+  const { data: recentSessions } = await service
     .from('sessions')
-    .select('session_summary')
+    .select('session_number, started_at, session_summary, homework_assigned, next_session_plan, risk_level')
     .eq('patient_id', session.patient_id)
     .eq('status', 'completed')
     .neq('id', sessionId)
     .order('started_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(4);
 
   let transcript = (session.transcript_raw as TranscriptSegment[]) || [];
   const notesManual = (session.manual_notes as string) || manualNotes || '';
@@ -131,7 +134,14 @@ export async function runNoteGeneration(
       transcript,
       patient,
       sessionNumber,
-      previousSessionSummary: prevSession?.session_summary ?? undefined,
+      recentSessionHistory: (recentSessions ?? []).map(s => ({
+        sessionNumber: s.session_number as number,
+        date: s.started_at as string,
+        summary: (s.session_summary as string) || '',
+        homeworkAssigned: (s.homework_assigned as string) || null,
+        nextSessionPlan: (s.next_session_plan as string) || null,
+        riskLevel: (s.risk_level as string) || null,
+      })),
       manualNotes: notesManual,
       speakerMap,
       noteFormat: therapistBilling?.note_format === 'emdr' ? 'emdr' : 'soap',
