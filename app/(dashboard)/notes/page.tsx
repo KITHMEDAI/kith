@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { FileText, ChevronRight, Search } from 'lucide-react';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { embedQuery } from '@/lib/embeddings';
 
 interface NoteSession {
   id: string;
@@ -9,6 +10,13 @@ interface NoteSession {
   started_at: string;
   session_summary: string | null;
   patient: { display_name: string; diagnosis: string[] } | null;
+}
+
+const SESSION_COLUMNS = 'id, session_number, started_at, session_summary, patient:patients(display_name, diagnosis)';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeSession(s: any): NoteSession {
+  return { ...s, patient: Array.isArray(s.patient) ? s.patient[0] : s.patient };
 }
 
 function relativeDate(iso: string) {
@@ -30,28 +38,82 @@ export default async function NotesPage({ searchParams }: { searchParams: { pati
   if (!therapist) redirect('/register');
 
   const service = createServiceRoleClient();
-  let query = service
-    .from('sessions')
-    .select('id, session_number, started_at, session_summary, patient:patients(display_name, diagnosis)')
-    .eq('therapist_id', therapist.id)
-    .eq('status', 'completed')
-    .not('soap_note', 'is', null)
-    .order('started_at', { ascending: false })
-    .limit(100);
+  const q = searchParams.q?.trim();
+  let sessions: NoteSession[];
 
-  if (searchParams.patient) query = query.eq('patient_id', searchParams.patient);
-
-  const { data } = await query;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let sessions = ((data as any[])?.map(s => ({ ...s, patient: Array.isArray(s.patient) ? s.patient[0] : s.patient })) as NoteSession[]) || [];
-
-  // Client-side text search applied server-side via filter
-  const q = searchParams.q?.toLowerCase();
   if (q) {
-    sessions = sessions.filter(s =>
-      s.patient?.display_name?.toLowerCase().includes(q) ||
-      s.session_summary?.toLowerCase().includes(q)
-    );
+    // Two independent match paths, merged: an exact patient-name lookup
+    // ("find Maria's notes" — note content never contains the patient's
+    // real name, see lib/claude.ts's initials-only rule, so this can't be
+    // covered by content search) and hybrid semantic+keyword search over
+    // the actual note content (search_session_notes RPC, see migration
+    // 016_notes_semantic_search.sql). Name matches surface first — that's a
+    // precise filter intent — followed by content matches in ranked order.
+    const [nameMatches, contentMatches] = await Promise.all([
+      (async () => {
+        const { data: patients } = await service
+          .from('patients')
+          .select('id')
+          .eq('therapist_id', therapist.id)
+          .ilike('display_name', `%${q}%`);
+        const patientIds = (patients ?? []).map((p: { id: string }) => p.id);
+        if (patientIds.length === 0) return [] as NoteSession[];
+
+        let nameQuery = service
+          .from('sessions')
+          .select(SESSION_COLUMNS)
+          .eq('therapist_id', therapist.id)
+          .eq('status', 'completed')
+          .not('soap_note', 'is', null)
+          .in('patient_id', patientIds)
+          .order('started_at', { ascending: false })
+          .limit(100);
+        if (searchParams.patient) nameQuery = nameQuery.eq('patient_id', searchParams.patient);
+
+        const { data } = await nameQuery;
+        return (data ?? []).map(normalizeSession);
+      })(),
+      (async () => {
+        const queryEmbedding = await embedQuery(q);
+        const { data: ranked, error } = await service.rpc('search_session_notes', {
+          p_therapist_id: therapist.id,
+          p_query_embedding: queryEmbedding,
+          p_query_text: q,
+          p_patient_id: searchParams.patient ?? null,
+          p_limit: 100,
+        });
+        if (error) {
+          console.warn('[Kith] notes search RPC failed:', error.message);
+          return [] as NoteSession[];
+        }
+        const orderedIds: string[] = (ranked ?? []).map((r: { id: string }) => r.id);
+        if (orderedIds.length === 0) return [] as NoteSession[];
+
+        const { data } = await service.from('sessions').select(SESSION_COLUMNS).in('id', orderedIds);
+        const byId = new Map((data ?? []).map((s) => [s.id, normalizeSession(s)]));
+        return orderedIds.map(id => byId.get(id)).filter((s): s is NoteSession => !!s);
+      })(),
+    ]);
+
+    const seen = new Set<string>();
+    sessions = [...nameMatches, ...contentMatches].filter(s => {
+      if (seen.has(s.id)) return false;
+      seen.add(s.id);
+      return true;
+    });
+  } else {
+    let query = service
+      .from('sessions')
+      .select(SESSION_COLUMNS)
+      .eq('therapist_id', therapist.id)
+      .eq('status', 'completed')
+      .not('soap_note', 'is', null)
+      .order('started_at', { ascending: false })
+      .limit(100);
+    if (searchParams.patient) query = query.eq('patient_id', searchParams.patient);
+
+    const { data } = await query;
+    sessions = (data ?? []).map(normalizeSession);
   }
 
   return (
@@ -69,7 +131,7 @@ export default async function NotesPage({ searchParams }: { searchParams: { pati
             <input
               name="q"
               defaultValue={searchParams.q}
-              placeholder="Search patient or summary…"
+              placeholder="Search patient, topic, or note content…"
               className="pl-9 pr-4 py-2 rounded-lg border border-input bg-white/70 text-[13px] focus:outline-none focus:ring-2 focus:ring-violet-400 w-64"
             />
           </div>

@@ -16,6 +16,7 @@
  */
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { generateSessionNotes } from '@/lib/claude';
+import { embedAndStoreNote } from '@/lib/embeddings';
 import { getEntitlements } from '@/lib/entitlements';
 import type { Patient, TranscriptSegment } from '@/types';
 
@@ -183,6 +184,13 @@ export async function runNoteGeneration(
       });
     } catch (metricsErr) {
       console.warn('[Kith] patient_metrics insert failed (non-fatal):', metricsErr);
+    }
+
+    // Best-effort — indexing for search should never fail note generation.
+    try {
+      await embedAndStoreNote(sessionId, service);
+    } catch (embedErr) {
+      console.warn('[Kith] note embedding failed (non-fatal):', embedErr);
     }
 
     console.log(`[Kith] process-notes: completed for session ${sessionId}, risk=${riskLevel}`);

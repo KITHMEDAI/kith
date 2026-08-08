@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
 import { getEntitlements } from '@/lib/entitlements';
+import { embedAndStoreNote } from '@/lib/embeddings';
 
 export async function GET(
   req: NextRequest,
@@ -93,5 +94,19 @@ export async function PATCH(
 
   const { error } = await service.from('sessions').update(updates).eq('id', params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // soap_note is only ever PATCHed from the completed-note editor (see
+  // app/(dashboard)/notes/[sessionId]/page.tsx handleSave) — never during a
+  // live session, unlike manual_notes/transcript_raw autosave — so this is
+  // exactly "the clinician corrected a finished note" and the search index
+  // should reflect the correction. Best-effort: never fail the save over it.
+  if (updates.soap_note !== undefined) {
+    try {
+      await embedAndStoreNote(params.id, service);
+    } catch (embedErr) {
+      console.warn('[Kith] note re-embedding after edit failed (non-fatal):', embedErr);
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
