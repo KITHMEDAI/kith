@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
-const LAST_UPDATED = 'August 8, 2026';
+const LAST_UPDATED = 'August 9, 2026';
 
 function H2({ children }: { children: React.ReactNode }) {
   return <h2 className="text-xl font-bold text-foreground mt-10 mb-3">{children}</h2>;
@@ -116,6 +116,19 @@ export default function PrivacyPolicyPage() {
           <LI><strong>Google (Calendar API)</strong> — reads appointment times from a Practitioner&rsquo;s connected
             Google Calendar and, for video sessions, creates a Google Meet link. Kith never reads unrelated emails,
             documents, or personal calendar entries.</LI>
+        </ul>
+        <P>
+          <strong>Google Calendar data, specifically:</strong> if you connect your Google Calendar, Kith reads your
+          event times to check for scheduling conflicts, and — only when you book a video session inside Kith —
+          creates a new calendar event with a Google Meet link for that booking. It does not modify or delete any
+          other event, and it never reads your emails, documents, or Drive files. This data is used solely to
+          provide that scheduling functionality: it is never shared, sold, or transferred to any third party, and
+          is never used to train an AI model. Your Google access tokens are held in encrypted secret storage
+          (Supabase Vault), separate from the rest of our database. You can disconnect Google Calendar at any time
+          from Settings &rarr; Integrations, which deletes those stored tokens; deleting your Kith account does the
+          same.
+        </P>
+        <ul className="list-disc pl-5 mb-4">
           <LI><strong>Twilio</strong> — delivers WhatsApp/SMS messages a Practitioner chooses to send to a Patient.</LI>
           <LI><strong>Resend</strong> — delivers transactional email.</LI>
           <LI><strong>Razorpay</strong> — processes subscription payments; Kith never receives or stores full card
