@@ -163,3 +163,49 @@ there's no blank page to perfectionistically fill in the first place) fits
 here if it comes up honestly - but the OCD/perfectionism angle and the board/
 insurance liability framing are the real conversation and should be engaged
 with on their own terms first.
+
+## Insurance/Medicaid documentation for complex long-term clients - the continuity-tracking angle nobody else in the thread addressed
+
+Thread: [r/therapists - "AI note taking/transcribing tools (I know, but I am having serious trouble keeping up with all insurance requirements and paperwork and can't afford a backlog building)"](https://www.reddit.com/r/therapists/comments/1v25zlf/ai_note_takingtranscribing_tools_i_know_but_i_am/)
+(posted 19 days ago, but still getting new comments as recently as 2 days ago -
+worth flagging that this is outside the usual 7-day freshness window, but the
+fit is unusually strong and the thread is demonstrably still alive, so use
+judgment rather than skipping it on the date alone). OP is a long-term private
+practice therapist (10+ years, 5-6 in PP) whose caseload is 90-95% complex,
+multi-diagnosis, chronic/complex trauma - explicitly not the "simple" cases
+most note-writing advice assumes. She's asking for an AI note tool that
+handles Medicaid/insurance documentation requirements without being "insanely
+costly," doesn't want SimplePractice's built-in notetaker, and separately
+flagged that "treatment plans and treatment plan reviews/updates are the bane
+of my existence" because she works with clients long-term rather than
+short-term. The thread already has ~15 competitor tools name-dropped (TwoFold,
+SnapNotes, BastionGPT, Upheal, Mentalyc, Supanote, Blueprint, etc.) so a bare
+tool-name reply adds nothing - what nobody in the thread has addressed is her
+specific long-term-continuity problem. Kith's new multi-session treatment
+history feature (pulls the last 4 sessions' summary/homework/next-session-plan/
+risk level when drafting a note, so it can flag when something planned earlier
+never got followed up on) speaks directly to that, and the new BIRP format
+(added specifically for insurance/agency documentation) speaks directly to her
+Medicaid/insurance-language complaint. Be precise and not overclaiming: Kith
+does NOT write or manage formal treatment-plan documents - be clear that this
+is session-to-session continuity tracking, not treatment-plan generation, so
+it doesn't overpromise on the exact thing she's most frustrated by. Also worth
+echoing the consent point another commenter (msp_ryno) already raised in-thread
+- Kith's separate recording vs. AI-processing consent gates are a genuine,
+non-generic answer to that, not just a compliance checkbox mention.
+
+**Important:** r/therapists' sidebar rules explicitly include "Participate in
+Good Faith - no AI-Generated Responses" - whoever posts this needs to write it
+personally, not paste a generated draft verbatim, same as every other entry in
+this file.
+
+Suggested angle (not a verbatim comment - personalize before posting): "The
+treatment-plan continuity piece is the part most of these don't touch. I built
+Kith (free, no card needed) - it just added BIRP alongside SOAP/DAP/EMDR
+specifically for the insurance/Medicaid documentation angle. It also pulls your
+last few sessions' summary, homework, and next-session plan when drafting a new
+note, so it can flag if something planned earlier never got followed up on -
+not full treatment-plan writing, but it's helped with the 'did we actually
+address what we said we would' tracking on longer-term cases. Recording and
+AI-processing consent are separate opt-ins too, for what it's worth given
+what's already been said here."
