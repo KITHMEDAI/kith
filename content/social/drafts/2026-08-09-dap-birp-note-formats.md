@@ -7,7 +7,9 @@ image: content/social/assets/2026-08-09-og-card.png
 platforms:
   - twitter
   - instagram
-status: pending
+status: posted
+posted_at: '2026-08-09T04:32:53.619Z'
+tweet_url: 'https://x.com/i/web/status/2086309727798239259'
 ---
 
 ## Twitter/X
