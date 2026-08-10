@@ -1,8 +1,16 @@
 ---
-topic: "when Kith drafts a new note, it pulls the last 4 sessions - summary, homework, next-session plan, risk level - so it tracks trajectory across sessions instead of just today vs. last time, and flags anything planned earlier that never got followed up on"
-platforms: ["twitter", "instagram"]
+topic: >-
+  when Kith drafts a new note, it pulls the last 4 sessions - summary, homework,
+  next-session plan, risk level - so it tracks trajectory across sessions
+  instead of just today vs. last time, and flags anything planned earlier that
+  never got followed up on
+platforms:
+  - twitter
+  - instagram
 image: content/social/assets/2026-08-10-og-card.png
-status: "pending"
+status: posted
+posted_at: '2026-08-10T04:06:00.081Z'
+tweet_url: 'https://x.com/i/web/status/2086665338138288582'
 ---
 
 ## Twitter/X
