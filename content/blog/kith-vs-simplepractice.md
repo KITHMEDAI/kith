@@ -3,6 +3,7 @@ title: "Kith vs SimplePractice: Best Alternative for India"
 description: "An honest look at Kith as a SimplePractice alternative for solo therapists in India and the UK — pricing, AI notes, and where each one fits best."
 date: "2026-09-06"
 keyword: "simplepractice alternative india"
+category: "Running a Private Practice"
 draft: true
 ---
 

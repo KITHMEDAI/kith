@@ -3,6 +3,7 @@ title: "How to Reduce No-Shows With Better Scheduling Software"
 description: "Why therapy sessions get missed, and which parts of therapy scheduling software genuinely reduce no-shows versus which parts just feel like they should."
 date: "2026-08-23"
 keyword: "therapy scheduling software"
+category: "Running a Private Practice"
 ---
 
 A no-show costs more than the missed fee. It's a hole in your day you can't always fill on short notice, a gap in a patient's treatment continuity, and — if it happens often enough with the same person — a sign something about the working relationship or the logistics around it isn't working. Most advice on this topic jumps straight to "send reminder texts." That's part of the picture, but it's not the whole one. Here's a more complete look at why sessions actually get missed, and where therapy scheduling software genuinely helps versus where the fix is still on you.

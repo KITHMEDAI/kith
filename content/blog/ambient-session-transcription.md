@@ -3,6 +3,7 @@ title: "What Is Ambient Session Transcription? A Guide for Therapists"
 description: "How ambient transcription actually works for therapy sessions — in-person and online — and what it does (and doesn't) do for your notes."
 date: "2026-07-26"
 keyword: "ambient transcription therapy"
+category: "AI Clinical Documentation"
 ---
 
 If you've spent any part of a session typing instead of listening, you've already felt the problem ambient transcription is built to solve. It's a term that's started showing up across clinical software, but it gets used loosely — so here's what it actually means, how it works in practice, and where its limits are.

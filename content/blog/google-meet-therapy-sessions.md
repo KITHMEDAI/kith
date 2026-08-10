@@ -3,6 +3,7 @@ title: "Google Meet for Therapy Sessions: A Practical Setup Guide"
 description: "A practical guide to running online therapy sessions on Google Meet — link setup, privacy basics, connection backups, and where automatic notetaking fits in."
 date: "2026-08-30"
 keyword: "online therapy sessions google meet"
+category: "Running a Private Practice"
 draft: true
 ---
 

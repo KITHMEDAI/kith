@@ -3,6 +3,7 @@ title: "SOAP Note Templates for Therapists (Free)"
 description: "A clean, copyable SOAP note template for therapy sessions — what belongs in each section, a worked example, and mistakes worth avoiding."
 date: "2026-08-09"
 keyword: "soap note template therapy"
+category: "Clinical Documentation Best Practice"
 leadMagnet: "guide-soap-templates"
 leadMagnetLabel: "Get this template pack by email"
 ---

@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import KithLockup from '@/components/brand/KithLockup';
 import LeadCaptureForm from '@/components/marketing/LeadCaptureForm';
-import { getAllPosts, getPostBySlug } from '@/lib/blog';
+import { getAllPosts, getPostBySlug, getRelatedPosts } from '@/lib/blog';
 
 const BG = 'linear-gradient(160deg, #1e0d4e 0%, #16083a 60%, #0f2a1e 100%)';
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
@@ -59,6 +59,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     ],
   };
 
+  const relatedPosts = getRelatedPosts({ slug: post.slug, category: post.category });
+
   const faqJsonLd = post.faqs.length > 0 ? {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -110,6 +112,21 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
             </div>
           )}
         </div>
+
+        {relatedPosts.length > 0 && (
+          <div className="mt-14 pt-10 border-t border-slate-200">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Related reading</p>
+            <div className="space-y-4">
+              {relatedPosts.map(related => (
+                <Link key={related.slug} href={`/blog/${related.slug}`}
+                  className="block rounded-xl border border-slate-200 p-4 hover:border-violet-300 hover:bg-violet-50/30 transition-colors">
+                  <h3 className="text-sm font-semibold text-foreground">{related.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{related.description}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
