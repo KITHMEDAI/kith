@@ -87,7 +87,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           <KithLockup markSize={22} className="text-[15px] text-white" gradientId={`kith-post-${post.slug}`} gradientFrom="#e9d5ff" gradientTo="#a78bfa" />
           <h1 className="text-2xl sm:text-3xl font-bold text-white mt-6 leading-tight">{post.title}</h1>
           <p className="text-xs text-purple-200/50 mt-3">
-            {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+            By the Kith Team · {new Date(post.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
       </div>
