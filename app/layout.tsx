@@ -46,6 +46,16 @@ const organizationJsonLd = {
   description,
 };
 
+// Deliberately no `potentialAction: SearchAction` here — that requires an
+// actual on-site search page (e.g. /search?q={term}), which Kith doesn't
+// have. Adding it anyway would be schema for a feature that doesn't exist.
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Kith',
+  url: BASE_URL,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -55,6 +65,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         {children}
         <Analytics />
       </body>
