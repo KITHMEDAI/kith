@@ -11,6 +11,7 @@
     { "date": "2026-08-06", "slug": "import-patients-csv", "topic": "switching practice management tools usually means retyping every existing patient by hand - Kith imports patients straight from a CSV or Excel export instead" },
     { "date": "2026-08-07", "slug": "online-session-privacy-room-not-platform", "topic": "the biggest confidentiality risk in an online session usually isn't the video platform - it's who else is actually in the room" },
     { "date": "2026-08-08", "slug": "recurring-sessions-auto-meet-link", "topic": "recurring appointments in Kith generate a fresh Google Meet link for every occurrence automatically - not one reused link that gets copied, lost, or goes stale over weeks of sessions" },
-    { "date": "2026-08-09", "slug": "dap-birp-note-formats", "topic": "Kith now generates DAP and BIRP notes, not just SOAP and EMDR - BIRP's Intervention field is real added structure for insurance/agency documentation requirements" }
+    { "date": "2026-08-09", "slug": "dap-birp-note-formats", "topic": "Kith now generates DAP and BIRP notes, not just SOAP and EMDR - BIRP's Intervention field is real added structure for insurance/agency documentation requirements" },
+    { "date": "2026-08-10", "slug": "multi-session-treatment-history", "topic": "when Kith drafts a new note, it pulls the last 4 sessions - summary, homework, next-session plan, risk level - to track trajectory across sessions and flag anything planned earlier that never got followed up on" }
   ]
 }
