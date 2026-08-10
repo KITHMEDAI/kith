@@ -69,7 +69,10 @@ documentation / practice-management tools, converting to a free Kith signup.
 - 1000–2000 words depending on `priority` (quick-win: ~1200, big-bet: ~1800-2200).
 - Frontmatter: `title`, `description` (under 160 chars, used as meta description),
   `date` (next available date, roughly 1 week after the last post's date — check
-  existing files in `content/blog/` for the most recent date), `keyword`, `draft: true`.
+  existing files in `content/blog/` for the most recent date), `keyword`, `category`
+  (one of the three pillars, exactly as written: `AI Clinical Documentation`,
+  `Running a Private Practice`, `Clinical Documentation Best Practice` — powers the
+  automatic "Related reading" block on the post page, see `lib/blog.ts`), `draft: true`.
 - Compliance/legal topics (data protection law, regulatory claims) get an upfront
   italicized disclaimer, same pattern as `dpdp-2023-therapist-notes.md`.
 - Comparison posts must be fair — acknowledge where a competitor is genuinely
