@@ -22,8 +22,38 @@ export interface BlogPostMeta {
   leadMagnetLabel?: string;
 }
 
+export interface BlogFaq {
+  question: string;
+  answer: string;
+}
+
 export interface BlogPost extends BlogPostMeta {
   html: string;
+  /** Parsed from a "## Frequently asked questions" section, if the post has one —
+   *  used to emit FAQPage JSON-LD. Empty when the post has no such section. */
+  faqs: BlogFaq[];
+}
+
+// Pulls Q/A pairs out of a "## Frequently asked questions" section, written as
+// **Question?**\nAnswer text. Runs on the raw markdown (not the rendered HTML)
+// since bold-line-then-paragraph is easy to match reliably there.
+function extractFaqs(content: string): BlogFaq[] {
+  const heading = content.match(/^##\s+frequently asked questions\s*$/im);
+  if (!heading) return [];
+
+  const afterHeading = content.slice(heading.index! + heading[0].length);
+  const nextHeadingIdx = afterHeading.search(/^##\s/m);
+  const section = nextHeadingIdx === -1 ? afterHeading : afterHeading.slice(0, nextHeadingIdx);
+
+  const faqs: BlogFaq[] = [];
+  const pairPattern = /\*\*(.+?)\*\*\s*\n([^\n]+(?:\n(?!\*\*)[^\n]+)*)/g;
+  let match: RegExpExecArray | null;
+  while ((match = pairPattern.exec(section)) !== null) {
+    const question = match[1].trim();
+    const answer = match[2].trim().replace(/\s+/g, ' ');
+    if (question && answer) faqs.push({ question, answer });
+  }
+  return faqs;
 }
 
 function readSlugs(): string[] {
@@ -64,6 +94,7 @@ function readPost(slug: string): BlogPost | null {
     leadMagnet: data.leadMagnet,
     leadMagnetLabel: data.leadMagnetLabel,
     html: marked.parse(content, { async: false }) as string,
+    faqs: extractFaqs(content),
   };
 }
 

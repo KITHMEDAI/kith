@@ -19,11 +19,21 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION, images: [OG_IMAGE] },
 };
 
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: BASE_URL },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: `${BASE_URL}/blog` },
+  ],
+};
+
 export default function BlogIndexPage() {
   const posts = getAllPosts();
 
   return (
     <div className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div style={{ background: BG }}>
         <div className="max-w-3xl mx-auto px-6 py-8">
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-purple-200/60 hover:text-white transition-colors mb-6">
