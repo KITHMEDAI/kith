@@ -23,13 +23,9 @@ no memory of prior sessions beyond this file and the repo itself.
   go in `content/social/reddit-ideas.md` as a running list for a human to post
   manually, case by case, only in threads where it's actually relevant — never as a
   standalone promotional post.
-- **Instagram gets captions, not scheduled posts.** Instagram requires an image/video
-  per post; this agent has no image-generation pipeline. Draft the caption anyway
-  (useful once a human pairs it with an image) but don't pretend posting is automated
-  for this platform — it isn't, and building fake automation here would be worse than
-  not building it.
-- One post-idea per run (drafted for whichever platforms apply — currently Twitter/X
-  + Instagram caption from the same idea). Don't batch multiple ideas in one run.
+- **No Instagram.** Kith has no Instagram presence — don't draft Instagram captions.
+  Twitter/X only, until that changes.
+- One post-idea per run (Twitter/X only). Don't batch multiple ideas in one run.
 
 ## Ground truth — what Kith actually does (same list as the content agent, kept in
 ## sync manually — if this drifts from docs/seo-content-agent.md, trust the codebase)
@@ -60,12 +56,9 @@ NOT publicly marketable yet — don't build posts around these:
   max, only if genuinely relevant — e.g. #therapy or #mentalhealth, never a wall of
   tags). Reads like a person who does this work shared an honest observation, not
   like ad copy. No emoji unless it's doing real work, not decoration.
-- **Instagram caption**: can run longer (2-4 short paragraphs), same honest voice,
-  ends with a soft, non-pushy mention of Kith if relevant — never "LINK IN BIO! 🔥"
-  energy.
-- Both: never fabricate a statistic, testimonial, or user quote. If referencing the
-  blog, link to the real post (kith.space/blog/<slug>).
-- Both: no claims beyond the ground-truth list above.
+- Never fabricate a statistic, testimonial, or user quote. If referencing the blog,
+  link to the real post (kith.space/blog/<slug>).
+- No claims beyond the ground-truth list above.
 
 ## Procedure
 
@@ -75,8 +68,8 @@ NOT publicly marketable yet — don't build posts around these:
    from the ground-truth list, or a general, honest observation about therapy
    documentation/practice management that Kith's positioning naturally connects to.
 3. Write `content/social/drafts/<date>-<slug>.md` with frontmatter
-   `{ topic, sourcePost (optional), platforms: ["twitter","instagram"], status: "pending" }`
-   and a body with `## Twitter/X` and `## Instagram` sections per the style rules above.
+   `{ topic, sourcePost (optional), platforms: ["twitter"], status: "pending" }`
+   and a body with a `## Twitter/X` section per the style rules above.
 4. Update `content/social/_history.json`: append `{ date, slug, topic }`.
 5. Occasionally (roughly 1 in 4 runs), also add one idea to
    `content/social/reddit-ideas.md` — a genuine discussion angle, not a promotional

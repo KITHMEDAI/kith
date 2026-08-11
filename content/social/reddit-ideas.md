@@ -209,3 +209,42 @@ not full treatment-plan writing, but it's helped with the 'did we actually
 address what we said we would' tracking on longer-term cases. Recording and
 AI-processing consent are separate opt-ins too, for what it's worth given
 what's already been said here."
+
+## Platform-level AI defaults vs. a therapist actually controlling when AI touches a session - the real distinction in a "which video platform is safe" question
+
+Thread: [r/therapists - "secure video platforms"](https://www.reddit.com/r/therapists/comments/1vl5xyl/secure_video_platforms/)
+(posted 14 hours ago, active - OP is asking what video platforms are actually
+private/secure, specifically worried about AI and smart features creeping in
+without clear consent. Concrete, unsettling detail in the post: mid-session,
+Gemini popped up unprompted on a client's untouched phone after AI came up in
+conversation while they were on Google Meet, and a different client got a
+Google "smart features" email right after a session where they'd discussed it
+- OP suspects Google Meet's AI settings silently reset on updates. Two comments
+so far: one (Manzanita_Grove) is skeptical of any EHR's privacy claims, since
+the vendor holds the encryption keys and can be subpoenaed regardless of
+platform choice; the other (msp_ryno) makes the point that practices can turn
+AI off and everything has AI now, the real work is due diligence + a signed
+BAA + HIPAA safeguards, not platform-hopping - and recommends a Person Centered
+Tech CEU on clinical AI. OP's own reply pushes back with the real distinction:
+she's not against AI in the abstract, she wants to be the one deciding when
+it's active on a call, not have a platform's AI default flip back on after
+every update without a way to durably turn it off).
+
+This is a "which video platform" thread, not a documentation-tool thread, so
+don't force a product pitch - the platform-choice question (Doxy vs. Zoom vs.
+Google Meet vs. an EHR's built-in video) is real and Kith isn't a video
+platform, doesn't answer it, and shouldn't pretend to. But OP's actual
+underlying complaint - wanting an explicit, therapist-controlled decision
+point for when AI touches a session, instead of a platform-level AI setting
+that's ambiently on/off and can reset itself - is a genuine, non-generic thing
+to engage with regardless of which platform she lands on. If it comes up
+naturally (e.g. someone asks how a separate AI tool avoids the same "did this
+just turn itself back on" problem), worth mentioning that an add-on notetaker
+bot only ever processes audio when it's explicitly invited into that specific
+call, and recording consent and AI-processing consent are two separate
+opt-ins rather than one bundled platform default - a concrete example of the
+"I decide when AI is active, not the platform" pattern OP is asking for,
+without claiming it solves the video-platform question itself. The honest,
+most useful reply here probably doesn't need a Kith mention at all - the
+platform-security question and the "AI defaults vs. explicit consent"
+distinction are worth engaging with on their own terms first.
