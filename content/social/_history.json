@@ -14,6 +14,7 @@
     { "date": "2026-08-09", "slug": "dap-birp-note-formats", "topic": "Kith now generates DAP and BIRP notes, not just SOAP and EMDR - BIRP's Intervention field is real added structure for insurance/agency documentation requirements" },
     { "date": "2026-08-10", "slug": "multi-session-treatment-history", "topic": "when Kith drafts a new note, it pulls the last 4 sessions - summary, homework, next-session plan, risk level - to track trajectory across sessions and flag anything planned earlier that never got followed up on" },
     { "date": "2026-08-10", "slug": "pdf-note-export-ownership", "topic": "a session note is supposed to outlive whatever software it was written in - PDF export as a practical ownership question, not a feature checkbox" },
-    { "date": "2026-08-11", "slug": "soap-note-template-worked-example", "topic": "the free SOAP note template guide - the hard part was never the blank format, it's deciding what actually belongs in each section" }
+    { "date": "2026-08-11", "slug": "soap-note-template-worked-example", "topic": "the free SOAP note template guide - the hard part was never the blank format, it's deciding what actually belongs in each section" },
+    { "date": "2026-08-12", "slug": "ai-notes-addon-vs-included", "topic": "AI note-drafting is usually priced as an upsell on top of a base EHR subscription - Kith builds the ambient transcription + note pipeline into the free plan instead of gating it behind a per-clinician add-on fee" }
   ]
 }
