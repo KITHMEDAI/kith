@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 
 // Placeholder URL used in mock mode — Supabase client is constructed but never
 // actually called, so these dummy values are safe.
@@ -40,6 +41,19 @@ export function createServerSupabaseClient() {
     }
   );
 }
+
+// The dashboard layout and every page it renders each independently checked
+// auth on every navigation (layout + page = 2+ sequential network round
+// trips to Supabase Auth before any page data even starts loading).
+// React's cache() dedupes calls with the same arguments within a single
+// server-render pass, so every getAuthUser() call in the same request
+// collapses into one actual network request — this is Supabase's documented
+// pattern for Next.js App Router.
+export const getAuthUser = cache(async () => {
+  const supabase = createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+});
 
 export function createServiceRoleClient() {
   return createServerClient(

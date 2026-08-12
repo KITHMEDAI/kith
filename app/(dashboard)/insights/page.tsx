@@ -1,10 +1,10 @@
 import { redirect } from 'next/navigation';
 import { TrendingUp, TrendingDown, Users, FileText, Clock, Activity } from 'lucide-react';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 
 export default async function InsightsPage() {
   const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect('/login');
 
   const { data: therapist } = await supabase

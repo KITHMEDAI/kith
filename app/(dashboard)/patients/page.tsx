@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import PatientListClient from '@/components/patients/PatientListClient';
 import type { Patient } from '@/types';
 
 export default async function PatientsPage() {
   const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect('/login');
 
   const { data: therapist } = await supabase

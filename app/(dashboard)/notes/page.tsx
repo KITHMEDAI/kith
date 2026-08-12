@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { FileText, ChevronRight, Search } from 'lucide-react';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import { embedQuery } from '@/lib/embeddings';
 
 interface NoteSession {
@@ -30,7 +30,7 @@ function relativeDate(iso: string) {
 
 export default async function NotesPage({ searchParams }: { searchParams: { patient?: string; q?: string } }) {
   const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect('/login');
 
   const { data: therapist } = await supabase

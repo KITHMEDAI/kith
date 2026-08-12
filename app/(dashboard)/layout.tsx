@@ -1,7 +1,7 @@
 import DashboardShell from '@/components/layout/DashboardShell';
 import AppointmentReminder from '@/components/notifications/AppointmentReminder';
 import type { Therapist } from '@/types';
-import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, getAuthUser } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 
@@ -38,7 +38,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (!USE_MOCK) {
     const supabase = createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getAuthUser();
     if (user) {
       const { data } = await supabase.from('therapists')
         .select('id,user_id,display_name,designation,avatar_url,subscription_plan,subscription_status,trial_ends_at,onboarding_completed')

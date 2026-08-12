@@ -5,7 +5,7 @@ import {
   ChevronRight, Play, Circle, CheckCircle2,
   TrendingUp, Video,
 } from 'lucide-react';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import CalendarAutoSync from '@/components/calendar/CalendarAutoSync';
 import BookAppointmentButton from '@/components/appointments/BookAppointmentButton';
 import type { Patient } from '@/types';
@@ -26,7 +26,7 @@ function relDate(iso: string) {
 
 export default async function DashboardPage() {
   const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect('/login');
 
   const { data: therapist } = await supabase

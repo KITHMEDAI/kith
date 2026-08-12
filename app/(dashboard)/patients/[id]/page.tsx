@@ -4,7 +4,7 @@ import {
   ArrowLeft, Phone, Mail, MessageSquare, Calendar,
   FileText, Brain, Activity, ChevronRight, Loader2, StickyNote,
 } from 'lucide-react';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import { ProcessingBanner } from '@/components/patients/ProcessingBanner';
 import StartSessionButton from '@/components/patients/StartSessionButton';
 import EditPatientButton from '@/components/patients/EditPatientButton';
@@ -45,7 +45,7 @@ function sessionDuration(s: SessionRow): string | null {
 export default async function PatientProfilePage({ params }: { params: { id: string } }) {
   // Auth check with user Supabase client
   const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect('/login');
 
   // Get therapist ID for ownership verification

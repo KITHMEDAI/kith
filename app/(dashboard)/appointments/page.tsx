@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import AppointmentsClient from '@/components/appointments/AppointmentsClient';
 import type { Appointment, Patient } from '@/types';
 
 export default async function AppointmentsPage({ searchParams }: { searchParams: { book?: string } }) {
   const supabase = createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) redirect('/login');
 
   const { data: therapist } = await supabase
