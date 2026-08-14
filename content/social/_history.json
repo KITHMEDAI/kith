@@ -16,6 +16,7 @@
     { "date": "2026-08-10", "slug": "pdf-note-export-ownership", "topic": "a session note is supposed to outlive whatever software it was written in - PDF export as a practical ownership question, not a feature checkbox" },
     { "date": "2026-08-11", "slug": "soap-note-template-worked-example", "topic": "the free SOAP note template guide - the hard part was never the blank format, it's deciding what actually belongs in each section" },
     { "date": "2026-08-12", "slug": "ai-notes-addon-vs-included", "topic": "AI note-drafting is usually priced as an upsell on top of a base EHR subscription - Kith builds the ambient transcription + note pipeline into the free plan instead of gating it behind a per-clinician add-on fee" },
-    { "date": "2026-08-12", "slug": "two-layer-note-pipeline", "topic": "one AI call asked to both compress a raw session transcript and structure it into a SOAP note tends to do both jobs badly - Kith runs a two-layer pipeline instead, one pass to compress and a separate pass to structure" }
+    { "date": "2026-08-12", "slug": "two-layer-note-pipeline", "topic": "one AI call asked to both compress a raw session transcript and structure it into a SOAP note tends to do both jobs badly - Kith runs a two-layer pipeline instead, one pass to compress and a separate pass to structure" },
+    { "date": "2026-08-13", "slug": "note-speed-immediacy-not-templates", "topic": "note-writing speed varies less by template quality than by how soon after the session the note gets written - immediacy beats formatting, and that's the gap ambient transcription closes by default" }
   ]
 }
