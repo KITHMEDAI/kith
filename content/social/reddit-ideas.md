@@ -194,6 +194,25 @@ echoing the consent point another commenter (msp_ryno) already raised in-thread
 - Kith's separate recording vs. AI-processing consent gates are a genuine,
 non-generic answer to that, not just a compliance checkbox mention.
 
+## "Free tier" almost always means a card on file and a countdown, not actually free
+
+A recurring theme in r/therapists and r/privatepractice threads about picking
+EHR software: solo and early-career therapists comparing options on cost, and
+getting frustrated that most "free trials" require a credit card upfront and
+convert automatically after 14 or 30 days, so "free" really means "free until
+you forget to cancel." Worth engaging genuinely in any thread about choosing
+affordable tools for a new or low-volume practice - the actual distinction
+worth raising isn't which platform's free tier has the most features, it's
+whether "free" requires payment info at all or is a genuine no-card starting
+point. If a tool mention fits naturally, note that Kith's free plan doesn't
+ask for a card to start - but the honest, useful thing to contribute first is
+the general point that a countdown-timer "free trial" and a no-card free plan
+are different products being marketed with the same word, and it's worth
+asking which one a given tool actually is before signing up. No specific live
+thread identified this run (web search didn't surface a current one) - use
+this as a standing angle to drop into the next fresh "which EHR should I use"
+or "affordable options for new practice" thread that comes up.
+
 **Important:** r/therapists' sidebar rules explicitly include "Participate in
 Good Faith - no AI-Generated Responses" - whoever posts this needs to write it
 personally, not paste a generated draft verbatim, same as every other entry in
