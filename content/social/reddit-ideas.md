@@ -213,6 +213,37 @@ thread identified this run (web search didn't surface a current one) - use
 this as a standing angle to drop into the next fresh "which EHR should I use"
 or "affordable options for new practice" thread that comes up.
 
+## Subpoena-proofing notes isn't a format problem - it's knowing what to review and when
+
+Thread: [r/therapists - "Note overhall"](https://www.reddit.com/r/therapists/comments/1vnbddd/note_overhall/)
+(posted 2 days ago, active as recently as 8 hours ago - a 10-year clinician,
+prompted by a recent high-profile case, asking whether their self-made DAP
+format from years ago actually holds up if subpoenaed, and whether more
+experienced therapists have a better handout/formula). The two substantive
+replies pull in different directions worth engaging with on their own terms.
+One (Alternative-Knee8102, well-received) argues this is a structural problem,
+not a personal one - 7 minutes between sessions isn't enough time to think,
+consult, and document defensibly, and the fix is advocacy for systemic change,
+not individual optimization. That's a real point and shouldn't be waved away
+with a tool pitch. The other (GroupPracticeIRL) is more concrete and
+genuinely useful: they built a Copilot note agent off a Colorado Medicaid
+audit checklist, pin their treatment goals in the chart so they can be
+copy-pasted each note, and pin the 3-month treatment-plan-review date so it's
+never missed - takes about 5 minutes. That second reply is the sharper
+practical angle for this thread: subpoena/audit defensibility isn't really a
+template-wording problem, it's a "did I address what I said I'd address, on
+schedule" problem, which is a slightly different framing than the templates
+angle already noted elsewhere in this file. If engaging here, validate the
+structural-burden point first (it's genuinely correct, not just anxiety as OP
+half-worries), then it's fine to build on the goal-tracking-cadence idea
+directly - Kith's multi-session treatment history (pulls the last 4 sessions'
+summary/homework/next-session-plan when drafting a new note, flags anything
+planned earlier that never got followed up on) is a genuine, non-generic
+answer to exactly the "did we actually address what we said we would, and can
+I show that" question this thread is actually about - but only worth raising
+if it comes up naturally, not as the first thing said in a thread whose real
+energy is the systemic-burden point.
+
 **Important:** r/therapists' sidebar rules explicitly include "Participate in
 Good Faith - no AI-Generated Responses" - whoever posts this needs to write it
 personally, not paste a generated draft verbatim, same as every other entry in
