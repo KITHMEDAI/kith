@@ -128,6 +128,16 @@ export default function PrivacyPolicyPage() {
           from Settings &rarr; Integrations, which deletes those stored tokens; deleting your Kith account does the
           same.
         </P>
+        <P>
+          <strong>Limited Use compliance.</strong> Kith&rsquo;s use of information received from Google APIs adheres
+          to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:underline">Google API Services User Data Policy</a>,
+          including the Limited Use requirements. Specifically: data obtained through the Google Calendar API is used
+          only to provide the scheduling functionality described above, and neither that data nor any data derived
+          from it is used, transferred, or sold to develop, improve, or train generalized or foundational AI/ML
+          models &mdash; by Kith or by any third party we work with (including Anthropic&rsquo;s Claude, used
+          elsewhere in the Service for clinical note generation, which never receives Google Calendar data in the
+          first place).
+        </P>
         <ul className="list-disc pl-5 mb-4">
           <LI><strong>Twilio</strong> — delivers WhatsApp/SMS messages a Practitioner chooses to send to a Patient.</LI>
           <LI><strong>Resend</strong> — delivers transactional email.</LI>
