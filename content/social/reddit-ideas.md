@@ -298,3 +298,42 @@ without claiming it solves the video-platform question itself. The honest,
 most useful reply here probably doesn't need a Kith mention at all - the
 platform-security question and the "AI defaults vs. explicit consent"
 distinction are worth engaging with on their own terms first.
+
+## Documentation anxiety after the Clancy trial - the real fix is a review habit, not a better template
+
+Thread: [r/therapists - "Notes Training"](https://www.reddit.com/r/therapists/comments/1vot2z0/notes_training/)
+(posted 1 day ago, active as recently as a few hours ago - a solo private-
+practice therapist in Illinois asking for notes/documentation training
+resources, explicit that the Clancy case has them anxious about their own
+documentation holding up if something similar happened with a client, and
+that they generally overthink notes being solo in PP with no one to
+sanity-check against). Two replies so far, both pointing to paid template/
+training products (a CE webinar, a documentation consultant's templates that
+don't even import cleanly into the poster's EHU). Neither reply actually
+engages the anxiety itself, just the format-shopping instinct under it.
+
+Don't link this to the much larger, much rawer "Clancy Trial and
+Documentation" megathread (4 days old, 100+ comments, live case/tragedy
+discussion) - that thread is a real ongoing court case with a family's death
+at the center of it and is not a place to insert any product mention, full
+stop, not even a soft one. This smaller "Notes Training" thread is a
+different, calmer register - OP is asking for practical help with their own
+anxiety, not litigating the case - and worth engaging with genuinely on that
+basis alone.
+
+The templates being recommended here solve a formatting problem OP didn't
+actually say they have. The anxiety in the post is really about a different
+question: "if I got audited or subpoenaed years from now, could I show I
+actually followed up on what I said I'd address" - a review-habit problem,
+not a template-wording problem. Worth validating that solo PP is genuinely
+harder for this specifically (no colleague or supervisor casually catching a
+gap in a case discussion, the way group-practice or agency therapists get by
+default) before anything else. If a product mention fits naturally after
+that - it's a stretch here, more so than most other entries in this file, so
+skip it unless the thread's replies specifically ask "how do you actually
+catch that" - Kith's last-4-sessions pull when drafting a new note (surfacing
+what was planned earlier and flagging if it never got followed up on) is a
+genuine partial answer to the review-habit gap, not the template-format one
+these two replies are offering. r/therapists' "no AI-generated responses"
+rule applies here same as every other entry - write personally, don't paste
+this verbatim.

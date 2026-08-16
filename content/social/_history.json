@@ -20,6 +20,7 @@
     { "date": "2026-08-13", "slug": "note-speed-immediacy-not-templates", "topic": "note-writing speed varies less by template quality than by how soon after the session the note gets written - immediacy beats formatting, and that's the gap ambient transcription closes by default" },
     { "date": "2026-08-14", "slug": "scheduling-conflict-check", "topic": "most scheduling tools trust the therapist not to double-book - Kith actually checks for overlapping appointments before confirming a booking, and fails closed rather than silently confirming if the check itself breaks" },
     { "date": "2026-08-14", "slug": "free-plan-no-card", "topic": "most EHR trials ask for a credit card before you've even tried the product - Kith's free plan skips that entirely, no card required to start" },
-    { "date": "2026-08-15", "slug": "gdpr-uk-data-controller", "topic": "UK GDPR: your notetaking software is a data processor, you're the controller - the compliance obligation is yours first, not something a vendor's privacy page covers for you" }
+    { "date": "2026-08-15", "slug": "gdpr-uk-data-controller", "topic": "UK GDPR: your notetaking software is a data processor, you're the controller - the compliance obligation is yours first, not something a vendor's privacy page covers for you" },
+    { "date": "2026-08-16", "slug": "dpdp-no-special-health-tier", "topic": "India's DPDP Act 2023 dropped the special \"sensitive personal data\" tier that earlier drafts had for health information - therapy notes get the same baseline protection as everything else, not an extra checklist" }
   ]
 }
