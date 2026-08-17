@@ -1,8 +1,12 @@
 ---
-topic: "ambient transcription reduces the paperwork tax"
-sourcePost: "ambient-session-transcription"
-platforms: ["twitter", "instagram"]
-status: "pending"
+topic: ambient transcription reduces the paperwork tax
+sourcePost: ambient-session-transcription
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:15:10.460Z'
+tweet_url: 'https://x.com/i/web/status/2089355356996817334'
 ---
 
 ## Twitter/X

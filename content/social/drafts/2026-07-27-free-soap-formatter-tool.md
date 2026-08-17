@@ -1,8 +1,14 @@
 ---
-topic: "a free tool that turns rough session notes into a structured SOAP or EMDR note, no signup"
+topic: >-
+  a free tool that turns rough session notes into a structured SOAP or EMDR
+  note, no signup
 sourcePost: null
-platforms: ["twitter", "instagram"]
-status: "pending"
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:15:23.597Z'
+tweet_url: 'https://x.com/i/web/status/2089355412189610447'
 ---
 
 ## Twitter/X

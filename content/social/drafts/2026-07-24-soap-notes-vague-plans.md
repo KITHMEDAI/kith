@@ -1,8 +1,12 @@
 ---
-topic: "a vague Plan section is the same as no plan at all"
-sourcePost: "soap-note-templates"
-platforms: ["twitter", "instagram"]
-status: "pending"
+topic: a vague Plan section is the same as no plan at all
+sourcePost: soap-note-templates
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:15:17.070Z'
+tweet_url: 'https://x.com/i/web/status/2089355384796619105'
 ---
 
 ## Twitter/X
