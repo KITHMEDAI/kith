@@ -337,3 +337,35 @@ genuine partial answer to the review-habit gap, not the template-format one
 these two replies are offering. r/therapists' "no AI-generated responses"
 rule applies here same as every other entry - write personally, don't paste
 this verbatim.
+
+## Five disconnected subscriptions to see one client - the actual HIPAA-compliance math is a lot simpler than the tool stack implies
+
+Thread: [r/therapists - "How many subscriptions should a solo therapist need just to see one insured client?"](https://www.reddit.com/r/therapists/comments/1vqgaxx/how_many_subscriptions_should_a_solo_therapist/)
+(posted 2 hours ago, very fresh, active - OP is a solo therapist who added up
+their monthly software spend and was floored: a separate EHR, separate
+scheduling tool, separate video platform, separate billing service, and yet
+another tool just for intake forms, none of which talk to each other, so
+client info gets manually copied across five tabs before every session. Asking
+if anyone else is drowning in subscriptions or found a way out. Comments are a
+mix of "just get SimplePractice, it covers everything" and a genuinely good
+counter-argument from Feral_fucker: for a single client you don't need most of
+this at all, HIPAA compliance is mostly about your own access controls and
+data handling, not which paid "HIPAA-compliant" app you're renting, and a lot
+of people paying a lot every month for "compliance" tools are conflating
+convenience with the actual legal requirement. No one in the thread has
+mentioned Kith.).
+
+This is a strong, natural fit - OP's actual complaint (fragmentation, retyping
+client info across tools that don't talk to each other) is close to a direct
+description of the problem an all-in-one free EHR solves, and it's a fresh,
+high-engagement thread with zero product mentions so far. Validate
+Feral_fucker's point first since it's correct and more useful than "buy a
+bundle" - the baseline HIPAA bar is lower than the sub-stack implies. Then, if
+it fits without crowding out that point: Kith bundles scheduling (with
+conflict checking), patient records with CSV import, session notes (SOAP/DAP/
+BIRP), and video (auto-generated Google Meet links for online sessions) into
+one free-to-start product, so client info lives in one place instead of being
+retyped across five logins - not a billing/claims replacement (that part
+isn't live yet), so be upfront that a separate billing tool may still be
+needed for insurance claims specifically. Don't oversell it as solving 100%
+of OP's list.
