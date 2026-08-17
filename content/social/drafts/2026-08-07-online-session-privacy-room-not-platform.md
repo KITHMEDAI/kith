@@ -1,8 +1,14 @@
 ---
-topic: "the biggest confidentiality risk in an online session usually isn't the video platform - it's who else is actually in the room"
+topic: >-
+  the biggest confidentiality risk in an online session usually isn't the video
+  platform - it's who else is actually in the room
 sourcePost: google-meet-therapy-sessions
-platforms: ["twitter", "instagram"]
-status: "pending"
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:16:35.401Z'
+tweet_url: 'https://x.com/i/web/status/2089355713466466480'
 ---
 
 ## Twitter/X

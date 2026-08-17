@@ -1,8 +1,14 @@
 ---
-topic: "AI note-drafting is usually priced as an upsell on top of a base EHR subscription - Kith builds the ambient transcription + note pipeline into the free plan instead of gating it behind a per-clinician add-on fee"
-sourcePost: "kith-vs-simplepractice"
-platforms: ["twitter"]
-status: "pending"
+topic: >-
+  AI note-drafting is usually priced as an upsell on top of a base EHR
+  subscription - Kith builds the ambient transcription + note pipeline into the
+  free plan instead of gating it behind a per-clinician add-on fee
+sourcePost: kith-vs-simplepractice
+platforms:
+  - twitter
+status: posted
+posted_at: '2026-08-17T14:16:53.711Z'
+tweet_url: 'https://x.com/i/web/status/2089355790201364659'
 ---
 
 ## Twitter/X

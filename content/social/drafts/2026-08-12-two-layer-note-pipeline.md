@@ -1,8 +1,14 @@
 ---
-topic: "one AI call asked to both compress a raw session transcript and structure it into a SOAP note tends to do both jobs badly - Kith runs a two-layer pipeline instead, one pass to compress and a separate pass to structure"
+topic: >-
+  one AI call asked to both compress a raw session transcript and structure it
+  into a SOAP note tends to do both jobs badly - Kith runs a two-layer pipeline
+  instead, one pass to compress and a separate pass to structure
 sourcePost: null
-platforms: ["twitter"]
-status: "pending"
+platforms:
+  - twitter
+status: posted
+posted_at: '2026-08-17T14:17:03.742Z'
+tweet_url: 'https://x.com/i/web/status/2089355832299532627'
 ---
 
 ## Twitter/X

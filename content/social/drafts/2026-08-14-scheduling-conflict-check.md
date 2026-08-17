@@ -1,9 +1,16 @@
 ---
-topic: "most scheduling tools trust the therapist not to double-book - Kith actually checks for overlapping appointments before confirming a booking, and fails closed (refuses the booking) rather than silently confirming if the check itself breaks"
+topic: >-
+  most scheduling tools trust the therapist not to double-book - Kith actually
+  checks for overlapping appointments before confirming a booking, and fails
+  closed (refuses the booking) rather than silently confirming if the check
+  itself breaks
 sourcePost: null
-platforms: ["twitter"]
+platforms:
+  - twitter
 image: content/social/assets/2026-08-14-og-card.png
-status: "pending"
+status: posted
+posted_at: '2026-08-17T14:17:23.111Z'
+tweet_url: 'https://x.com/i/web/status/2089355913325060491'
 ---
 
 ## Twitter/X

@@ -1,8 +1,15 @@
 ---
-topic: "the online notetaker bot joins a Google Meet call like a silent observer - no camera, no chat, just audio - and feeds the same note pipeline as in-person sessions"
-sourcePost: "ambient-session-transcription"
-platforms: ["twitter", "instagram"]
-status: "pending"
+topic: >-
+  the online notetaker bot joins a Google Meet call like a silent observer - no
+  camera, no chat, just audio - and feeds the same note pipeline as in-person
+  sessions
+sourcePost: ambient-session-transcription
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:16:22.055Z'
+tweet_url: 'https://x.com/i/web/status/2089355657413828941'
 ---
 
 ## Twitter/X

@@ -1,8 +1,14 @@
 ---
-topic: "not every no-show has the same cause - separating logistics failures (double-booking, a missing Meet link) from genuine forgetting or ambivalence"
+topic: >-
+  not every no-show has the same cause - separating logistics failures
+  (double-booking, a missing Meet link) from genuine forgetting or ambivalence
 sourcePost: null
-platforms: ["twitter", "instagram"]
-status: "pending"
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:16:09.487Z'
+tweet_url: 'https://x.com/i/web/status/2089355604716659041'
 ---
 
 ## Twitter/X

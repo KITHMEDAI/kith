@@ -1,8 +1,14 @@
 ---
-topic: "recording consent and AI-processing consent are legally and practically distinct - most intake flows still treat them as one checkbox"
-sourcePost: "dpdp-2023-therapist-notes"
-platforms: ["twitter", "instagram"]
-status: "pending"
+topic: >-
+  recording consent and AI-processing consent are legally and practically
+  distinct - most intake flows still treat them as one checkbox
+sourcePost: dpdp-2023-therapist-notes
+platforms:
+  - twitter
+  - instagram
+status: posted
+posted_at: '2026-08-17T14:16:15.838Z'
+tweet_url: 'https://x.com/i/web/status/2089355631371444463'
 ---
 
 ## Twitter/X

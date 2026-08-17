@@ -1,8 +1,14 @@
 ---
-topic: "note-writing speed varies less by template quality than by how soon after the session the note gets written - immediacy beats formatting, and that's the gap ambient transcription closes by default"
+topic: >-
+  note-writing speed varies less by template quality than by how soon after the
+  session the note gets written - immediacy beats formatting, and that's the gap
+  ambient transcription closes by default
 sourcePost: null
-platforms: ["twitter"]
-status: "pending"
+platforms:
+  - twitter
+status: posted
+posted_at: '2026-08-17T14:17:09.873Z'
+tweet_url: 'https://x.com/i/web/status/2089355858027397200'
 ---
 
 ## Twitter/X

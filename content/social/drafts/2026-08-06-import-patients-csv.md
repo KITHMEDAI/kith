@@ -1,8 +1,15 @@
 ---
-topic: "switching practice management tools usually means retyping every existing patient by hand - Kith imports patients straight from a CSV or Excel export instead"
-platforms: ["twitter", "instagram"]
+topic: >-
+  switching practice management tools usually means retyping every existing
+  patient by hand - Kith imports patients straight from a CSV or Excel export
+  instead
+platforms:
+  - twitter
+  - instagram
 image: content/social/assets/2026-08-06-og-card.png
-status: "pending"
+status: posted
+posted_at: '2026-08-17T14:16:29.356Z'
+tweet_url: 'https://x.com/i/web/status/2089355687822598286'
 ---
 
 ## Twitter/X
