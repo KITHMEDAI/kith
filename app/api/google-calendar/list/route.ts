@@ -9,12 +9,20 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { data: therapist } = await supabase
+  const { data: therapist, error: therapistErr } = await supabase
     .from('therapists')
     .select('id, google_calendar_vault_secret_id, google_calendar_id')
     .eq('user_id', user.id)
     .single();
 
+  // Distinguish "query itself failed" (schema drift, RLS misconfig, etc.) from
+  // "this therapist just hasn't connected Calendar" — collapsing both into the
+  // same 400 previously made a broken query silently look identical to an
+  // unconnected account, with no error logged anywhere.
+  if (therapistErr) {
+    console.error('[google-calendar/list] therapist lookup failed', therapistErr);
+    return NextResponse.json({ error: 'Could not look up therapist record' }, { status: 500 });
+  }
   if (!therapist?.google_calendar_vault_secret_id) {
     return NextResponse.json({ error: 'Google Calendar not connected' }, { status: 400 });
   }

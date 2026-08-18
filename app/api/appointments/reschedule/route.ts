@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { sendRescheduleNotification } from '@/lib/notify';
 import { buildCalendarInvite } from '@/lib/ics';
+import { getTokensFromVault, updateCalendarEvent } from '@/lib/google-calendar';
 import { z } from 'zod';
 
 // Accept both snake_case (API-native) and camelCase (what the modal historically
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
   // Fetch the appointment (with its duration + patient contact for the notice)
   const { data: appt } = await supabase
     .from('appointments')
-    .select('id, scheduled_at, duration_minutes, modality, meeting_url, patient:patients(display_name, email, phone, whatsapp_number)')
+    .select('id, scheduled_at, duration_minutes, modality, meeting_url, google_event_id, patient:patients(display_name, email, phone, whatsapp_number)')
     .eq('id', appointment_id!)
     .eq('therapist_id', therapist.id)
     .single();
@@ -103,6 +104,18 @@ export async function POST(req: NextRequest) {
 
   if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
 
+  // Best-effort: move the linked Google Calendar event to match — otherwise
+  // the patient's calendar invite silently stays at the old time even though
+  // Kith itself shows the new one. Mirrors the cancel route's pattern below
+  // (app/api/appointments/[id]/route.ts), which already does this for deletes.
+  if (appt.google_event_id) {
+    try {
+      const tokens = await getTokensFromVault(therapist.id);
+      const endISO = new Date(newMs + dur * 60000).toISOString();
+      await updateCalendarEvent(tokens, appt.google_event_id, { start: new_datetime, end: endISO });
+    } catch { /* not connected / event already removed — ignore */ }
+  }
+
   // Best-effort patient notification (never blocks the reschedule)
   let notifications = null;
   if (channels.length > 0) {
@@ -135,6 +148,7 @@ export async function POST(req: NextRequest) {
       message,
       channels,
       icsAttachment,
+      meetingUrl: appt.meeting_url || undefined,
     }).catch(() => null);
   }
 
