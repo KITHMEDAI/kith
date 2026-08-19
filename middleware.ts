@@ -35,6 +35,14 @@ export async function middleware(request: NextRequest) {
     || pathname.startsWith('/opengraph-image') || pathname.startsWith('/twitter-image')
     || pathname.startsWith('/soap-formatter');
 
+  // The (dashboard) route group's top-level segments — the only paths worth
+  // bouncing an unauthenticated visitor to /login for. Anything else (typos,
+  // dead links, bot-guessed URLs) falls through to Next.js's own routing
+  // instead, which 404s for real rather than silently resolving to a 200
+  // /login page — that mismatch is what search engines flag as a soft 404.
+  const PROTECTED_PREFIXES = ['/dashboard', '/appointments', '/insights', '/notes', '/onboarding', '/patients', '/session', '/settings'];
+  const isKnownProtectedRoute = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
   // For reset/api/public paths, neither redirect below can ever fire (both
   // conditions require the opposite of these flags), so `user` would never
   // actually be read. Skip the round trip to Supabase's auth server entirely
@@ -66,6 +74,9 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user && !isAuthPage) {
+    if (!isKnownProtectedRoute) {
+      return supabaseResponse;
+    }
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = '';
