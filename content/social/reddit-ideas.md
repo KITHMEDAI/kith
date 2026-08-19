@@ -6,6 +6,49 @@ where it's actually relevant to the discussion already happening — never as a
 standalone promotional post. See docs/influencer-agent-runbook.md for why this
 list exists instead of scheduled Reddit posts.
 
+## Data-retention distrust after SimplePractice's opt-out AI transcript storage change
+
+Thread: [r/therapists - "I'm worried about SimplePractice session recording and transcription retention"](https://www.reddit.com/r/therapists/comments/1urxxvp/im_worried_about_simplepractice_session_recording/)
+(posted ~1 month ago, but still getting comments as recently as 3 days ago -
+most recently Organic-Fly-9392 asking "Which one do you guys recommend that
+is reliable and more ethical," so the thread is not dead). OP lays out a
+detailed, well-reasoned complaint about SimplePractice's June default change:
+paying for AI notes now means transcripts are stored indefinitely, can't be
+deleted, and get used for "product development," with no audit trail on how
+complete the "deidentification" actually is. 40+ comments, overwhelmingly
+validating the concern - several therapists say they already left SP over
+this, several ask what to use instead, and a couple of other EHR builders
+(dralbertwong/Practice Harbor, several Sessions Health referral links) have
+already commented with their own tools, so a genuine, disclosed answer isn't
+off-pattern for this thread the way it would be elsewhere. The real
+distinguishing question several commenters circle without landing on: is
+consent to recording tracked separately from consent to AI-processing (most
+platforms bundle it into one opt-in), and is encryption field-level or just
+in-transit/at-rest generically. Kith's own transcript-retention/deletion
+policy isn't documented anywhere I could verify, so don't claim one - only
+mention what's actually confirmed (separate consent gates, field-level
+encryption, per-therapist row-level security). Important honesty caveat:
+this thread is entirely HIPAA-context (US audience), and Kith's compliance
+work is built around India's DPDP Act, not HIPAA - say that plainly rather
+than let a mention imply HIPAA coverage it doesn't have; it will filter out
+most of this audience and that's fine.
+
+Suggested comment (validate first, generic due-diligence framework, disclosed
+mention last, edit before posting):
+
+> Not overthinking it - "deidentified, stored forever, used for future
+> products" with no audit and a privacy policy that reserves the right to
+> change the rules whenever is a real, specific problem, not just an ick
+> feeling. Worth asking any vendor selling AI notes: is consent to recording
+> tracked separately from consent to AI-processing (a lot of platforms bundle
+> both into one checkbox), and is encryption field-level or just
+> in-transit/at-rest in general. Full disclosure since I'm not a neutral
+> party here: I built Kith, which does separate consent gates for recording
+> vs. AI-processing and field-level encryption. It's built around India's
+> DPDP Act rather than HIPAA though, so if HIPAA compliance specifically is
+> the bar, check that directly rather than assuming it maps over - wanted to
+> be upfront about that rather than let the mention imply more than it is.
+
 ## Being uncomfortable with a client recording sessions while using an AI scribe yourself - the two consents aren't actually the same ask
 
 Thread: [r/therapists - "Client requested to record session."](https://www.reddit.com/r/therapists/comments/1vc9ywu/client_requested_to_record_session/)
