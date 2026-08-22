@@ -412,3 +412,44 @@ retyped across five logins - not a billing/claims replacement (that part
 isn't live yet), so be upfront that a separate billing tool may still be
 needed for insurance claims specifically. Don't oversell it as solving 100%
 of OP's list.
+
+## AI note-taking vendor terms: "we don't train on your data" usually just means "not while it still has PHI attached" - and none of them ask the client to consent to the technology itself, only to its retention
+
+Thread: [r/therapists - "Therapists using AI note-taking tools: please actually
+read the terms you're agreeing to."](https://www.reddit.com/r/therapists/comments/1vtuze2/therapists_using_ai_notetaking_tools_please/)
+(posted 1 day ago, very active - 500+ upvotes, 200+ comments, still getting
+replies within the last few hours). OP did the actual work of reading vendor
+privacy policies rather than trusting marketing copy, and found the pattern:
+platforms that say "your data is never used to train AI" or "transcripts are
+deleted after 7 days" also say, in the same policy, that they retain
+de-identified derivatives of that data for "research," "product development,"
+or "improving the models" - so the claim is true only in the narrowest sense
+(PHI-attached data isn't retained/trained on) while de-identified data
+absolutely is. OP also raises that most platforms only require client consent
+to *retain and use* the processed data, not to the underlying practice of
+routing session audio through 3-4+ third-party vendors (interface company,
+transcription vendor, LLM provider) in the first place - that gap is on the
+therapist to close via their own intake paperwork, and several commenters
+(asdfgghk, Dear_Preference_9487) argue that's a liability the platforms are
+knowingly offloading. Several therapists in the thread describe going back to
+paper or writing notes by hand as a direct result.
+
+This is a genuine discussion angle - the consent-bundling point (recording vs.
+AI-processing vs. de-identified-data-retention are three different asks most
+platforms collapse into one checkbox or don't ask about at all) is exactly the
+gap Kith's separate consent gates are built around, and would be a
+substantive, on-topic thing to add. **But this specific thread is not the
+place to say so.** The dominant, most-upvoted sentiment here is blanket
+distrust of any vendor's privacy claims as a category ("Anyone who thinks your
+data is safe on these sites... I have a bridge to sell you," a senior
+infosec commenter saying he'd leave a therapist outright for using any such
+tool) - a disclosed vendor showing up to say "here's how we do it differently"
+would land as exactly the pattern OP is warning people about, regardless of
+how it's framed or caveated. If engaging here at all, engage with the
+analytical point only (consent bundling, what "we don't train on your data"
+actually excludes) and skip any product mention entirely - similar to the
+Clancy megathread caveat noted elsewhere in this file. The consent-bundling
+insight itself is worth carrying into a calmer, less vendor-skeptical thread
+(an intake-paperwork or "what do you wish your consent forms did differently"
+thread) where a disclosed mention wouldn't read as confirming the room's worst
+assumption.

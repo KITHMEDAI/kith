@@ -7,7 +7,9 @@ topic: >-
 sourcePost: kith-vs-upheal
 platforms:
   - twitter
-status: pending
+status: posted
+posted_at: '2026-08-19T15:21:36.875Z'
+tweet_url: 'https://x.com/i/web/status/2090096849525092491'
 ---
 
 ## Twitter/X
