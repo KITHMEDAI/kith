@@ -78,9 +78,7 @@ export async function GET(req: Request) {
       });
       const therapistName = therapist.display_name || 'your therapist';
       const isVideo = appt.modality === 'video' && appt.meeting_url;
-      const message = isVideo
-        ? `Hi ${patient.display_name}, reminder: your online session with ${therapistName} is coming up on ${when}. Join here: ${appt.meeting_url}`
-        : `Hi ${patient.display_name}, reminder: your session with ${therapistName} is coming up on ${when}.`;
+      const message = `Hi ${patient.display_name}, reminder: your session with ${therapistName} is coming up.`;
 
       const icsAttachment = buildCalendarInvite({
         uid: appt.id,
@@ -102,6 +100,8 @@ export async function GET(req: Request) {
         message,
         channels: ['email'],
         icsAttachment,
+        details: [{ label: 'When', value: when }],
+        cta: isVideo ? { label: 'Join Session', url: appt.meeting_url } : undefined,
       });
 
       // Only mark sent on actual success — a transient Resend failure should

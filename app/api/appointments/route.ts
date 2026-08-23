@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
           });
           const recurringNote = recurrence ? ` (repeats ${recurrence.frequency})` : '';
           const therapistName = therapistInfo?.display_name || 'your therapist';
-          const message = `Hi ${pt.display_name}, your online session with ${therapistName} is booked for ${firstTime}${recurringNote}. Join here: ${resolvedMeetingUrl}`;
+          const message = `Hi ${pt.display_name}, your online session with ${therapistName} is booked.`;
           // Attaches a real calendar invite so the patient gets an "Add to
           // Calendar" prompt in their email client, regardless of whether the
           // therapist has Google Calendar connected on their own end.
@@ -270,6 +270,10 @@ export async function POST(req: NextRequest) {
             // business verification is approved (see MessagePatientButton.tsx).
             channels: ['email'],
             icsAttachment,
+            details: [
+              { label: 'When', value: firstTime + recurringNote },
+            ],
+            cta: { label: 'Join Session', url: resolvedMeetingUrl },
           });
         }
       } catch (err) {

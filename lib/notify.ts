@@ -24,6 +24,17 @@ function escapeHtml(str: string) {
     .replace(/'/g, '&#39;');
 }
 
+// Runs on already-escaped text, so it's safe to drop straight into HTML —
+// turns a bare pasted URL (e.g. a Google Meet link sitting in plain message
+// text) into a real clickable link instead of unstyled text a mobile mail
+// client may or may not auto-detect.
+function linkifyEscaped(escaped: string): string {
+  return escaped.replace(
+    /https?:\/\/[^\s<]+/g,
+    (url) => `<a href="${url}" style="color:#7c3aed;text-decoration:underline">${url}</a>`,
+  );
+}
+
 export interface NotifyParams {
   to: { email?: string; phone?: string; whatsapp?: string };
   subject: string;
@@ -33,9 +44,16 @@ export interface NotifyParams {
    *  "Add to Calendar" / RSVP prompt in Gmail/Outlook instead of just reading
    *  a sentence with the time in it. */
   icsAttachment?: { filename: string; content: string; contentType: string };
+  /** Key/value rows rendered as a distinct details card (e.g. When/Previous
+   *  time) — email only, ignored for sms/whatsapp. Keeps appointment facts
+   *  scannable instead of buried mid-sentence. */
+  details?: { label: string; value: string }[];
+  /** Rendered as a real button — use instead of pasting a raw URL into
+   *  `message` so a join/reschedule link reads as an action. Email only. */
+  cta?: { label: string; url: string };
 }
 
-export async function sendNotification({ to, subject, message, channels, icsAttachment }: NotifyParams) {
+export async function sendNotification({ to, subject, message, channels, icsAttachment, details, cta }: NotifyParams) {
   const results: { email?: boolean; sms?: boolean; whatsapp?: boolean } = {};
 
   if (channels.includes('email') && to.email) {
@@ -55,11 +73,23 @@ export async function sendNotification({ to, subject, message, channels, icsAtta
               <img src="https://kith.space/kith-logo-email.png" width="22" height="22" alt="Kith" style="display:block" />
               <span style="font-size:14px;font-weight:700;letter-spacing:0.02em;color:#7c3aed">KITH</span>
             </div>
-            <p style="margin:0;font-size:14px;line-height:1.65;color:#1e1b3a">${escapeHtml(message).replace(/\n/g, '<br/>')}</p>
+            <p style="margin:0;font-size:14px;line-height:1.65;color:#1e1b3a">${linkifyEscaped(escapeHtml(message)).replace(/\n/g, '<br/>')}</p>
+            ${details && details.length ? `
+            <table role="presentation" style="width:100%;margin:20px 0;border-collapse:collapse;background:#faf8ff;border-radius:10px">
+              ${details.map(d => `
+              <tr>
+                <td style="padding:10px 0 10px 14px;font-size:12px;color:#8b7fa8;white-space:nowrap;vertical-align:top">${escapeHtml(d.label)}</td>
+                <td style="padding:10px 14px 10px 8px;font-size:13px;color:#1e1b3a;font-weight:600">${escapeHtml(d.value)}</td>
+              </tr>`).join('')}
+            </table>` : ''}
+            ${cta ? `
+            <div style="margin:${details && details.length ? '4px' : '20px'} 0 20px">
+              <a href="${escapeHtml(cta.url)}" style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;font-size:13px;font-weight:600;padding:11px 22px;border-radius:8px">${escapeHtml(cta.label)}</a>
+            </div>` : ''}
             <p style="margin:24px 0 0;padding-top:14px;border-top:1px solid #ece6ff;font-size:11px;color:#9992ad">Sent via Kith on behalf of your therapist.</p>
           </div>
         `,
-        text: message,
+        text: message + (details && details.length ? '\n\n' + details.map(d => `${d.label}: ${d.value}`).join('\n') : '') + (cta ? `\n\n${cta.label}: ${cta.url}` : ''),
         ...(icsAttachment ? { attachments: [icsAttachment] } : {}),
       });
       if (error) {
@@ -122,8 +152,17 @@ export async function sendRescheduleNotification(params: {
   message?: string;
   channels: ('email' | 'sms' | 'whatsapp')[];
   icsAttachment?: { filename: string; content: string; contentType: string };
+  /** Video sessions only — rendered as a "Join Session" button in the email
+   *  instead of the therapist/patient having to dig the link out again. */
+  meetingUrl?: string;
 }) {
-  const defaultMessage = `Hi ${params.patient.display_name}, your appointment has been rescheduled from ${new Date(params.oldTime).toLocaleString('en-IN')} to ${new Date(params.newTime).toLocaleString('en-IN')}. Please reply to confirm.`;
+  const oldStr = new Date(params.oldTime).toLocaleString('en-IN');
+  const newStr = new Date(params.newTime).toLocaleString('en-IN');
+  // Same message goes to every requested channel (sendNotification doesn't
+  // branch per-channel) — keep both times spelled out here so SMS/WhatsApp
+  // stay self-contained; the details card below is an email-only addition
+  // on top, not a replacement.
+  const defaultMessage = `Hi ${params.patient.display_name}, your appointment has been rescheduled from ${oldStr} to ${newStr}. Please reply to confirm.`;
 
   return sendNotification({
     to: {
@@ -135,6 +174,11 @@ export async function sendRescheduleNotification(params: {
     message: params.message || defaultMessage,
     channels: params.channels,
     icsAttachment: params.icsAttachment,
+    details: [
+      { label: 'Previous time', value: oldStr },
+      { label: 'New time', value: newStr },
+    ],
+    cta: params.meetingUrl ? { label: 'Join Session', url: params.meetingUrl } : undefined,
   });
 }
 
