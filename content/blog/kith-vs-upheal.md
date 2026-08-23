@@ -4,7 +4,6 @@ description: "An honest look at Kith as an Upheal alternative for therapists —
 date: "2026-09-13"
 keyword: "upheal alternative"
 category: "AI Clinical Documentation"
-draft: true
 ---
 
 If you've been comparing AI notetaking tools for therapy, Upheal is one of the names that comes up constantly — it's built a real reputation specifically around AI-assisted documentation, not practice management with AI bolted on. That makes it a closer comparison to Kith than a broad platform like SimplePractice. This is an honest look at Kith as an Upheal alternative: what Upheal actually does well, where it doesn't fit a practice outside the US, and where it's still the better pick even for practices it wasn't built for.

@@ -4,7 +4,6 @@ description: "An honest look at Kith as a SimplePractice alternative for solo th
 date: "2026-09-06"
 keyword: "simplepractice alternative india"
 category: "Running a Private Practice"
-draft: true
 ---
 
 If you've searched for practice-management software as a therapist, you've run into SimplePractice. It's the largest player in the US market by a wide margin, and its name shows up in almost every "best EHR for therapists" list. If you're practicing in India or the UK, though, that popularity can be misleading — SimplePractice was built for the US market first, and some of what makes it a strong choice there doesn't translate. This is an honest look at Kith as a SimplePractice alternative for India and the UK, including where SimplePractice is still the better pick.

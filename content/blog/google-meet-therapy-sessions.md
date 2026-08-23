@@ -4,7 +4,6 @@ description: "A practical guide to running online therapy sessions on Google Mee
 date: "2026-08-30"
 keyword: "online therapy sessions google meet"
 category: "Running a Private Practice"
-draft: true
 ---
 
 If you're running online therapy sessions on Google Meet, you've probably already worked out the basics by trial and error — most therapists do. But there's a difference between "it worked last time" and having a setup you don't have to think about mid-session. Here's a practical walkthrough: how to set up the link, what to check before a session, what to do when the connection drops, and where automatic notetaking fits into the picture without adding another thing to manage.
