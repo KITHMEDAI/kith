@@ -456,6 +456,9 @@ assumption.
 
 ## UK therapist starting a private practice, asking for a documentation/records platform - zero organic answers yet
 
+**Posted 2026-08-23** (as u/KithMedAi, disclosed, with the kith.space link
+included rather than the bare name).
+
 Thread: [r/therapists - "Private Practice Management Software?"](https://www.reddit.com/r/therapists/comments/1vtn0fa/private_practice_management_software/)
 (posted 3 days ago - a UK-based therapist about to start their private practice
 asking, plainly, what online platforms other people recommend for keeping
@@ -476,6 +479,10 @@ pattern to worry about - just be upfront that this is your own product
 before naming it, same disclosure standard as every other entry here.
 
 ## Documentation anxiety framed as an unresolvable tension: protect the client (write less) vs. protect yourself/insurance (write more) - and checkbox templates don't actually resolve it
+
+**Posted 2026-08-23** (as u/KithMedAi, disclosed, with the kith.space link
+included rather than the bare name - the streetwear brand of the same name
+made the link necessary, not just nice-to-have).
 
 Thread: [r/therapists - "Experiencing major anxiety w progress notes/charting —helppp"](https://www.reddit.com/r/therapists/comments/1vtznie/experiencing_major_anxiety_w_progress/)
 (posted 2 days ago, active into the last day - OP describes real anxiety about
