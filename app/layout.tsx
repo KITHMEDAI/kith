@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     title,
     description,
   },
+  verification: {
+    google: '8-9pOJnPvbZguHKYVW3we5387WAsHGuml-9-Rzu_TT0',
+  },
 };
 
 // Site-wide identity signal for Google (knowledge panel / brand search
