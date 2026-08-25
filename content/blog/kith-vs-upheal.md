@@ -1,7 +1,7 @@
 ---
 title: "Kith vs Upheal: An Honest AI Notes Alternative"
 description: "An honest look at Kith as an Upheal alternative for therapists — pricing, session capture, compliance framing, and where Upheal is still the stronger pick."
-date: "2026-09-13"
+date: "2026-08-23"
 keyword: "upheal alternative"
 category: "AI Clinical Documentation"
 ---
