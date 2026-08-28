@@ -518,3 +518,30 @@ pushed through - worth raising only if it comes up naturally, since the
 core anxiety here is emotional/systemic (fear of a hypothetical court
 proceeding) more than it is a tooling gap, and that should be met on its own
 terms first, same as the other Clancy-adjacent entries in this file.
+
+## A practice switching to Google Meet for telehealth, asking about the experience - direct fit for the notetaker-bot angle
+
+Thread: [r/therapists - "Google meet?"](https://www.reddit.com/r/therapists/comments/1vyjfcp/google_meet/)
+(posted 2 days ago, active - OP's practice is switching from Zoom to Google
+Meet to save money and is asking about other therapists' experience with it
+for telehealth specifically: security, user-friendliness, general fit).
+Replies so far are uniformly positive and generic ("so easy," "no
+complaints," "same thing different skin," one person mentioning they use
+Doxy instead) - nobody has raised AI notetaking, security specifics beyond
+vibes, or anything Kith-adjacent yet.
+
+This is a narrow but genuine fit: OP is a therapist actively switching to
+Google Meet specifically, which is exactly the platform Kith's online
+notetaker bot integrates with. The honest, useful answer to what OP actually
+asked (is Google Meet good for telehealth) doesn't need a product mention -
+the existing replies already cover that reasonably (works well with a Google
+Workspace/Calendar setup, Chrome browser recommended for client-side
+issues). If a mention fits, the natural angle is narrower and more specific
+than "is Google Meet good" - something like: once you're on Google Meet, an
+AI notetaker bot can join the call directly (audio only, no camera/chat) and
+feed a note pipeline automatically, which isn't something Zoom-specific
+scribe tools always support the same way. Worth being precise that this
+only extends to Google Meet specifically (not Zoom, Doxy, or other
+platforms mentioned in the thread) - don't imply broader platform support
+than what's real. Disclose authorship plainly if posting, per the standard
+in every other entry in this file.
