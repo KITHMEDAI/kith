@@ -545,3 +545,54 @@ only extends to Google Meet specifically (not Zoom, Doxy, or other
 platforms mentioned in the thread) - don't imply broader platform support
 than what's real. Disclose authorship plainly if posting, per the standard
 in every other entry in this file.
+
+## Solo-practice overhead breakdown thread - EHR/notes line item is the one everyone lists, and a tool swap already got recommended unprompted
+
+Thread: [r/therapists - "Monthly overhead for solo practice?"](https://www.reddit.com/r/therapists/comments/1vx4lml/monthly_overhead_for_solo_practice/)
+(posted 5 days ago, still getting replies as recently as 14 hours ago - OP is
+planning a move from group to solo practice and asked what monthly overhead
+actually looks like: rent, billing, website, marketing, EHR, etc., and what's
+worth doing yourself vs. outsourcing). ~20+ commenters answered with detailed
+real budgets. SimplePractice is the EHR almost everyone lists, at
+$80-$375/month depending on clinician count and add-ons, plus separate line
+items for Psych Today, Google Workspace, malpractice insurance, a biller, etc.
+Tool-swap recommendations are already normal in this thread, not off-pattern:
+GeneralChemistry1467 (Top 1% Commenter) directly told OP to trial Sessions
+Health instead of SimplePractice "it does everything Simplepractice does at
+half the cost," including their own referral link, and another commenter
+(lookamazed, in a related solo-practice-startup thread linked below) named
+several free/cheaper EHR options unprompted (Sessions Health's free-for-3-
+active-clients tier, an open-source EHR called Practice Harbor, Open Path
+Collective's TherapyNotes discount). So a genuine, disclosed "there's also a
+free option with no card required, though it's narrower in scope than
+SimplePractice" reply is answering the question actually asked (reducing
+overhead), not pivoting into a plug.
+
+Related thread, same theme, worth checking before commenting since the
+answer may already be well covered by the time this is read: [r/therapists -
+"Researching details to start a solo private practice"](https://www.reddit.com/r/therapists/comments/1vwe67h/researching_details_to_start_a_solo_private/)
+(6 days ago) - a long, well-regarded comment from lookamazed already lists
+Sessions Health, Practice Harbor, and TherapyNotes-via-Open-Path-Collective as
+EHR options for a US-based startup practice specifically (NPI registration,
+insurance paneling, Stripe payment processing). That thread is US-insurance-
+billing-heavy in a way Kith doesn't serve today (no insurance claims, no NPI/
+paneling support) - a Kith mention there would be answering a question OP
+didn't really ask. Better fit is the overhead thread, where the ask is
+generically "what's the EHR/notes line item cost," not "what do I need for US
+insurance credentialing."
+
+Suggested comment (answer the actual overhead question first, disclosed
+mention last, edit before posting):
+
+> The EHR/notes line is usually the one line item everyone's paying whether
+> they use it fully or not - SimplePractice alone is $80-375+/mo depending on
+> clinician count and add-ons, before Psych Today, a biller, etc. Worth
+> checking whether you actually need everything bundled into one platform, or
+> just scheduling + notes to start, since that's a place several people in
+> this thread already found cheaper swaps (Sessions Health's free-for-3-
+> clients tier, Practice Harbor). Full disclosure since I'm not neutral here:
+> I built Kith, which is free with no card required - no insurance billing or
+> client self-scheduling yet, so if you're paneling with insurers this isn't
+> a drop-in SimplePractice replacement, but if you're private-pay and mostly
+> need scheduling, patient records, and AI session notes, it covers that
+> without adding to the monthly stack.
