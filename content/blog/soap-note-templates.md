@@ -52,6 +52,8 @@ PLAN
 - Referrals (if any):
 ```
 
+If you'd rather not fill this in by hand every time, we built a [free SOAP note formatter](/soap-formatter) — paste in whatever you jotted down during the session and it structures it into the format above (or into EMDR's target/SUD/VOC/phase). No signup required.
+
 ## A worked example
 
 To show the format in action — this is a fully fictional, generic vignette, not a real case:

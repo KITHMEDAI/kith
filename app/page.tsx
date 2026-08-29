@@ -151,6 +151,7 @@ export default function HomePage() {
           </p>
           <div className="flex items-center gap-4 text-xs text-purple-300/40">
             <Link href="/blog" className="hover:text-purple-200 transition-colors">Blog</Link>
+            <Link href="/soap-formatter" className="hover:text-purple-200 transition-colors">Free SOAP Formatter</Link>
             <Link href="/privacy" className="hover:text-purple-200 transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-purple-200 transition-colors">Terms</Link>
             <a href="mailto:hello@kith.space" className="hover:text-purple-200 transition-colors">
