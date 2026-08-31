@@ -623,25 +623,42 @@ isn't a real channel for those two markets right now - worth trying
 Facebook groups or national associations instead, per
 docs/promotion-channel-ideas.md.
 
-**Language note - read before posting:** this subreddit is German-language.
-The angle below is drafted in English for review; it needs a genuine
-translation and a native/fluent German speaker's check before posting; do not
-post a literal machine translation as-is, since it would read as obviously
-foreign in a professional community and undercut the "genuine" framing this
-whole file depends on.
+Angle (answer the actual question first, disclosed mention last): practice-
+founding advice threads like this tend to get answers about the big-ticket
+items (insurance/billing setup, office lease, referral networks) and skip
+the smaller recurring cost that actually eats the most weekly hours once the
+practice is running - session documentation. Worth naming that explicitly as
+a "wish I'd known" item: budget real time (or tooling) for note-writing from
+day one, not as an afterthought once caseload fills up, since that's the
+piece that's hardest to retrofit later. If a product mention fits naturally
+after that: an honest, disclosed line that ambient transcription (device mic
+in person, a notetaker bot for Google Meet online) drafting a first-pass
+note is one way to keep that specific cost down from the start, free with no
+card required - worth raising only if the thread's other answers don't
+already cover documentation workload, since the core question here is
+broader than just tooling.
 
-Angle (answer the actual question first, disclosed mention last, translate
-and edit before posting): practice-founding advice threads like this tend to
-get answers about the big-ticket items (insurance/billing setup, office
-lease, referral networks) and skip the smaller recurring cost that actually
-eats the most weekly hours once the practice is running - session
-documentation. Worth naming that explicitly as a "wish I'd known" item: budget
-real time (or tooling) for note-writing from day one, not as an
-afterthought once caseload fills up, since that's the piece that's hardest
-to retrofit later. If a product mention fits naturally after that: an
-honest, disclosed line that ambient transcription (device mic in person, a
-notetaker bot for Google Meet online) drafting a first-pass note is one way
-to keep that specific cost down from the start, free with no card required -
-worth raising only if the thread's other answers don't already cover
-documentation workload, since the core question here is broader than just
-tooling.
+**Draft comment (German)** — translated carefully, not machine-translated,
+but I'm not a native speaker and can't fully vouch for register/idiom the way
+a native German speaker's own read-through would. Give it a look before
+posting, especially the "Volle Transparenz" disclosure line, which is doing
+real work and shouldn't read as awkward or trying too hard:
+
+> Bei solchen Fragen zur Praxisgründung geht es meistens um die großen Posten
+> – Kassenzulassung/Abrechnung, Praxisräume, Zuweisernetzwerk – und ein
+> Punkt, der dabei oft untergeht, ist die Dokumentation. Das ist der Teil,
+> der sich später am schwersten nachrüsten lässt: Sobald die Praxis erstmal
+> voll ausgelastet ist, bleibt für die Sitzungsnotizen kaum noch Zeit. Ich
+> würde das von Anfang an fest einplanen – entweder als bewusst reservierte
+> Zeit oder mit einem Tool, das dabei unterstützt.
+>
+> Volle Transparenz, ich bin hier nicht neutral: Ich habe Kith gebaut, ein
+> kostenloses Tool, das Sitzungen automatisch erfasst (übers Gerätemikro bei
+> Präsenzsitzungen, per Notetaker-Bot bei Google Meet online) und daraus
+> einen ersten Entwurf der Notiz erstellt – man liest und bearbeitet ihn
+> selbst, nichts wird ungeprüft übernommen. Bei Kith sind die Einwilligung
+> zur Aufnahme und die Einwilligung zur KI-Verarbeitung zwei getrennte
+> Zustimmungen, keine gebündelte Checkbox. Kostenlos, keine Kreditkarte nötig
+> zum Start. Nur relevant, falls der Dokumentationsaufwand in den anderen
+> Antworten hier noch nicht zur Sprache kam – die eigentliche Frage ist ja
+> viel breiter als nur Tools.
