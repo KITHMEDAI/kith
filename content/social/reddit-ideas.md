@@ -596,3 +596,52 @@ mention last, edit before posting):
 > a drop-in SimplePractice replacement, but if you're private-pay and mostly
 > need scheduling, patient records, and AI session notes, it covers that
 > without adding to the monthly stack.
+
+## German-language thread: psychotherapist asking what to know before founding a private practice (r/Psychologie)
+
+Thread: [r/Psychologie - "Psychotherapeuten mit eigener Praxis: Was hättet ihr
+gerne vor der Gründung gewusst?"](https://www.reddit.com/r/Psychologie/comments/1w3apdh/psychotherapeuten_mit_eigener_praxis_was_h%C3%A4ttet/)
+(posted 5 hours ago, zero comments yet - genuinely fresh, no established
+discourse to read the room on yet, posted by an unverified "Psychotherapeut*in"
+flair). Title translates to "Psychotherapists with their own practice: what
+would you have liked to know before founding it?" - an open-ended
+practice-founding question with no body text beyond the title, flaired
+"Karriere in der Psychologie und Psychotherapie" (career).
+
+Context on r/Psychologie generally: it's the main active German-language
+psychology subreddit (a community for 8 years), but skews toward psychology
+students and early-career/training-stage posts (Bachelorarbeit questions,
+Approbation, exam prep) more than established private-practice therapists -
+this specific thread is a genuine exception, asked by someone actually
+founding a practice. Checked for Dutch and French equivalents too
+(r/Psychologie search, r/GGZ-adjacent search, r/psychologue search) - neither
+the Netherlands nor France has an active dedicated therapist/psychology
+subreddit; the closest matches were general country subreddits (r/thenetherlands,
+r/france) or patient-facing peer-support subs (r/besoindeparler,
+r/questionsante), none of which fit a practice-founding/tooling angle. Reddit
+isn't a real channel for those two markets right now - worth trying
+Facebook groups or national associations instead, per
+docs/promotion-channel-ideas.md.
+
+**Language note - read before posting:** this subreddit is German-language.
+The angle below is drafted in English for review; it needs a genuine
+translation and a native/fluent German speaker's check before posting; do not
+post a literal machine translation as-is, since it would read as obviously
+foreign in a professional community and undercut the "genuine" framing this
+whole file depends on.
+
+Angle (answer the actual question first, disclosed mention last, translate
+and edit before posting): practice-founding advice threads like this tend to
+get answers about the big-ticket items (insurance/billing setup, office
+lease, referral networks) and skip the smaller recurring cost that actually
+eats the most weekly hours once the practice is running - session
+documentation. Worth naming that explicitly as a "wish I'd known" item: budget
+real time (or tooling) for note-writing from day one, not as an
+afterthought once caseload fills up, since that's the piece that's hardest
+to retrofit later. If a product mention fits naturally after that: an
+honest, disclosed line that ambient transcription (device mic in person, a
+notetaker bot for Google Meet online) drafting a first-pass note is one way
+to keep that specific cost down from the start, free with no card required -
+worth raising only if the thread's other answers don't already cover
+documentation workload, since the core question here is broader than just
+tooling.
