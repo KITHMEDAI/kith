@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { Calendar, MessageSquare, Mail, CheckCircle2, XCircle, ExternalLink, Loader2, Link2, Globe, Phone, Lock } from 'lucide-react';
 import LockedFeatureButton from '@/components/upgrade/LockedFeatureButton';
+import SettingsTabs from '@/components/settings/SettingsTabs';
 
 const BOOKING_LABELS: Record<string, { name: string; color: string; needsUrl: boolean }> = {
   calendly:        { name: 'Calendly',           color: '#006BFF', needsUrl: true },
@@ -110,6 +111,7 @@ export default function IntegrationsPage() {
 
   return (
     <div className="p-6 max-w-3xl space-y-6">
+      <SettingsTabs active="integrations" />
       <div>
         <h1 className="text-xl font-semibold text-foreground">Integrations</h1>
         <p className="text-sm text-muted-foreground mt-1">Connect external services to extend Kith</p>
@@ -232,9 +234,9 @@ export default function IntegrationsPage() {
               <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-100 text-violet-700">Ultra plan</span>
             </div>
             <p className="text-sm text-muted-foreground">Send appointment reminders and rescheduling messages via WhatsApp.</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Configure TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in your .env.local file</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Not yet enabled on your account — contact Kith support to turn this on.</p>
           </div>
-          <span className="text-xs font-medium px-3 py-1.5 rounded-lg bg-muted text-muted-foreground shrink-0">Via .env config</span>
+          <span className="text-xs font-medium px-3 py-1.5 rounded-lg bg-muted text-muted-foreground shrink-0">Not enabled</span>
         </div>
       </div>
 
@@ -247,9 +249,10 @@ export default function IntegrationsPage() {
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-foreground mb-1">Transactional Email (Resend)</h3>
             <p className="text-sm text-muted-foreground">Session confirmations, reschedule notifications, and homework reminders.</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Configure RESEND_API_KEY in your .env.local file</p>
           </div>
-          <span className="text-xs font-medium px-3 py-1.5 rounded-lg bg-muted text-muted-foreground shrink-0">Via .env config</span>
+          <span className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
+            <CheckCircle2 className="h-3.5 w-3.5"/> Active
+          </span>
         </div>
       </div>
 

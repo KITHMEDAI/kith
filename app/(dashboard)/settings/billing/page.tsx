@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { createClientSupabaseClient } from '@/lib/supabase/client';
 import { CreditCard, CheckCircle2, Zap, Building2, Loader2, Gift, Sparkles } from 'lucide-react';
 import { PLAN_FEATURES, SESSION_DURATION_CAPS } from '@/lib/entitlements';
+import SettingsTabs from '@/components/settings/SettingsTabs';
 
 interface BillingInfo {
   therapist_id: string;
@@ -204,6 +205,7 @@ function BillingPageInner() {
 
   return (
     <div className="p-6 max-w-5xl space-y-7">
+      <SettingsTabs active="billing" />
       <div>
         <h1 className="text-xl font-semibold text-foreground">Billing & Plans</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your subscription and see what each plan unlocks</p>
