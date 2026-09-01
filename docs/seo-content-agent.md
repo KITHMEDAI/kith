@@ -97,6 +97,13 @@ documentation / practice-management tools, converting to a free Kith signup.
 6. Update `content/blog/_queue.json`: set this item's `"status"` to `"drafted"`.
 7. Run `npx tsc --noEmit` to confirm nothing broke (should be a no-op for a markdown
    file, but confirms the queue JSON is still valid and nothing else was touched).
+7b. Run `npx tsx scripts/check-blog-drafts.ts`. This must exit 0 before you commit.
+    It catches the queue status and each post's `draft` frontmatter flag drifting
+    apart — specifically, a post that isn't `"published"` in the queue yet but is
+    missing `draft: true`, which means it's actually live and unreviewed. This
+    exact gap let `reduce-no-shows-scheduling.md` go live without review — if the
+    new post you just wrote doesn't have `draft: true` in its frontmatter, add it
+    now and rerun the check before continuing.
 8. `git add` only the new post file and the queue file. Commit with a message
    describing what was drafted and, for research-backed posts, what was verified.
 9. `git push origin main`. If the push is rejected (remote has commits you don't have

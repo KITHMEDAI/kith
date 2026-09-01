@@ -93,6 +93,137 @@
       "priority": "big-bet",
       "status": "drafted",
       "researchNeeded": true
+    },
+    {
+      "slug": "dap-note-templates",
+      "title": "DAP Note Templates for Therapists (Free)",
+      "keyword": "DAP note template therapy",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "birp-note-templates",
+      "title": "BIRP Note Templates for Therapists (Free)",
+      "keyword": "BIRP note template therapy",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "girp-note-template",
+      "title": "GIRP Note Template for Therapists",
+      "keyword": "GIRP note template therapy",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "progress-note-examples-anxiety",
+      "title": "Progress Note Examples for Anxiety (SOAP, DAP, BIRP)",
+      "keyword": "progress note examples for anxiety",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "progress-note-examples-depression",
+      "title": "Progress Note Examples for Depression (SOAP, DAP, BIRP)",
+      "keyword": "progress note examples for depression",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "therapy-progress-notes-cheat-sheet",
+      "title": "Therapy Progress Notes Cheat Sheet (Free Guide)",
+      "keyword": "therapy progress notes cheat sheet pdf",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "ai-therapy-notes-without-recording",
+      "title": "AI Therapy Notes Without Recording: How It Works",
+      "keyword": "AI therapy notes without recording",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "therapy-notes-no-audio-upload",
+      "title": "Therapy Notes Tools That Don't Require Audio Upload",
+      "keyword": "therapy notes tool no audio upload",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "free-hipaa-compliant-note-app",
+      "title": "Is There a Free HIPAA-Compliant Note-Taking App?",
+      "keyword": "free hipaa compliant note taking app",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
+    },
+    {
+      "slug": "hipaa-ai-scribe-no-cloud-storage",
+      "title": "HIPAA-Compliant AI Scribe With No Cloud Audio Storage",
+      "keyword": "hipaa compliant ai scribe no cloud storage",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "free-dap-note-generator",
+      "title": "Free AI DAP Note Generator: Options Compared",
+      "keyword": "free ai dap note generator",
+      "intent": "commercial",
+      "priority": "fill-in",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "free-birp-note-generator",
+      "title": "Free BIRP Note Generator: Options Compared",
+      "keyword": "birp note generator free",
+      "intent": "commercial",
+      "priority": "fill-in",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "free-ai-therapy-note-generator-roundup",
+      "title": "Free AI Therapy Note Generators: A Comparison",
+      "keyword": "free ai therapy note generator",
+      "intent": "commercial",
+      "priority": "big-bet",
+      "status": "pending",
+      "researchNeeded": true
+    },
+    {
+      "slug": "couples-therapy-session-notes-example",
+      "title": "Couples Therapy Session Notes: Example & Template",
+      "keyword": "couples therapy session notes example",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "child-therapy-progress-note-example",
+      "title": "Child Therapy Progress Note Example",
+      "keyword": "child therapy progress note example",
+      "intent": "informational",
+      "priority": "fill-in",
+      "status": "pending"
+    },
+    {
+      "slug": "intake-note-template-therapist",
+      "title": "Intake Note Template for Therapists",
+      "keyword": "intake note template therapist",
+      "intent": "informational",
+      "priority": "quick-win",
+      "status": "pending"
     }
   ]
 }
