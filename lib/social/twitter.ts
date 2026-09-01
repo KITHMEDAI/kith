@@ -23,8 +23,13 @@ export function getTwitterClient(): TwitterApi {
   });
 }
 
-export async function postTweet(text: string): Promise<{ id: string; url: string }> {
+export async function postTweet(text: string, imagePath?: string): Promise<{ id: string; url: string }> {
   const client = getTwitterClient();
+  if (imagePath) {
+    const mediaId = await client.v1.uploadMedia(imagePath);
+    const { data } = await client.v2.tweet(text, { media: { media_ids: [mediaId] } });
+    return { id: data.id, url: `https://x.com/i/web/status/${data.id}` };
+  }
   const { data } = await client.v2.tweet(text);
   return { id: data.id, url: `https://x.com/i/web/status/${data.id}` };
 }

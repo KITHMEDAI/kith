@@ -44,9 +44,16 @@ async function main() {
   }
   const tweetText = twitterMatch[1].trim();
 
+  // Optional `image` frontmatter field — path relative to the repo root.
+  const imagePath = data.image ? path.join(__dirname, '..', data.image) : undefined;
+  if (imagePath && !fs.existsSync(imagePath)) {
+    console.error(`Frontmatter "image: ${data.image}" doesn't exist at ${imagePath}.`);
+    process.exit(1);
+  }
+
   console.log('--- Would post to Twitter/X ---');
   console.log(tweetText);
-  console.log(`--- (${tweetText.length} characters) ---\n`);
+  console.log(`--- (${tweetText.length} characters)${imagePath ? ` + image: ${data.image}` : ''} ---\n`);
 
   if (!confirm) {
     console.log('Dry run only — nothing was posted. Re-run with --confirm to actually post.');
@@ -58,7 +65,7 @@ async function main() {
     process.exit(1);
   }
 
-  const result = await postTweet(tweetText);
+  const result = await postTweet(tweetText, imagePath);
   console.log(`Posted: ${result.url}`);
 
   const updated = matter.stringify(content, { ...data, status: 'posted', posted_at: new Date().toISOString(), tweet_url: result.url });
