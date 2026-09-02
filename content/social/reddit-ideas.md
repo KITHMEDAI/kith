@@ -662,3 +662,37 @@ real work and shouldn't read as awkward or trying too hard:
 > zum Start. Nur relevant, falls der Dokumentationsaufwand in den anderen
 > Antworten hier noch nicht zur Sprache kam – die eigentliche Frage ist ja
 > viel breiter als nur Tools.
+
+## Choosing a device for in-person note-taking assumes the real fix is picking the right device - the thread's own top comment says the barrier isn't the hardware
+
+Thread: [r/therapists - "Digital note-taking in in-person sessions?"](https://www.reddit.com/r/therapists/comments/1w4m9mm/digital_notetaking_in_inperson_sessions/)
+(posted 9 hours ago, active - OP went back to in-person work after being fully
+remote since covid, misses their old digital-notes workflow, and is shopping
+for a device (iPad mini vs regular, with or without a keyboard case) that
+would let them write directly into their EHR during session without it
+feeling wrong the way a laptop does). Several genuine, substantive replies:
+one (top comment, well-received) says the OP's gut instinct is correct - a
+laptop screen forms a physical barrier and reads as distraction regardless of
+which device it is, and recommends an iPad with Apple Pencil handwriting-to-
+text instead. Two other commenters go further: one terminated with their own
+therapist over in-session laptop use specifically because "there could be
+anything on the laptop screen" in a way a notebook doesn't allow; another
+says clients (including kids they work with) have told them directly that a
+laptop in session feels like a barrier.
+
+The real angle nobody in the thread has raised: every answer so far is still
+about which device to hold - iPad vs laptop vs supernote vs pen and paper -
+when the actual problem being described (a screen up during session breaks
+attunement) doesn't get solved by switching hardware, only avoided by not
+having a device up at all. Kith's in-person capture is ambient through the
+phone's mic - nothing open, nothing to look at or type into during the
+session itself, the note gets drafted afterward from what was actually said.
+That's a direct, non-generic answer to the specific tension this thread is
+wrestling with, not just another entry in the "which tablet" debate. Be
+precise if mentioning it: this only addresses the note-taking-during-session
+part of OP's ask (notes), not the scheduling/homework-in-meeting workflow
+they also mention missing from their old digital setup - Kith's scheduling
+is separate from the session itself, not something typed into live during a
+session either way, worth being clear that's a different kind of "in
+session" than what they described missing. Disclose authorship plainly if
+posting, per the standard in every other entry in this file.
