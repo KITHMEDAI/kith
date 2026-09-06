@@ -696,3 +696,42 @@ is separate from the session itself, not something typed into live during a
 session either way, worth being clear that's a different kind of "in
 session" than what they described missing. Disclose authorship plainly if
 posting, per the standard in every other entry in this file.
+
+## A note backlog from a written-notes workflow is a translation problem, not just a time-management one
+
+Thread: [r/therapists - "Notes. Help."](https://www.reddit.com/r/therapists/comments/1w6oesj/notes_help/)
+(posted 18 hours ago, active - 77 comments and climbing). OP is a private-pay
+therapist badly behind on progress notes, explains they take thorough written
+notes in session but the notes are closer to process notes than something
+that can be turned directly into an EHR entry, and is asking for the leanest
+defensible note format to dig out of the backlog fast without risking their
+license. The thread is genuinely useful and non-hostile to outside answers:
+multiple experienced therapists share real minimal templates (a 4-6 sentence
+structure, a "5 sentence rule" - MSE/safety/intervention/response/plan,
+dictation instead of typing, a bare SOAP skeleton for stable low-risk
+caseloads), plus one serious risk-management comment about why having no
+notes at all is actually the bigger liability (a specific custody-case
+example of a therapist unable to produce records years later). Nobody in the
+thread has raised AI tooling at all as of this check.
+
+The genuinely useful angle: answer the actual question first, using the
+thread's own good advice - the format doesn't need to be longer than
+presenting problem / intervention / response / plan, and dictating rather
+than typing from memory is a real technique several therapists here already
+independently converged on. The systemic thing worth naming honestly,
+separate from format: a backlog like this specifically happens when there's
+a manual translation step between what happened in the room and what ends up
+in the EHR - written or scribbled session notes have to be reread and
+rewritten into a progress note later, and that gap is exactly where "behind
+on notes" comes from for a lot of therapists, not laziness. If a disclosed
+mention fits after actually answering the question: for future sessions,
+Kith's ambient in-person capture (device mic, no manual note-taking during
+the session) skips that translation step entirely by drafting the SOAP/DAP/
+BIRP note straight from what was said, so there's no separate written note
+to transcribe later - worth being clear this only addresses go-forward
+sessions, not OP's actual backlog of already-written paper notes, which
+still needs to get typed up by hand one way or another. Keep the format
+advice honest and thread-native (bullet points, 4-6 sentences, whichever
+matches OP's context) rather than leading with the product. Disclose
+authorship plainly if posting, per the standard in every other entry in this
+file.
