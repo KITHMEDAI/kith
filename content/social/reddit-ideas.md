@@ -697,6 +697,36 @@ session either way, worth being clear that's a different kind of "in
 session" than what they described missing. Disclose authorship plainly if
 posting, per the standard in every other entry in this file.
 
+## Juggling three calendars (Headway, SessionsHealth, Google Calendar) just to book a consult without double-booking
+
+Thread: [r/therapists - "Scheduling issues"](https://www.reddit.com/r/therapists/comments/1w7eg11/scheduling_issues/)
+(posted 2 days ago, active as of 1 day ago - OP sees most clients through Headway,
+some cash-pay clients through SessionsHealth, and is trying to grow the cash-pay
+side by booking consults off their own Google Calendar. They've already synced
+Headway and SessionsHealth bookings into that same Google Calendar so all three
+overlap in one place and they don't have to check three calendars before booking
+a new consult - but tried Google Workspace's paid "appointment scheduling"
+upgrade for the consult-booking piece specifically, and got stuck needing a
+separate email/server setup they didn't want. Asking for recommendations. Only
+one reply so far (generic "sync Headway with SessionsHealth" advice), no
+product mentions, not hostile).
+
+Precise, narrow fit worth being exact about: OP has already done the hard part
+(consolidating Headway + SessionsHealth bookings into one Google Calendar) - what's
+missing is just a booking flow for new consults that checks against that combined
+calendar before confirming a slot, without the Workspace add-on's separate-email
+hassle. That's exactly what Kith's Google Calendar sync + conflict-checked
+scheduling does: it pulls in existing Google Calendar events (which, per OP's own
+setup, would already include their Headway/SessionsHealth bookings) and won't
+confirm a new appointment that conflicts, with a Google Meet link auto-created for
+each online consult. Be precise about what this isn't: Kith doesn't sync out to
+Headway or SessionsHealth, doesn't touch their existing client sessions on those
+platforms, and doesn't do client self-scheduling (the therapist would still be the
+one creating the consult booking in Kith) - this only solves the specific "don't
+let a new consult collide with what's already on my Google Calendar" problem OP
+described, not a full three-platform merge. Disclose authorship plainly if
+posting, per the standard in every other entry in this file.
+
 ## A note backlog from a written-notes workflow is a translation problem, not just a time-management one
 
 Thread: [r/therapists - "Notes. Help."](https://www.reddit.com/r/therapists/comments/1w6oesj/notes_help/)
