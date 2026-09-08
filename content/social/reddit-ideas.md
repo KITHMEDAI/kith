@@ -765,3 +765,42 @@ advice honest and thread-native (bullet points, 4-6 sentences, whichever
 matches OP's context) rather than leading with the product. Disclose
 authorship plainly if posting, per the standard in every other entry in this
 file.
+
+## Recurring appointments feel inflexible for the therapist's own time off, not the client relationship - and the fix isn't choosing recurring vs. one-at-a-time
+
+Thread: [r/therapists - "Recurring sessions vs scheduling one session at a
+time"](https://www.reddit.com/r/therapists/comments/1w3wej8/recurring_sessions_vs_scheduling_one_session_at_a/)
+(posted 7 days ago, active through yesterday - a full-time telehealth
+therapist asking how others handle recurring vs. week-to-week scheduling,
+specifically frustrated that clients on a permanent recurring slot mean she
+has to individually cancel/reschedule several appointments any time she wants
+a day off, since they're "scheduled forever recurring"). ~30 comments,
+overwhelmingly in favor of recurring for the client relationship (routine,
+fewer no-shows, clients "love" a fixed slot) - but several therapists
+(Aggressive-Hair-2677, emailsatmidnight, LetTheSunShineIn3000) describe the
+same workaround OP hasn't landed on yet: keep clients recurring, and instead
+proactively block your *own* calendar for planned time off weeks in advance so
+it never becomes an individual-appointment cleanup problem after the fact.
+SSPYoda's comment goes further and is the closest to a software-shaped answer:
+an online scheduler where the therapist sets their own true availability once,
+so clients can only ever book into open slots - "it's only chaos if you make
+it that way."
+
+The genuinely useful angle: OP's problem isn't recurring vs. one-at-a-time as
+a binary, it's that "recurring" in most tools OP has used apparently makes an
+individual occurrence feel welded to the series - when in practice, whether an
+EHR treats a cancelled occurrence as touching only that one date or the whole
+series onward is a real, checkable product distinction, not a scheduling
+philosophy question. Verified in Kith's own codebase before writing this:
+Kith's recurring appointments are stored as independent rows per occurrence
+(sharing only the Google Meet link), so cancelling one date is a normal
+single-appointment cancellation that doesn't touch the rest of the series -
+worth naming as the actual mechanic worth asking about when evaluating any
+scheduling tool, since "does recurring lock me in" is answerable concretely
+rather than by feel. If a Kith mention fits after validating the real
+workaround (block your own time off in advance, same as several commenters
+already do) - keep it to that one specific mechanic, not a general pitch;
+conflict-checked scheduling matters here too, since blocking your own time and
+having a client's cancelled slot both live on the same calendar without double
+booking is the actual thing OP is missing a tool for. Disclose authorship
+plainly if posting, per the standard in every other entry in this file.
