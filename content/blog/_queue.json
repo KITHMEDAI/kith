@@ -100,7 +100,7 @@
       "keyword": "DAP note template therapy",
       "intent": "informational",
       "priority": "quick-win",
-      "status": "pending"
+      "status": "drafted"
     },
     {
       "slug": "birp-note-templates",
