@@ -804,3 +804,36 @@ conflict-checked scheduling matters here too, since blocking your own time and
 having a client's cancelled slot both live on the same calendar without double
 booking is the actual thing OP is missing a tool for. Disclose authorship
 plainly if posting, per the standard in every other entry in this file.
+
+## A struggling MFT student can't tell what actually belongs in a progress note - the free SOAP formatter shows one worked example, but doesn't cover the DAP format she's also stuck on
+
+Thread: [r/therapists - "Progress note help!"](https://www.reddit.com/r/therapists/comments/1wfqjkp/progress_note_help/)
+(posted 5 hours ago, only 1 comment so far - genuinely fresh). OP is an MFT
+student in clinicals, a year in, still taking 10-30 minutes per note against a
+professor's "should take 5 minutes" expectation, using SimplePractice's
+standard template plus SOAP/DAP formats she says she still doesn't fully
+understand - and her supervisor doesn't review her notes to give feedback, so
+she has no feedback loop to calibrate against. The one existing comment
+(Reflective_Tempist) points her toward asking a colleague or quality team for
+example notes.
+
+The genuinely useful angle: this is a "what belongs in each section" problem,
+not a time-management or software problem - she already has a template, the
+gap is judgment about level of detail, which comes from seeing worked
+examples and getting feedback, exactly what she says she's missing from her
+supervisor. Answer that directly first (ask a peer or the practice's quality
+team to review a note or two, since that feedback loop is the actual thing
+missing here - a professor's abstract "5 minutes" standard isn't calibrated to
+a real caseload anyway). Kith's free SOAP/EMDR note formatter
+(kith.space/soap-formatter, public tool, no signup - SOAP only, not DAP,
+verified against the tool's own copy before writing this) is a genuine fit
+worth mentioning after that, scoped to what it actually does: paste in rough
+session notes or bullet points and it returns a structured SOAP note, which
+is a decent way to see a fully worked SOAP example - and worth naming
+honestly that it doesn't cover DAP, which is the second format she says she's
+shaky on. Keep the framing to "here's a way to see one worked SOAP example
+while you wait on real feedback," not "this solves your note-writing speed"
+or "this covers both formats you're stuck on" - her stated problem is
+comprehension, not speed, and the formatter doesn't replace an actual
+supervisor reviewing her clinical judgment. Disclose authorship plainly if
+posting, per the standard in every other entry in this file.
