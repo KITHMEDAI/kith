@@ -837,3 +837,54 @@ or "this covers both formats you're stuck on" - her stated problem is
 comprehension, not speed, and the formatter doesn't replace an actual
 supervisor reviewing her clinical judgment. Disclose authorship plainly if
 posting, per the standard in every other entry in this file.
+
+## Solo/small practice in India held together by Google Calendar + WhatsApp + a spreadsheet - genuinely asking what tool people trust with client data, and why
+
+Thread: [r/therapists - "How is everyone actually streamlining their practice
+in India? What tools do you trust with client
+data?"](https://www.reddit.com/r/therapists/comments/1we5m1n/how_is_everyone_actually_streamlining_their/)
+(posted 4 days ago, still getting comments - a solo/small-practice therapist
+in India describing their actual workflow: Google Calendar for scheduling, a
+non-HIPAA-compliant notes app, WhatsApp for client comms because that's where
+clients already are, and a spreadsheet updated weekly for billing - no
+integration, manual sync causes real slips (a WhatsApp reschedule not
+reflected in the calendar, an invoice left half-written for two weeks).
+Explicitly not looking for a sales pitch, asking what's still running
+people's practice six months later and *specifically* what made them trust a
+tool enough to put client data into it, since "most of what's out there feels
+built for US clinics" and there's uncertainty about what happens to Indian
+client data on those platforms). This is a strong, direct fit - Kith's whole
+DPDP-2023 positioning exists for exactly this question, and it's rare to see
+it asked this explicitly. Five substantive replies so far, none hostile to
+tool mentions (only one auto-mod comment plus an unrelated ClickUp ad),
+mostly describing manual/offline workarounds (paper notes, non-cloud tablets,
+WhatsApp for everything) out of resignation rather than preference -
+several say plainly that client-side privacy expectations in India are low
+and platform choice feels like it doesn't matter much, which is worth
+engaging with honestly rather than glossing over. One reply
+(BetInformal6081) lays out almost exactly the right question to ask any
+vendor: where data is stored, who can access it, encryption, export/deletion
+options, backups, and whether the company clearly explains its India-specific
+privacy practices - answering that checklist directly (rather than a bare
+"try Kith") is the genuinely useful angle here.
+
+Be precise and not overclaiming: don't imply DPDP 2023 gives Indian therapy
+data the kind of enforceable protection HIPAA nominally provides in the US -
+one commenter (inkyknit) explicitly notes India has "little to no useful
+legislation on data management, privacy, and encrypted protocols" and several
+others describe just working around that gap rather than trusting any
+platform. The honest, accurate claim is narrower: Kith field-encrypts data at
+rest and enforces per-therapist row-level security *voluntarily*, aligned
+with DPDP 2023's principles, not because a regulator is currently enforcing
+that standard on this category of data - say that plainly rather than imply
+regulatory weight the law doesn't yet carry in practice. If a disclosed
+mention fits after actually answering the "what would you check before
+trusting a tool" question: Kith is free with no card required, does
+scheduling + patient records (CSV/Excel import) + session notes in one place
+instead of three unrelated apps, and is a genuine answer to BetInformal6081's
+specific checklist (field-level encryption at rest, row-level isolation
+per-therapist, CSV/PDF export so data isn't locked in) - but doesn't solve
+the billing/WhatsApp-communication pieces of OP's stack, so be upfront that
+this is partial, not a full replacement for their three-app setup. Disclose
+authorship plainly if posting, per the standard in every other entry in this
+file.
