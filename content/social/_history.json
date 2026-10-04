@@ -1,300 +1,64 @@
 {
   "_comment": "Tracks social post topics already drafted, so the influencer agent doesn't repeat itself. Each entry: { date, slug, topic }. The agent reads this before picking a new topic — avoid anything covered in the last 14 days.",
   "entries": [
-    {
-      "date": "2026-07-22",
-      "slug": "ambient-transcription-paperwork-tax",
-      "topic": "ambient transcription reduces the paperwork tax"
-    },
-    {
-      "date": "2026-07-24",
-      "slug": "soap-notes-vague-plans",
-      "topic": "a vague Plan section is the same as no plan at all"
-    },
-    {
-      "date": "2026-07-27",
-      "slug": "free-soap-formatter-tool",
-      "topic": "a free tool that turns rough session notes into a structured SOAP or EMDR note, no signup"
-    },
-    {
-      "date": "2026-07-29",
-      "slug": "no-show-causes-scheduling",
-      "topic": "not every no-show has the same cause - separating logistics failures (double-booking, a missing Meet link) from genuine forgetting or ambivalence"
-    },
-    {
-      "date": "2026-07-31",
-      "slug": "consent-gates-recording-vs-ai",
-      "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still treat them as one checkbox"
-    },
-    {
-      "date": "2026-08-03",
-      "slug": "notetaker-bot-joins-quietly",
-      "topic": "the online notetaker bot joins a Google Meet call like a silent observer - no camera, no chat, just audio - and feeds the same note pipeline as in-person sessions"
-    },
-    {
-      "date": "2026-08-05",
-      "slug": "field-encryption-row-level-security",
-      "topic": "\"encrypted\" in a privacy policy usually just means the connection - field-level encryption at rest and per-therapist row-level security are a different claim"
-    },
-    {
-      "date": "2026-08-06",
-      "slug": "import-patients-csv",
-      "topic": "switching practice management tools usually means retyping every existing patient by hand - Kith imports patients straight from a CSV or Excel export instead"
-    },
-    {
-      "date": "2026-08-07",
-      "slug": "online-session-privacy-room-not-platform",
-      "topic": "the biggest confidentiality risk in an online session usually isn't the video platform - it's who else is actually in the room"
-    },
-    {
-      "date": "2026-08-08",
-      "slug": "recurring-sessions-auto-meet-link",
-      "topic": "recurring appointments in Kith generate a fresh Google Meet link for every occurrence automatically - not one reused link that gets copied, lost, or goes stale over weeks of sessions"
-    },
-    {
-      "date": "2026-08-09",
-      "slug": "dap-birp-note-formats",
-      "topic": "Kith now generates DAP and BIRP notes, not just SOAP and EMDR - BIRP's Intervention field is real added structure for insurance/agency documentation requirements"
-    },
-    {
-      "date": "2026-08-10",
-      "slug": "multi-session-treatment-history",
-      "topic": "when Kith drafts a new note, it pulls the last 4 sessions - summary, homework, next-session plan, risk level - to track trajectory across sessions and flag anything planned earlier that never got followed up on"
-    },
-    {
-      "date": "2026-08-10",
-      "slug": "pdf-note-export-ownership",
-      "topic": "a session note is supposed to outlive whatever software it was written in - PDF export as a practical ownership question, not a feature checkbox"
-    },
-    {
-      "date": "2026-08-11",
-      "slug": "soap-note-template-worked-example",
-      "topic": "the free SOAP note template guide - the hard part was never the blank format, it's deciding what actually belongs in each section"
-    },
-    {
-      "date": "2026-08-12",
-      "slug": "ai-notes-addon-vs-included",
-      "topic": "AI note-drafting is usually priced as an upsell on top of a base EHR subscription - Kith builds the ambient transcription + note pipeline into the free plan instead of gating it behind a per-clinician add-on fee"
-    },
-    {
-      "date": "2026-08-12",
-      "slug": "two-layer-note-pipeline",
-      "topic": "one AI call asked to both compress a raw session transcript and structure it into a SOAP note tends to do both jobs badly - Kith runs a two-layer pipeline instead, one pass to compress and a separate pass to structure"
-    },
-    {
-      "date": "2026-08-13",
-      "slug": "note-speed-immediacy-not-templates",
-      "topic": "note-writing speed varies less by template quality than by how soon after the session the note gets written - immediacy beats formatting, and that's the gap ambient transcription closes by default"
-    },
-    {
-      "date": "2026-08-14",
-      "slug": "scheduling-conflict-check",
-      "topic": "most scheduling tools trust the therapist not to double-book - Kith actually checks for overlapping appointments before confirming a booking, and fails closed rather than silently confirming if the check itself breaks"
-    },
-    {
-      "date": "2026-08-14",
-      "slug": "free-plan-no-card",
-      "topic": "most EHR trials ask for a credit card before you've even tried the product - Kith's free plan skips that entirely, no card required to start"
-    },
-    {
-      "date": "2026-08-15",
-      "slug": "gdpr-uk-data-controller",
-      "topic": "UK GDPR: your notetaking software is a data processor, you're the controller - the compliance obligation is yours first, not something a vendor's privacy page covers for you"
-    },
-    {
-      "date": "2026-08-16",
-      "slug": "dpdp-no-special-health-tier",
-      "topic": "India's DPDP Act 2023 dropped the special \"sensitive personal data\" tier that earlier drafts had for health information - therapy notes get the same baseline protection as everything else, not an extra checklist"
-    },
-    {
-      "date": "2026-08-17",
-      "slug": "no-patient-reminders-yet",
-      "topic": "most scheduling software markets automated SMS/email reminders sent to the patient as the no-show fix - Kith doesn't send those today, and it's more useful to say so directly than let the feature list imply it"
-    },
-    {
-      "date": "2026-08-18",
-      "slug": "one-way-calendar-sync-honest",
-      "topic": "Kith's Google Calendar sync pulls your existing calendar events in to check for conflicts before booking - it doesn't push Kith appointments back out to Google Calendar yet. Worth saying plainly rather than letting \"calendar sync\" imply both directions."
-    },
-    {
-      "date": "2026-08-19",
-      "slug": "no-record-button-ambient",
-      "topic": "most AI scribes still require you to manually hit record - a browser extension, app, or button - at the start of a session. Kith's in-person capture is ambient through the device mic instead, nothing to remember to press."
-    },
-    {
-      "date": "2026-08-19",
-      "slug": "homework-field-not-sticky-note",
-      "topic": "the homework or next-session plan a therapist assigns at the end of a session usually lives in a sticky note or memory, not the chart - Kith's note pipeline writes it into its own structured field on every note instead"
-    },
-    {
-      "date": "2026-08-22",
-      "slug": "session-summary-vs-clinical-note",
-      "topic": "a SOAP note and a plain-English session summary answer different questions - the note is for the chart/audit trail, the summary is for quickly recalling what actually happened without re-reading clinical language. Kith's note pipeline generates both, plus a separate key-points list, from the same session automatically."
-    },
-    {
-      "date": "2026-08-23",
-      "slug": "row-level-security-not-shared-database",
-      "topic": "most EHR breaches don't expose one therapist's caseload - they expose everyone's, because isolation between accounts is enforced at the app layer instead of the database layer. Kith enforces row-level security at the database layer, so one compromised login can't read another therapist's patient data."
-    },
-    {
-      "date": "2026-08-24",
-      "slug": "scattered-subscriptions-one-free-plan",
-      "topic": "solo therapists commonly patch together five disconnected subscriptions (EHR, scheduling, video, intake) that don't share data - Kith keeps scheduling, patient records, and session notes in one free plan instead"
-    },
-    {
-      "date": "2026-08-25",
-      "slug": "two-separate-consents-not-one-checkbox",
-      "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still bundle both into one signature, and it's the specific gap AI vendor privacy policies keep getting called out for"
-    },
-    {
-      "date": "2026-08-26",
-      "slug": "ambient-capture-vs-manual-record",
-      "topic": "most AI notetakers for therapy still require you to manually start a recording (button, extension, browser tab) - Kith's in-person capture is ambient through the device mic instead, nothing to press, riffing on the published Kith vs Upheal comparison post"
-    },
-    {
-      "date": "2026-08-26",
-      "slug": "calendar-invite-name-is-a-leak",
-      "topic": "a Google Calendar invite titled with a client's name is itself a small data leak, separate from the video platform - if the calendar is shared with a receptionist or practice partner, event visibility needs to be private, not just the meeting link (backfilled - drafted 2026-08-26 but not committed until this run)"
-    },
-    {
-      "date": "2026-08-27",
-      "slug": "in-app-reminder-is-for-you",
-      "topic": "Kith's 15-minute pre-session heads-up notifies the therapist, not the patient - worth being precise about who a 'reminder' feature is actually for, since most scheduling software marketing means the opposite"
-    },
-    {
-      "date": "2026-08-28",
-      "slug": "notes-grounded-in-transcript-not-template",
-      "topic": "a note pulled from a fixed template still starts from a blank box for every client, which is where generic, recycled-sounding language comes from - Kith's notes are built from what was actually said in the session, not filled into a template afterward"
-    },
-    {
-      "date": "2026-08-29",
-      "slug": "no-upload-only-live-capture",
-      "topic": "Kith's session capture is fully automatic within its scope but has no override outside it - mic for in-person, a notetaker bot for Google Meet online - no upload option, no dictate-a-recap fallback, so a session not captured live through one of those two paths has no note generated"
-    },
-    {
-      "date": "2026-08-30",
-      "slug": "note-is-a-draft-not-final-entry",
-      "topic": "Kith's AI note pipeline produces a draft after the session - nothing writes into the patient's chart automatically, the therapist reads and edits it first - a first pass, not a finished unreviewed entry"
-    },
-    {
-      "date": "2026-08-31",
-      "slug": "simplepractice-ai-notes-addon-cost",
-      "topic": "SimplePractice's AI note-taking isn't included in any base tier - it's a $17.50-29.50/mo per-clinician add-on stacked on top of $49-99/mo base pricing, which comes to $210-354/year just for AI notes. Kith bundles ambient transcription + AI notes into the free plan instead, riffing on the published Kith vs SimplePractice comparison post"
-    },
-    {
-      "date": "2026-08-31",
-      "slug": "mentalyc-note-allowance-pricing",
-      "topic": "Mentalyc prices AI notes on a tiered monthly-note-allowance model - 40 notes for $19.99/mo up to 330 for $119.99/mo - so seeing more clients costs more every month just for notes. Kith's AI note pipeline is unlimited on the free plan, riffing on the published Kith vs Mentalyc comparison post"
-    },
-    {
-      "date": "2026-09-01",
-      "slug": "dap-birp-format-lock-in",
-      "topic": "insurance and Medicaid documentation usually wants DAP or BIRP, not SOAP - most AI note tools only speak one format. Kith drafts SOAP, DAP, BIRP, or EMDR from the same session, so note format doesn't dictate which tool a therapist can use"
-    },
-    {
-      "date": "2026-09-02",
-      "slug": "notetaker-bot-only-when-invited",
-      "topic": "the online notetaker bot only processes audio when it's explicitly invited into that specific Google Meet call - not a platform-level AI setting that can quietly reset itself back on after an update, which is the actual complaint behind a lot of 'is this video platform safe' questions"
-    },
-    {
-      "date": "2026-09-04",
-      "slug": "nothing-up-during-session",
-      "topic": "the actual value of ambient in-person capture isn't convenience, it's that there's nothing up on a screen during the session - a laptop or tablet reads as a barrier to clients the same way a notepad used to, regardless of which device it is; Kith's in-person capture runs through the device mic with nothing open to type into or look at while the session is happening"
-    },
-    {
-      "date": "2026-09-06",
-      "slug": "emdr-format-not-soap-shoehorned",
-      "topic": "EMDR sessions don't fit a Subjective/Objective/Assessment/Plan structure - Kith has a dedicated EMDR note format with its own fields (Target Processed, SUD to VOC, negative to positive cognition shift, phase and next-session plan) instead of forcing EMDR work into a SOAP template"
-    },
-    {
-      "date": "2026-09-07",
-      "slug": "imported-patients-start-with-no-session-history",
-      "topic": "importing existing patients via CSV/Excel brings in their name and contact info, not session history - Kith's multi-session continuity check (pulling the last 4 completed sessions when drafting a new note) starts from zero for an imported patient and only builds up from sessions actually run in Kith, not backfilled from whatever platform the patient was imported from"
-    },
-    {
-      "date": "2026-09-08",
-      "slug": "recurring-meet-link-never-expires",
-      "topic": "most therapists reuse the same Google Meet link for every session with a client - convenient, but the link never expires, so anyone who's ever had it can still join later. Kith generates a fresh Meet link per booking automatically, riffing on the published Google Meet setup guide"
-    },
-    {
-      "date": "2026-09-09",
-      "slug": "pdf-export-not-locked-in",
-      "topic": "a session note is only actually yours if you can get it out of the software that wrote it - PDF export of any note means a client transfer, an audit request, or switching tools later doesn't mean re-typing a chart from scratch or losing access to old notes"
-    },
-    {
-      "date": "2026-09-10",
-      "slug": "ai-notes-addon-india-uk-tools",
-      "topic": "across five practice-management tools built for India and five built for the UK, AI-generated session notes are consistently either a separate pricier tier (WriteUpp's AI Scribe plan costs almost 2x its base Solo plan) or missing entirely (India's ProTherapy has encrypted templates, not AI-generated notes) - Kith bundles ambient transcription + AI notes into the free plan instead"
-    },
-    {
-      "date": "2026-09-12",
-      "slug": "recurring-cancel-one-occurrence-not-series",
-      "topic": "most schedulers treat a recurring booking as one welded-together series - cancelling a single date usually means editing the whole series or leaving it alone. Kith stores each occurrence as its own row sharing only the Google Meet link, so cancelling one date is a normal single-appointment cancellation that doesn't touch the rest of the series"
-    },
-    {
-      "date": "2026-09-13",
-      "slug": "no-billing-or-reminders-yet",
-      "topic": "Kith doesn't handle client-facing payments or automated reminders today - no billing, no UPI/card collection, no SMS/email sent to the patient, just a 15-minute in-app toast for the therapist. Worth saying plainly instead of letting \"practice management\" imply a full suite - Kith is built around the note-writing problem first, not trying to be the whole back office yet, riffing on the feature-comparison table in the published India practice-management comparison post"
-    },
-    {
-      "date": "2026-09-14",
-      "slug": "free-plan-not-a-countdown-trial",
-      "topic": "\"free\" in most EHR pricing pages means a time-boxed trial that asked for a card up front and quietly converts to paid billing if you forget to cancel in time - Kith's free plan has no card on file and no countdown, so there's nothing to remember to cancel"
-    },
-    {
-      "date": "2026-09-15",
-      "slug": "field-encryption-not-just-transit",
-      "topic": "\"we encrypt your data\" usually just means the connection (https) is encrypted, not the data itself once it's stored - Kith field-encrypts sensitive data at rest under DPDP 2023, extending past patient notes to things like the OAuth tokens behind Google Calendar sync, verified directly in lib/google-calendar.ts and lib/encryption.ts, not just the pipe data travels through"
-    },
-    {
-      "date": "2026-09-16",
-      "slug": "vague-enough-detailed-enough-tension",
-      "topic": "\"vague enough to protect the client, detailed enough to protect yourself\" is standard documentation advice but not a formula - it's a genuine, unresolved tension between two goals, and what actually helps on the self-protection side is the note reflecting the specific session rather than recycled template phrasing"
-    },
-    {
-      "date": "2026-09-23",
-      "slug": "ambient-capture-nothing-to-buy",
-      "topic": "in-person ambient transcription runs through the mic already built into whatever device is in the room (laptop, phone) - there's no separate recording hardware to buy, charge, or carry to a session, a logistics/cost framing distinct from the 'nothing to press' convenience angle used in earlier posts on the same feature"
-    },
-    {
-      "date": "2026-09-25",
-      "slug": "birp-response-not-behavior-repeat",
-      "topic": "the most common BIRP note mistake is a Response section that just restates the mood from Behavior - Response should describe how the client reacted to the specific intervention named, which is the link that makes BIRP distinct from SOAP/DAP (evergreen documentation observation, no Kith mention, riffing on the not-yet-published BIRP template blog draft)"
-    },
-    {
-      "date": "2026-09-25",
-      "slug": "declined-recording-notes-still-due",
-      "topic": "not every client consents to recording, and that session still needs a note - the free public formatter at kith.space/soap-formatter structures rough jotted notes into a SOAP or EMDR note, no signup, nothing stored; new consent-gate framing on the formatter (last covered 2026-07-27 as a plain tool announcement)"
-    },
-    {
-      "date": "2026-09-26",
-      "slug": "risk-silence-reads-ambiguous",
-      "topic": "a note that says nothing about risk isn't the same as one documenting that no risk was present - on chart review, silence reads as 'didn't ask', so one explicit line closes the gap (evergreen, no Kith mention, riffing on the DAP template blog draft's common-mistakes section)"
-    },
-    {
-      "date": "2026-09-27",
-      "slug": "recurring-series-conflict-check",
-      "topic": "double-booking usually sneaks in deep inside a recurring series nobody checks week by week - Kith conflict-checks every occurrence of a recurring booking against existing appointments, books the clear dates, and names the clashing ones (verified in app/api/appointments/route.ts)"
-    },
-    {
-      "date": "2026-09-28",
-      "slug": "dap-interpretation-leaks-into-data",
-      "topic": "the most common DAP note slip is interpretation leaking into the Data section - 'client seems to be minimizing' is a clinical read, not data; what was said and observed goes in Data, the read goes in Assessment (evergreen, no Kith mention, riffing on the DAP template blog draft's common-mistakes section)"
-    },
-    {
-      "date": "2026-09-29",
-      "slug": "anxiety-notes-record-what-they-did",
-      "topic": "anxiety progress notes tend to record what the client felt but not what they did - whether they stayed in the feared situation or left (approach vs. avoidance) is one of the clearest progress markers and belongs in the chart (evergreen, no Kith mention, riffing on the anxiety progress-note examples blog draft)"
-    },
-    {
-      "date": "2026-09-30",
-      "slug": "homework-follow-up-across-sessions",
-      "topic": "homework assigned in one session is the easiest thing to forget to ask about in the next - when Kith drafts a new note it reads the last 4 completed sessions' homework and planned focus and checks whether today's session came back to them (verified in lib/process-notes.ts + lib/claude.ts); new homework-follow-up framing on the multi-session history feature"
-    },
-    {
-      "date": "2026-10-04",
-      "slug": "objective-section-copied-forward",
-      "topic": "the Objective line that appears in every SOAP note ('affect appropriate, client engaged') is often copied forward rather than observed that session - an honest 'nothing notable observed' beats a backfilled generic detail (evergreen, no Kith feature claim, riffing on the published SOAP note template post's common-mistakes section)"
-    }
+    { "date": "2026-07-22", "slug": "ambient-transcription-paperwork-tax", "topic": "ambient transcription reduces the paperwork tax" },
+    { "date": "2026-07-24", "slug": "soap-notes-vague-plans", "topic": "a vague Plan section is the same as no plan at all" },
+    { "date": "2026-07-27", "slug": "free-soap-formatter-tool", "topic": "a free tool that turns rough session notes into a structured SOAP or EMDR note, no signup" },
+    { "date": "2026-07-29", "slug": "no-show-causes-scheduling", "topic": "not every no-show has the same cause - separating logistics failures (double-booking, a missing Meet link) from genuine forgetting or ambivalence" },
+    { "date": "2026-07-31", "slug": "consent-gates-recording-vs-ai", "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still treat them as one checkbox" },
+    { "date": "2026-08-03", "slug": "notetaker-bot-joins-quietly", "topic": "the online notetaker bot joins a Google Meet call like a silent observer - no camera, no chat, just audio - and feeds the same note pipeline as in-person sessions" },
+    { "date": "2026-08-05", "slug": "field-encryption-row-level-security", "topic": "\"encrypted\" in a privacy policy usually just means the connection - field-level encryption at rest and per-therapist row-level security are a different claim" },
+    { "date": "2026-08-06", "slug": "import-patients-csv", "topic": "switching practice management tools usually means retyping every existing patient by hand - Kith imports patients straight from a CSV or Excel export instead" },
+    { "date": "2026-08-07", "slug": "online-session-privacy-room-not-platform", "topic": "the biggest confidentiality risk in an online session usually isn't the video platform - it's who else is actually in the room" },
+    { "date": "2026-08-08", "slug": "recurring-sessions-auto-meet-link", "topic": "recurring appointments in Kith generate a fresh Google Meet link for every occurrence automatically - not one reused link that gets copied, lost, or goes stale over weeks of sessions" },
+    { "date": "2026-08-09", "slug": "dap-birp-note-formats", "topic": "Kith now generates DAP and BIRP notes, not just SOAP and EMDR - BIRP's Intervention field is real added structure for insurance/agency documentation requirements" },
+    { "date": "2026-08-10", "slug": "multi-session-treatment-history", "topic": "when Kith drafts a new note, it pulls the last 4 sessions - summary, homework, next-session plan, risk level - to track trajectory across sessions and flag anything planned earlier that never got followed up on" },
+    { "date": "2026-08-10", "slug": "pdf-note-export-ownership", "topic": "a session note is supposed to outlive whatever software it was written in - PDF export as a practical ownership question, not a feature checkbox" },
+    { "date": "2026-08-11", "slug": "soap-note-template-worked-example", "topic": "the free SOAP note template guide - the hard part was never the blank format, it's deciding what actually belongs in each section" },
+    { "date": "2026-08-12", "slug": "ai-notes-addon-vs-included", "topic": "AI note-drafting is usually priced as an upsell on top of a base EHR subscription - Kith builds the ambient transcription + note pipeline into the free plan instead of gating it behind a per-clinician add-on fee" },
+    { "date": "2026-08-12", "slug": "two-layer-note-pipeline", "topic": "one AI call asked to both compress a raw session transcript and structure it into a SOAP note tends to do both jobs badly - Kith runs a two-layer pipeline instead, one pass to compress and a separate pass to structure" },
+    { "date": "2026-08-13", "slug": "note-speed-immediacy-not-templates", "topic": "note-writing speed varies less by template quality than by how soon after the session the note gets written - immediacy beats formatting, and that's the gap ambient transcription closes by default" },
+    { "date": "2026-08-14", "slug": "scheduling-conflict-check", "topic": "most scheduling tools trust the therapist not to double-book - Kith actually checks for overlapping appointments before confirming a booking, and fails closed rather than silently confirming if the check itself breaks" },
+    { "date": "2026-08-14", "slug": "free-plan-no-card", "topic": "most EHR trials ask for a credit card before you've even tried the product - Kith's free plan skips that entirely, no card required to start" },
+    { "date": "2026-08-15", "slug": "gdpr-uk-data-controller", "topic": "UK GDPR: your notetaking software is a data processor, you're the controller - the compliance obligation is yours first, not something a vendor's privacy page covers for you" },
+    { "date": "2026-08-16", "slug": "dpdp-no-special-health-tier", "topic": "India's DPDP Act 2023 dropped the special \"sensitive personal data\" tier that earlier drafts had for health information - therapy notes get the same baseline protection as everything else, not an extra checklist" },
+    { "date": "2026-08-17", "slug": "no-patient-reminders-yet", "topic": "most scheduling software markets automated SMS/email reminders sent to the patient as the no-show fix - Kith doesn't send those today, and it's more useful to say so directly than let the feature list imply it" },
+    { "date": "2026-08-18", "slug": "one-way-calendar-sync-honest", "topic": "Kith's Google Calendar sync pulls your existing calendar events in to check for conflicts before booking - it doesn't push Kith appointments back out to Google Calendar yet. Worth saying plainly rather than letting \"calendar sync\" imply both directions." },
+    { "date": "2026-08-19", "slug": "no-record-button-ambient", "topic": "most AI scribes still require you to manually hit record - a browser extension, app, or button - at the start of a session. Kith's in-person capture is ambient through the device mic instead, nothing to remember to press." },
+    { "date": "2026-08-19", "slug": "homework-field-not-sticky-note", "topic": "the homework or next-session plan a therapist assigns at the end of a session usually lives in a sticky note or memory, not the chart - Kith's note pipeline writes it into its own structured field on every note instead" },
+    { "date": "2026-08-22", "slug": "session-summary-vs-clinical-note", "topic": "a SOAP note and a plain-English session summary answer different questions - the note is for the chart/audit trail, the summary is for quickly recalling what actually happened without re-reading clinical language. Kith's note pipeline generates both, plus a separate key-points list, from the same session automatically." },
+    { "date": "2026-08-23", "slug": "row-level-security-not-shared-database", "topic": "most EHR breaches don't expose one therapist's caseload - they expose everyone's, because isolation between accounts is enforced at the app layer instead of the database layer. Kith enforces row-level security at the database layer, so one compromised login can't read another therapist's patient data." },
+    { "date": "2026-08-24", "slug": "scattered-subscriptions-one-free-plan", "topic": "solo therapists commonly patch together five disconnected subscriptions (EHR, scheduling, video, intake) that don't share data - Kith keeps scheduling, patient records, and session notes in one free plan instead" },
+    { "date": "2026-08-25", "slug": "two-separate-consents-not-one-checkbox", "topic": "recording consent and AI-processing consent are legally and practically distinct - most intake flows still bundle both into one signature, and it's the specific gap AI vendor privacy policies keep getting called out for" },
+    { "date": "2026-08-26", "slug": "ambient-capture-vs-manual-record", "topic": "most AI notetakers for therapy still require you to manually start a recording (button, extension, browser tab) - Kith's in-person capture is ambient through the device mic instead, nothing to press, riffing on the published Kith vs Upheal comparison post" },
+    { "date": "2026-08-26", "slug": "calendar-invite-name-is-a-leak", "topic": "a Google Calendar invite titled with a client's name is itself a small data leak, separate from the video platform - if the calendar is shared with a receptionist or practice partner, event visibility needs to be private, not just the meeting link (backfilled - drafted 2026-08-26 but not committed until this run)" },
+    { "date": "2026-08-27", "slug": "in-app-reminder-is-for-you", "topic": "Kith's 15-minute pre-session heads-up notifies the therapist, not the patient - worth being precise about who a 'reminder' feature is actually for, since most scheduling software marketing means the opposite" },
+    { "date": "2026-08-28", "slug": "notes-grounded-in-transcript-not-template", "topic": "a note pulled from a fixed template still starts from a blank box for every client, which is where generic, recycled-sounding language comes from - Kith's notes are built from what was actually said in the session, not filled into a template afterward" },
+    { "date": "2026-08-29", "slug": "no-upload-only-live-capture", "topic": "Kith's session capture is fully automatic within its scope but has no override outside it - mic for in-person, a notetaker bot for Google Meet online - no upload option, no dictate-a-recap fallback, so a session not captured live through one of those two paths has no note generated" },
+    { "date": "2026-08-30", "slug": "note-is-a-draft-not-final-entry", "topic": "Kith's AI note pipeline produces a draft after the session - nothing writes into the patient's chart automatically, the therapist reads and edits it first - a first pass, not a finished unreviewed entry" },
+    { "date": "2026-08-31", "slug": "simplepractice-ai-notes-addon-cost", "topic": "SimplePractice's AI note-taking isn't included in any base tier - it's a $17.50-29.50/mo per-clinician add-on stacked on top of $49-99/mo base pricing, which comes to $210-354/year just for AI notes. Kith bundles ambient transcription + AI notes into the free plan instead, riffing on the published Kith vs SimplePractice comparison post" },
+    { "date": "2026-08-31", "slug": "mentalyc-note-allowance-pricing", "topic": "Mentalyc prices AI notes on a tiered monthly-note-allowance model - 40 notes for $19.99/mo up to 330 for $119.99/mo - so seeing more clients costs more every month just for notes. Kith's AI note pipeline is unlimited on the free plan, riffing on the published Kith vs Mentalyc comparison post" },
+    { "date": "2026-09-01", "slug": "dap-birp-format-lock-in", "topic": "insurance and Medicaid documentation usually wants DAP or BIRP, not SOAP - most AI note tools only speak one format. Kith drafts SOAP, DAP, BIRP, or EMDR from the same session, so note format doesn't dictate which tool a therapist can use" },
+    { "date": "2026-09-02", "slug": "notetaker-bot-only-when-invited", "topic": "the online notetaker bot only processes audio when it's explicitly invited into that specific Google Meet call - not a platform-level AI setting that can quietly reset itself back on after an update, which is the actual complaint behind a lot of 'is this video platform safe' questions" },
+    { "date": "2026-09-04", "slug": "nothing-up-during-session", "topic": "the actual value of ambient in-person capture isn't convenience, it's that there's nothing up on a screen during the session - a laptop or tablet reads as a barrier to clients the same way a notepad used to, regardless of which device it is; Kith's in-person capture runs through the device mic with nothing open to type into or look at while the session is happening" },
+    { "date": "2026-09-06", "slug": "emdr-format-not-soap-shoehorned", "topic": "EMDR sessions don't fit a Subjective/Objective/Assessment/Plan structure - Kith has a dedicated EMDR note format with its own fields (Target Processed, SUD to VOC, negative to positive cognition shift, phase and next-session plan) instead of forcing EMDR work into a SOAP template" },
+    { "date": "2026-09-07", "slug": "imported-patients-start-with-no-session-history", "topic": "importing existing patients via CSV/Excel brings in their name and contact info, not session history - Kith's multi-session continuity check (pulling the last 4 completed sessions when drafting a new note) starts from zero for an imported patient and only builds up from sessions actually run in Kith, not backfilled from whatever platform the patient was imported from" },
+    { "date": "2026-09-08", "slug": "recurring-meet-link-never-expires", "topic": "most therapists reuse the same Google Meet link for every session with a client - convenient, but the link never expires, so anyone who's ever had it can still join later. Kith generates a fresh Meet link per booking automatically, riffing on the published Google Meet setup guide" },
+    { "date": "2026-09-09", "slug": "pdf-export-not-locked-in", "topic": "a session note is only actually yours if you can get it out of the software that wrote it - PDF export of any note means a client transfer, an audit request, or switching tools later doesn't mean re-typing a chart from scratch or losing access to old notes" },
+    { "date": "2026-09-10", "slug": "ai-notes-addon-india-uk-tools", "topic": "across five practice-management tools built for India and five built for the UK, AI-generated session notes are consistently either a separate pricier tier (WriteUpp's AI Scribe plan costs almost 2x its base Solo plan) or missing entirely (India's ProTherapy has encrypted templates, not AI-generated notes) - Kith bundles ambient transcription + AI notes into the free plan instead" },
+    { "date": "2026-09-12", "slug": "recurring-cancel-one-occurrence-not-series", "topic": "most schedulers treat a recurring booking as one welded-together series - cancelling a single date usually means editing the whole series or leaving it alone. Kith stores each occurrence as its own row sharing only the Google Meet link, so cancelling one date is a normal single-appointment cancellation that doesn't touch the rest of the series" },
+    { "date": "2026-09-13", "slug": "no-billing-or-reminders-yet", "topic": "Kith doesn't handle client-facing payments or automated reminders today - no billing, no UPI/card collection, no SMS/email sent to the patient, just a 15-minute in-app toast for the therapist. Worth saying plainly instead of letting \"practice management\" imply a full suite - Kith is built around the note-writing problem first, not trying to be the whole back office yet, riffing on the feature-comparison table in the published India practice-management comparison post" },
+    { "date": "2026-09-14", "slug": "free-plan-not-a-countdown-trial", "topic": "\"free\" in most EHR pricing pages means a time-boxed trial that asked for a card up front and quietly converts to paid billing if you forget to cancel in time - Kith's free plan has no card on file and no countdown, so there's nothing to remember to cancel" },
+    { "date": "2026-09-15", "slug": "field-encryption-not-just-transit", "topic": "\"we encrypt your data\" usually just means the connection (https) is encrypted, not the data itself once it's stored - Kith field-encrypts sensitive data at rest under DPDP 2023, extending past patient notes to things like the OAuth tokens behind Google Calendar sync, verified directly in lib/google-calendar.ts and lib/encryption.ts, not just the pipe data travels through" },
+    { "date": "2026-09-16", "slug": "vague-enough-detailed-enough-tension", "topic": "\"vague enough to protect the client, detailed enough to protect yourself\" is standard documentation advice but not a formula - it's a genuine, unresolved tension between two goals, and what actually helps on the self-protection side is the note reflecting the specific session rather than recycled template phrasing" },
+    { "date": "2026-09-23", "slug": "ambient-capture-nothing-to-buy", "topic": "in-person ambient transcription runs through the mic already built into whatever device is in the room (laptop, phone) - there's no separate recording hardware to buy, charge, or carry to a session, a logistics/cost framing distinct from the 'nothing to press' convenience angle used in earlier posts on the same feature" },
+    { "date": "2026-09-25", "slug": "birp-response-not-behavior-repeat", "topic": "the most common BIRP note mistake is a Response section that just restates the mood from Behavior - Response should describe how the client reacted to the specific intervention named, which is the link that makes BIRP distinct from SOAP/DAP (evergreen documentation observation, no Kith mention, riffing on the not-yet-published BIRP template blog draft)" },
+    { "date": "2026-09-25", "slug": "declined-recording-notes-still-due", "topic": "not every client consents to recording, and that session still needs a note - the free public formatter at kith.space/soap-formatter structures rough jotted notes into a SOAP or EMDR note, no signup, nothing stored; new consent-gate framing on the formatter (last covered 2026-07-27 as a plain tool announcement)" },
+    { "date": "2026-09-26", "slug": "risk-silence-reads-ambiguous", "topic": "a note that says nothing about risk isn't the same as one documenting that no risk was present - on chart review, silence reads as 'didn't ask', so one explicit line closes the gap (evergreen, no Kith mention, riffing on the DAP template blog draft's common-mistakes section)" },
+    { "date": "2026-09-27", "slug": "recurring-series-conflict-check", "topic": "double-booking usually sneaks in deep inside a recurring series nobody checks week by week - Kith conflict-checks every occurrence of a recurring booking against existing appointments, books the clear dates, and names the clashing ones (verified in app/api/appointments/route.ts)" },
+    { "date": "2026-09-28", "slug": "dap-interpretation-leaks-into-data", "topic": "the most common DAP note slip is interpretation leaking into the Data section - 'client seems to be minimizing' is a clinical read, not data; what was said and observed goes in Data, the read goes in Assessment (evergreen, no Kith mention, riffing on the DAP template blog draft's common-mistakes section)" },
+    { "date": "2026-09-29", "slug": "anxiety-notes-record-what-they-did", "topic": "anxiety progress notes tend to record what the client felt but not what they did - whether they stayed in the feared situation or left (approach vs. avoidance) is one of the clearest progress markers and belongs in the chart (evergreen, no Kith mention, riffing on the anxiety progress-note examples blog draft)" },
+    { "date": "2026-09-30", "slug": "homework-follow-up-across-sessions", "topic": "homework assigned in one session is the easiest thing to forget to ask about in the next - when Kith drafts a new note it reads the last 4 completed sessions' homework and planned focus and checks whether today's session came back to them (verified in lib/process-notes.ts + lib/claude.ts); new homework-follow-up framing on the multi-session history feature" },
+    { "date": "2026-10-04", "slug": "objective-section-copied-forward", "topic": "the Objective line that appears in every SOAP note ('affect appropriate, client engaged') is often copied forward rather than observed that session - an honest 'nothing notable observed' beats a backfilled generic detail (evergreen, no Kith feature claim, riffing on the published SOAP note template post's common-mistakes section)" }
   ]
 }
