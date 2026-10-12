@@ -148,7 +148,7 @@
       "keyword": "AI therapy notes without recording",
       "intent": "informational",
       "priority": "quick-win",
-      "status": "pending"
+      "status": "drafted"
     },
     {
       "slug": "therapy-notes-no-audio-upload",
