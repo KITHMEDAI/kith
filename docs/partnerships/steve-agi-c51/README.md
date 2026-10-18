@@ -38,7 +38,7 @@ one organisation, one workflow, one tightly scoped pilot.
 | `glossary.md` | Plain-English glossary: NDIS, documentation, AU privacy/regulation, business jargon, Aussie English |
 | `money-plan.md` | Money principles, proposed split, pricing assumptions, projections |
 | `mock-call-rehearsal.md` | Model answers + coaching from the mock call |
-| `call-copilot-scope.md` | Scope for a live call copilot (transcribe + suggest answers during the call) |
+| `call-copilot-scope.md` | **Live call copilot: how to use it** (built; localhost:8080/copilot) + original scope |
 | `call-prep-faq.md` | Prep for the 20 Oct call: likely questions + answers, cheat sheet, red lines |
 
 Later (once the call happens): `call-notes/`, `pilot-scope.md`, `term-sheet.md`.

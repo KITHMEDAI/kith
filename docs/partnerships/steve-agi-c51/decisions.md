@@ -15,3 +15,4 @@
 | 2026-10-18 | Draft opening split: subscriptions **Kith 70 / C51 30** (accept 65/35), pilot fee 80/20, custom work 100% Kith; review after 12 months. *(Draft, not yet confirmed by Anurag.)* | Kith carries build, hosting, compliance and support; strategic-partner benchmark is 30–40%. |
 | 2026-10-18 | Expectation set: A$2–5k is a **one-off pilot fee**, not monthly. A$2–5k/month for Kith needs ~5–12 paying providers, realistic 12–18 months out, only if C51 delivers customers. | Avoid planning around income that doesn't exist yet. |
 | 2026-10-18 | **No live call copilot for the 20 Oct call.** Go in with the rehearsal and FAQ only. Scope kept in `call-copilot-scope.md` for later. | User's choice. |
+| 2026-10-18 | **Reversed: build the live call copilot** (Option A, local-only). Built + text-tested same day; real-audio test pending. Uses Sonnet 4.6 (Haiku broke red lines in testing). | User asked to build it. |

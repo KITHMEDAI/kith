@@ -1,4 +1,43 @@
-# Live call copilot: scope (draft, 2026-10-18), NOT BUILDING for now (decided 2026-10-18)
+# Live call copilot (BUILT 2026-10-18, Option A)
+
+## How to use it on the call
+
+1. Headphones on.
+2. Start the dev server: in Claude, "start the kith preview", or run `npx next dev --turbo -p 8080`
+   in the Kith folder. Start it **15 min before** the call. Never run `npm run build` while it's live.
+3. Join the Google Meet in **Chrome** (its own tab).
+4. In another Chrome window, open **http://localhost:8080/copilot** and put it beside Meet.
+5. Click **Start listening** → pick the **Meet tab** → tick **"Also share tab audio"** → Share →
+   allow the mic. Both dots turn green (Steve = tab, You = mic).
+6. During the call:
+   - 💬 blue = suggested response (~1 s to start, ~3 s complete). It stays silent (SKIP) on small talk.
+   - 🚨 red = our agreed position on a sensitive topic (instant).
+   - 📖 grey = definition of a term Steve used (instant, once per term).
+   - 🤖 purple = your private question: type in the bottom box + Enter.
+   - Click a card to dismiss it. Shift+Enter in the box simulates Steve speaking (for practice).
+7. **Stop & save** at the end. The transcript is saved to `call-notes/<date>-transcript.md`
+   (git-ignored, private, never share it). Autosaves every 2 minutes too.
+
+## Built pieces
+- Page: `app/copilot/page.tsx` + `components/copilot/CopilotClient.tsx` (404 in production)
+- Audio → Deepgram (nova-3, en): `lib/copilot/deepgram-stream.ts`, one stream per side
+- Instant cards: `lib/copilot/rules.ts` (glossary + red lines)
+- AI suggestions: `app/api/copilot/suggest/route.ts`. Claude Sonnet 4.6 with these prep
+  docs as cached context. Haiku was tested first but broke red lines (conceded the split,
+  hinted we'd seen Steve's demo), so Sonnet it is.
+- Token / save routes: `app/api/copilot/{token,save}/route.ts`; all copilot routes are
+  localhost + dev only (`lib/copilot/guard.ts`)
+
+## Tested (2026-10-18)
+- Simulated-Steve text → red-line cards instantly; suggestion first token ~1.1 s, full card
+  ~3.5 s, ~50 words; small talk → SKIP; private Ask works; Save writes a git-ignored file.
+- **Not yet tested with real audio.** Real tab + mic capture needs you to pick the tab.
+  Test Monday: Meet in one tab with a YouTube interview playing in it (or join from your
+  phone and talk), copilot beside it.
+
+---
+
+# Original scope (2026-10-18)
 
 Goal: during the 20 Oct call with Steve, a screen beside Google Meet that transcribes
 the conversation live and, whenever Steve asks something or uses a key term,

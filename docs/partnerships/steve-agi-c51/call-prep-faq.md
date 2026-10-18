@@ -143,7 +143,8 @@ share prompts, code, or database design.
 - **Speech-to-text is the hardest part to keep in Australia.** Deepgram is
   US-hosted (dedicated/self-hosted options exist, but they're enterprise-tier).
   Alternatives with Sydney regions are AWS Transcribe and Azure Speech. For a pilot
-  of **typed and pasted notes**, no audio leaves the device at all, which is the
+  of **typed and pasted notes**, no audio is recorded or transcribed at all (the typed
+  text still goes to Kith's Australian instance for the AI), which is the
   simplest compliant starting point. Worth suggesting.
 
 ### Security details he might ask about

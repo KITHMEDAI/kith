@@ -37,3 +37,6 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Private call transcripts from the local call copilot (never commit)
+docs/partnerships/*/call-notes/*-transcript.md
