@@ -28,7 +28,7 @@ registerProcessor('copilot-pcm', CopilotPcm);
 `;
 
 const KEYTERMS = [
-  'NDIS', 'NDIA', 'SIL', 'SDA', 'PRN', 'Kith', 'C51', 'AGI360', 'KAOS', 'Ahpra', 'TGA',
+  "G'day", 'mate', 'NDIS', 'NDIA', 'SIL', 'SDA', 'PRN', 'Kith', 'C51', 'AGI360', 'KAOS', 'Ahpra', 'TGA',
   'support worker', 'case notes', 'progress notes', 'restrictive practice', 'Practice Standards',
   'heads of agreement', 'Essential Eight', 'allied health', 'participant', 'Anurag',
 ];

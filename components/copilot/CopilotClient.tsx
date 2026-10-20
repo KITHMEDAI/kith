@@ -53,6 +53,13 @@ export default function CopilotClient() {
 
   useEffect(() => { transcriptEnd.current?.scrollIntoView({ block: 'end' }); }, [segments, partial]);
 
+  // Warm every route on load so nothing compiles mid-call (dev server compiles lazily).
+  useEffect(() => {
+    fetch('/api/copilot/token').catch(() => {});
+    fetch('/api/copilot/suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ warm: true }) }).catch(() => {});
+    fetch('/api/copilot/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+  }, []);
+
   const pushCard = useCallback((c: Omit<Card, 'id' | 'at'> & { id?: string }) => {
     const id = c.id || `c${++cardSeq.current}`;
     setCards(prev => [{ ...c, id, at: Date.now() }, ...prev].slice(0, 40));
@@ -175,6 +182,34 @@ export default function CopilotClient() {
     }
   }, [onUtterance]);
 
+  // Real audio path test without a call: plays a synthesized "Steve" clip and
+  // feeds the element's own stream through exactly the same Deepgram pipeline.
+  const testWithSample = useCallback(async () => {
+    setError('');
+    try {
+      const tokRes = await fetch('/api/copilot/token');
+      const tok = await tokRes.json();
+      if (!tokRes.ok) throw new Error(tok.error || 'Could not get Deepgram token');
+      const audio = new Audio('/api/copilot/test-audio');
+      await new Promise<void>((resolve, reject) => {
+        audio.oncanplaythrough = () => resolve();
+        audio.onerror = () => reject(new Error('Test clip failed to load'));
+      });
+      await audio.play();
+      const media: MediaStream = (audio as HTMLAudioElement & { captureStream(): MediaStream }).captureStream();
+      const stopSample = startDeepgramStream({
+        token: tok.token, media,
+        onPartial: t => setPartial(p => ({ ...p, them: t })),
+        onUtterance: t => onUtterance(THEM, t),
+        onStatus: setThemStatus,
+      });
+      // Give Deepgram a moment to finalise the last words after the clip ends.
+      audio.onended = () => setTimeout(stopSample, 2500);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }, [onUtterance]);
+
   const save = useCallback(async () => {
     if (!segmentsRef.current.length) return;
     const md = `# Call transcript: ${THEM}, ${new Date(startedAt.current || Date.now()).toString()}\n\n` +
@@ -234,6 +269,9 @@ export default function CopilotClient() {
             <button onClick={stop} className="rounded bg-rose-600 px-3 py-1.5 text-sm font-medium hover:bg-rose-500">Stop &amp; save</button>
           ) : (
             <button onClick={start} className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium hover:bg-emerald-500">Start listening</button>
+          )}
+          {!running && (
+            <button onClick={testWithSample} className="rounded border border-amber-500/60 px-3 py-1.5 text-sm">Test with sample audio</button>
           )}
           <button onClick={save} disabled={!segments.length} className="rounded border border-zinc-700 px-3 py-1.5 text-sm disabled:opacity-40">Save now</button>
           <button onClick={() => setCards([])} className="rounded border border-zinc-700 px-3 py-1.5 text-sm">Clear cards</button>

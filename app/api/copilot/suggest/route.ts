@@ -63,7 +63,13 @@ type Seg = { who: string; text: string };
 export async function POST(req: Request) {
   if (!copilotAllowed(req)) return new Response('Not found', { status: 404 });
 
-  const body = await req.json().catch(() => null) as { transcript?: Seg[]; ask?: string } | null;
+  const body = await req.json().catch(() => null) as { transcript?: Seg[]; ask?: string; warm?: boolean } | null;
+  // Page-load warm-up: compiles this route and loads the docs so the first
+  // real suggestion mid-call isn't stuck behind a cold start.
+  if (body?.warm) {
+    await loadContext();
+    return new Response('ok');
+  }
   const transcript = (body?.transcript || []).slice(-24);
   const ask = body?.ask?.trim();
   if (!transcript.length && !ask) return new Response('Nothing to respond to', { status: 422 });

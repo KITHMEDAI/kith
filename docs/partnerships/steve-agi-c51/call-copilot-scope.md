@@ -15,6 +15,7 @@
    - 📖 grey = definition of a term Steve used (instant, once per term).
    - 🤖 purple = your private question: type in the bottom box + Enter.
    - Click a card to dismiss it. Shift+Enter in the box simulates Steve speaking (for practice).
+   - **Test with sample audio** (before starting) plays a spoken Steve clip through the real pipeline.
 7. **Stop & save** at the end. The transcript is saved to `call-notes/<date>-transcript.md`
    (git-ignored, private, never share it). Autosaves every 2 minutes too.
 
@@ -28,12 +29,16 @@
 - Token / save routes: `app/api/copilot/{token,save}/route.ts`; all copilot routes are
   localhost + dev only (`lib/copilot/guard.ts`)
 
-## Tested (2026-10-18)
-- Simulated-Steve text → red-line cards instantly; suggestion first token ~1.1 s, full card
-  ~3.5 s, ~50 words; small talk → SKIP; private Ask works; Save writes a git-ignored file.
-- **Not yet tested with real audio.** Real tab + mic capture needs you to pick the tab.
-  Test Monday: Meet in one tab with a YouTube interview playing in it (or join from your
-  phone and talk), copilot beside it.
+## Tested
+- 2026-10-18: simulated-Steve text → instant red-line cards; suggestion first token ~1.1 s,
+  full card ~3.5 s; small talk → SKIP; private Ask works; Save writes a git-ignored file.
+- **2026-10-20: real-audio end-to-end PASSED.** "Test with sample audio" plays a spoken
+  Steve clip (Windows TTS, `scripts/copilot-test/`) through the real pipeline: all 6
+  utterances transcribed word-perfect (incl. "G'day"), NDIS/Participant definitions and
+  exclusivity / IP / hosting red lines fired instantly, and the suggestion card started ~1 s
+  after Steve stopped talking. Routes now warm up on page load, so there are no cold-start delays.
+- **Still to do by Anurag:** the 2-minute live check in real Chrome (Meet tab share + mic).
+  Only a human can click Chrome's tab picker.
 
 ---
 

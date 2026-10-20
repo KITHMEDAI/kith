@@ -40,3 +40,4 @@ Thumbs.db
 
 # Private call transcripts from the local call copilot (never commit)
 docs/partnerships/*/call-notes/*-transcript.md
+scripts/copilot-test/*.wav
