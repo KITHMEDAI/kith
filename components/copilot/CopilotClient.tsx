@@ -6,9 +6,9 @@ import { matchGlossary, matchRedLines } from '@/lib/copilot/rules';
 
 const THEM = 'Steve';
 const YOU = 'You';
-const SUGGEST_DEBOUNCE_MS = 1200;   // wait for Steve to finish a multi-part question
+const SUGGEST_DEBOUNCE_MS = 700;   // wait for Steve to finish a multi-part question
 const REDLINE_COOLDOWN_MS = 3 * 60 * 1000;
-const MIN_WORDS_FOR_SUGGESTION = 5;
+const MIN_WORDS_FOR_SUGGESTION = 4;
 
 type Seg = { who: string; text: string; at: number };
 type Card = { id: string; kind: 'suggest' | 'redline' | 'term' | 'ask'; title: string; body: string; at: number; streaming?: boolean };
@@ -40,6 +40,7 @@ export default function CopilotClient() {
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
   const [savedTo, setSavedTo] = useState('');
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const segmentsRef = useRef<Seg[]>([]);
   const stopFns = useRef<Array<() => void>>([]);
@@ -266,7 +267,7 @@ export default function CopilotClient() {
         <div className="ml-auto flex items-center gap-2">
           {savedTo && <span className="text-xs text-emerald-400">Saved → {savedTo}</span>}
           {running ? (
-            <button onClick={stop} className="rounded bg-rose-600 px-3 py-1.5 text-sm font-medium hover:bg-rose-500">Stop &amp; save</button>
+            <button onClick={stop} className="rounded bg-rose-600 px-3 py-1.5 text-sm font-medium hover:bg-rose-500">Stop</button>
           ) : (
             <button onClick={start} className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium hover:bg-emerald-500">Start listening</button>
           )}
@@ -274,6 +275,7 @@ export default function CopilotClient() {
             <button onClick={testWithSample} className="rounded border border-amber-500/60 px-3 py-1.5 text-sm">Test with sample audio</button>
           )}
           <button onClick={save} disabled={!segments.length} className="rounded border border-zinc-700 px-3 py-1.5 text-sm disabled:opacity-40">Save now</button>
+          <button onClick={() => setShowTranscript(v => !v)} className="rounded border border-zinc-700 px-3 py-1.5 text-sm">{showTranscript ? 'Hide' : 'Show'} transcript</button>
           <button onClick={() => setCards([])} className="rounded border border-zinc-700 px-3 py-1.5 text-sm">Clear cards</button>
         </div>
       </header>
@@ -287,32 +289,55 @@ export default function CopilotClient() {
       )}
 
       <main className="flex flex-1 min-h-0">
-        <section className="w-2/5 min-w-[260px] overflow-y-auto border-r border-zinc-800 p-3 text-sm leading-relaxed">
-          {segments.map((s, i) => (
-            <p key={i} className="mb-2">
-              <span className={s.who === THEM ? 'font-semibold text-amber-300' : 'font-semibold text-sky-300'}>{s.who}:</span>{' '}
-              <span className="text-zinc-300">{s.text}</span>
-            </p>
-          ))}
-          {partial.them && <p className="mb-2 italic text-zinc-500"><span className="text-amber-300/70">{THEM}:</span> {partial.them}</p>}
-          {partial.you && <p className="mb-2 italic text-zinc-500"><span className="text-sky-300/70">{YOU}:</span> {partial.you}</p>}
-          <div ref={transcriptEnd} />
-        </section>
-
-        <section className="flex-1 overflow-y-auto p-3 space-y-2">
-          {cards.map(c => (
+        <section className="flex-1 overflow-y-auto p-4 space-y-3">
+          {(() => {
+            const live = cards.find(c => c.kind === 'suggest' || c.kind === 'ask');
+            return (
+              <div className="rounded-xl border-2 border-sky-400/70 bg-sky-950/70 p-5 min-h-[9rem]">
+                <div className="mb-2 flex items-center justify-between text-sm text-sky-300">
+                  <span>{live?.kind === 'ask' ? `🤖 ${live.title}` : '💬 Say now'}</span>
+                  <span className="flex items-center gap-2">
+                    {partial.them && <span className="animate-pulse text-amber-300">{THEM} is talking…</span>}
+                    {live && clock(live.at)}
+                  </span>
+                </div>
+                <div className="whitespace-pre-wrap text-2xl leading-snug">
+                  {live ? (live.body.replace(/\*\*|__/g, '') || '…') : <span className="text-zinc-500 text-lg">Suggestions appear here as soon as {THEM} finishes a point.</span>}
+                </div>
+              </div>
+            );
+          })()}
+          {cards.filter(c => c.kind === 'redline' || c.kind === 'term').slice(0, 6).map(c => (
             <div key={c.id} onClick={() => removeCard(c.id)} title="Click to dismiss"
               className={`cursor-pointer rounded-lg border p-3 ${KIND_STYLE[c.kind]}`}>
               <div className="mb-1 flex items-center justify-between text-xs text-zinc-400">
                 <span>{KIND_ICON[c.kind]} {c.title}</span>
                 <span>{clock(c.at)}</span>
               </div>
-              <div className={`whitespace-pre-wrap ${c.kind === 'term' ? 'text-base' : 'text-lg leading-snug'}`}>
-                {c.body.replace(/\*\*|__/g, '') || (c.streaming ? '…' : '')}
-              </div>
+              <div className="whitespace-pre-wrap text-base">{c.body}</div>
+            </div>
+          ))}
+          {cards.filter(c => c.kind === 'suggest' || c.kind === 'ask').slice(1, 4).map(c => (
+            <div key={c.id} className="rounded-lg border border-zinc-700 bg-zinc-900/60 p-3 opacity-70">
+              <div className="mb-1 text-xs text-zinc-500">Earlier suggestion · {clock(c.at)}</div>
+              <div className="whitespace-pre-wrap text-sm">{c.body.replace(/\*\*|__/g, '')}</div>
             </div>
           ))}
         </section>
+
+        {showTranscript && (
+          <section className="w-1/3 min-w-[240px] overflow-y-auto border-l border-zinc-800 p-3 text-xs leading-relaxed">
+            {segments.map((s, i) => (
+              <p key={i} className="mb-2">
+                <span className={s.who === THEM ? 'font-semibold text-amber-300' : 'font-semibold text-sky-300'}>{s.who}:</span>{' '}
+                <span className="text-zinc-400">{s.text}</span>
+              </p>
+            ))}
+            {partial.them && <p className="mb-2 italic text-zinc-500"><span className="text-amber-300/70">{THEM}:</span> {partial.them}</p>}
+            {partial.you && <p className="mb-2 italic text-zinc-500"><span className="text-sky-300/70">{YOU}:</span> {partial.you}</p>}
+            <div ref={transcriptEnd} />
+          </section>
+        )}
       </main>
 
       <footer className="flex gap-2 border-t border-zinc-800 p-2">

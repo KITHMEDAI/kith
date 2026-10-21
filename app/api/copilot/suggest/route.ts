@@ -43,7 +43,7 @@ The prep docs below are your source of truth: Anurag's agreed positions, model a
 When given the latest transcript, respond to what Steve most recently said or asked.
 
 Output format (strict):
-- If Steve's latest words need no response from Anurag (small talk, filler, he's mid-thought, or Anurag is already answering well), output exactly: SKIP
+- Output exactly SKIP ONLY for pure pleasantries or one-word acknowledgements ("yeah", "right", "cheers"). For anything with substance (a statement, opinion, idea, question, or him describing his business), ALWAYS give Anurag something live to say or ask next.
 - Otherwise output 1–3 bullets, each starting with "• " and AT MOST 14 words. Glanceable key points in spoken phrasing — prompts, not a script, never full paragraphs.
 - Optionally one extra final line starting with "⚠ " (max 12 words) for a red line or trap (e.g. engine ownership, open-ended exclusivity, fees, promising audit outcomes, claiming features/customers/certifications Kith doesn't have).
 - Optionally one final line starting with "? " (max 14 words) with a smart question Anurag could ask back.
