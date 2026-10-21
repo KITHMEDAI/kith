@@ -27,7 +27,7 @@ export const NOTE_TYPES: NoteTypeDef[] = [
   {
     key: 'meeting_minutes', label: 'Meeting minutes', hint: 'Attendees, decisions, actions', fields: 'all',
     sections: ['Attendees', 'Agenda items discussed', 'Risks & issues'],
-    guidance: 'Formal minutes. One entry per agenda item. Attribute positions to people/roles when stated. Decisions and action items must be explicit.',
+    guidance: 'Formal minutes. One point per agenda item recording what was discussed and who raised it (role or name only if clear). Resolutions/decisions go ONLY in decisions and actions ONLY in action_items; the agenda item points must not restate them. Record movers/seconders only if named.',
   },
   {
     key: 'client_call', label: 'Client / stakeholder call', hint: 'Needs, commitments, next steps', fields: 'all',
@@ -36,18 +36,18 @@ export const NOTE_TYPES: NoteTypeDef[] = [
   },
   {
     key: 'interview', label: 'Interview', hint: 'Q&A, observations, assessment', fields: 'all',
-    sections: ['Candidate / interviewee', 'Questions & answers', 'Strengths', 'Concerns', 'Recommendation (as stated)'],
-    guidance: 'Summarise answers faithfully. Only include a recommendation if the interviewer stated one.',
+    sections: ['Interviewee & context', 'Questions & answers', 'Strengths (as stated)', 'Concerns (as stated)', 'Recommendation / outcome (as stated)'],
+    guidance: 'Summarise answers faithfully. Strengths, Concerns and Recommendation only from what the interviewer actually said; never infer them from answers; omit those headings if not stated. For witness, investigation or research interviews, omit Strengths/Concerns entirely and record no findings. Usually no flags unless a risk was raised.',
   },
   {
     key: 'daily_log', label: 'Daily log / handover', hint: 'What happened, what\'s next', fields: 'all',
     sections: ['Summary of the day/shift', 'Completed', 'Outstanding', 'Handover to next person'],
-    guidance: 'Write for the next person picking up the work. Outstanding items need enough detail to act on.',
+    guidance: 'Write for the next person picking up the work. "Outstanding" items need enough detail to act on; don\'t repeat the same item under both "Outstanding" and "Handover to next person". If the log describes a different day than the note date (e.g. "yesterday"), say which day.',
   },
   {
     key: 'incident_report', label: 'Incident report', hint: 'Facts, timeline, actions taken', fields: 'all',
     sections: ['What happened', 'When & where', 'People involved', 'Immediate actions taken', 'Witnesses', 'Follow-up required'],
-    guidance: 'Strictly factual, chronological, no blame or speculation. Missing facts (time, location, names) must be listed as missing.',
+    guidance: 'Strictly factual, chronological, no blame or speculation. Only record who witnessed what as stated (the author may not have seen it). Missing facts (time, location, names) go in missing_info. "Follow-up required" holds only follow-up the input mentions; put tasks with a doer in action_items instead. Flag whether it may be notifiable (e.g. to the WHS regulator) for a manager to decide when there is a serious injury or dangerous incident.',
   },
   {
     key: 'custom', label: 'Custom', hint: 'Describe the note you want', fields: 'all',
@@ -83,13 +83,13 @@ export const NOTE_TYPES: NoteTypeDef[] = [
   },
   {
     key: 'pharma_adverse_event', label: 'Adverse event capture', hint: 'Capture details for PV reporting', fields: ['pharma', 'healthcare'],
-    sections: ['Reporter', 'Patient (de-identified details as given)', 'Product(s)', 'Event description', 'Onset & outcome', 'Missing information'],
-    guidance: 'Capture the four minimum criteria (identifiable reporter, identifiable patient, suspect product, event) and list what is missing. Never assess causality. Always add a flag that this must go to pharmacovigilance within the company timeframe.',
+    sections: ['Reporter', 'Patient (de-identified details as given)', 'Product(s)', 'Event description', 'Onset & outcome'],
+    guidance: 'Capture the four minimum criteria (identifiable reporter, identifiable patient, suspect product, event); any that are absent go first in missing_info (there is no "Missing information" section). Record dose, dates and outcome exactly as given, keeping uncertainty ("caller thinks 5 mg"). Never assess or imply causality, not in the title either (say "reported while taking X", never "X-associated"). Always add one flag that this must go to pharmacovigilance within the company timeframe (urgent if hospitalisation, death or other serious outcome is mentioned).',
   },
   {
     key: 'construction_site_inspection', label: 'Site inspection / walkthrough', hint: 'Progress, defects, hazards', fields: ['construction', 'property'],
     sections: ['Site & areas inspected', 'Progress observed', 'Defects / issues', 'Safety observations', 'Instructions given'],
-    guidance: 'Location-specific: every defect/hazard tied to an area or level. Hazards also go in flags.',
+    guidance: 'Location-specific: every defect/hazard tied to an area or level. Each hazard appears once in "Safety observations" AND as a flag with location and responsible person (the flag is the only allowed double-up). Instructions given on the spot go under "Instructions given"; only tasks with a stated doer/deadline go in action_items instead.',
   },
   {
     key: 'construction_toolbox', label: 'Toolbox talk (safety)', hint: 'Topic, attendees, hazards', fields: ['construction', 'agriculture'],
@@ -104,7 +104,7 @@ export const NOTE_TYPES: NoteTypeDef[] = [
   {
     key: 'construction_defects', label: 'Defects / punch list', hint: 'Itemised defects with owners', fields: ['construction', 'property'],
     sections: ['Defects by location'],
-    guidance: 'One line per defect: location, description, responsible trade (if stated). Each also becomes an action item.',
+    guidance: 'One line per defect under "Defects by location": "Location: defect: responsible trade (only if stated)". The defect list IS the to-do list: do not repeat defects as action_items. action_items only for other tasks (e.g. "send rectification schedule"). Safety-relevant defects (smoke alarms, electrical, falls, water ingress) also get a flag.',
   },
   {
     key: 'ndis_progress_note', label: 'Shift / progress note', hint: 'Goal-linked, objective', fields: ['ndis'],
@@ -112,9 +112,9 @@ export const NOTE_TYPES: NoteTypeDef[] = [
     guidance: 'Objective, person-centred. Link to plan goals only when the input mentions them; otherwise list "goal link missing". Possible incidents or restrictive practices go in flags.',
   },
   {
-    key: 'ndis_incident', label: 'NDIS incident report', hint: 'Possible reportable incident', fields: ['ndis', 'aged_care'],
-    sections: ['What happened', 'When & where', 'People involved', 'Immediate actions & supports', 'Who was notified', 'Missing information'],
-    guidance: 'Factual and chronological. Always flag whether it may be a reportable incident (generally 24 h to the NDIS Commission) for a supervisor to decide.',
+    key: 'ndis_incident', label: 'Incident report (NDIS / aged care SIRS)', hint: 'Possible reportable incident', fields: ['ndis', 'aged_care'],
+    sections: ['What happened', 'When & where', 'People involved', 'Immediate actions & supports', 'Who was notified'],
+    guidance: 'Factual and chronological; no blame. Missing facts (exact time, authorisation, who has not been told) go in missing_info (there is no "Missing information" section). Always add one flag on whether it may be reportable, for a supervisor to decide: in NDIS settings, a reportable incident to the NDIS Commission (generally within 24 h); in aged care, a SIRS incident to the Aged Care Quality and Safety Commission (Priority 1 generally within 24 h). Use the regime that matches the user\'s field.',
   },
   {
     key: 'aged_care_note', label: 'Care note', hint: 'Care delivered and wellbeing', fields: ['aged_care'],

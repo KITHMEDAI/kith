@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { requireApiUser, getProfile, sealInput, processNote } from '@/lib/workspace/server';
 import { NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
+import { checkRateLimit } from '@/lib/rate-limit';
 
-export const maxDuration = 60;
+export const maxDuration = 300; // long meetings: generation runs after the response via waitUntil
+
+const MAX_INPUT_CHARS = 150_000; // ~2.5 hours of speech
 
 // Create a note from a recording transcript or typed text. Returns the id
 // immediately; generation continues in the background and the note page polls.
@@ -19,8 +22,16 @@ export async function POST(req: Request) {
   const customInstruction = noteType === 'custom' ? String(body.custom_instruction ?? '').slice(0, 600) : undefined;
   const duration = Number.isFinite(Number(body.duration_seconds)) ? Math.round(Number(body.duration_seconds)) : null;
 
-  if (input.split(/\s+/).length < 3) {
+  // Real words only: speaker labels and emoji/punctuation don't count.
+  const words = input.replace(/^\s*[^:\n]{1,40}:\s/gm, ' ').match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) ?? [];
+  if (words.length < 3) {
     return NextResponse.json({ error: 'Not enough content yet: say or type a little more.' }, { status: 422 });
+  }
+  if (input.length > MAX_INPUT_CHARS) {
+    return NextResponse.json({ error: 'That is too long for one note (about 2.5 hours of speech). Split it into parts.' }, { status: 413 });
+  }
+  if (!checkRateLimit(`ws-notes:${user.id}`, 40, 60 * 60 * 1000).allowed) {
+    return NextResponse.json({ error: 'You have created a lot of notes in the last hour. Try again shortly.' }, { status: 429 });
   }
 
   const profile = await getProfile(user.id);

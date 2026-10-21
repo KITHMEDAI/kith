@@ -1,0 +1,191 @@
+[
+  {
+    "id": "construction_site_walk", "field": "construction", "noteType": "construction_site_inspection",
+    "speakers": { "A": "Site manager (Mark)", "B": "Builder's supervisor (Priya)" },
+    "turns": [
+      ["A", "Morning Priya. Let's start on level two. How are the steel fixers going with the slab?"],
+      ["B", "They finished the reo yesterday afternoon. The engineer, Tom Nguyen, is booked to inspect at eight tomorrow morning."],
+      ["A", "Good. I noticed the edge protection on the north side is missing two panels near the hoist."],
+      ["B", "Yes, I saw that too. Scaffold crew pulled them out to land the formwork. I'll get them back in before lunch today."],
+      ["A", "Please do. Nobody goes past the hoist until it's fixed. Put a barricade and a sign up now."],
+      ["B", "Will do. Also the concrete pour for level two is pencilled for Thursday, but the forecast says thirty millimetres of rain."],
+      ["A", "Then we push it to Friday. Can you call Boral and move the pump booking?"],
+      ["B", "Sure. One more thing, the plumber hasn't finished the penetrations in the bathroom set downs."],
+      ["A", "That has to be done before the engineer's inspection. Ring Dave from Coastal Plumbing and tell him we need it finished by close of business today."],
+      ["B", "Okay. And there's a defect in the stair void, the formwork is about fifteen millimetres out of level."],
+      ["A", "Photograph it and send it to the formwork foreman. I want it corrected before the inspection as well."]
+    ]
+  },
+  {
+    "id": "pharma_hcp_call", "field": "pharma", "noteType": "pharma_hcp_call",
+    "speakers": { "A": "Sales rep (Jason)", "B": "GP (Dr Helen Carter)" },
+    "turns": [
+      ["A", "Thanks for seeing me, Doctor Carter. I wanted to follow up on the patient support program for our asthma inhaler."],
+      ["B", "Happy to chat for ten minutes. I've enrolled three patients so far and the feedback has been positive."],
+      ["A", "That's great to hear. Have any of them had trouble with the device technique?"],
+      ["B", "One elderly patient struggled with the dose counter. Actually, she mentioned she had a bad headache and palpitations after starting it last week."],
+      ["A", "Thanks for telling me. I'm required to report that to our pharmacovigilance team within one business day. Can I take a few details?"],
+      ["B", "Sure. She's in her seventies, started two weeks ago, and the palpitations settled after three days. I'll send the details through the form."],
+      ["A", "I'll email you the adverse event form today. Would you like more patient leaflets for the waiting room?"],
+      ["B", "Yes, maybe fifty copies. And I'd like to know if there's a lunch education session about the new asthma guidelines."],
+      ["A", "There's one on the twelfth of November at the Parramatta clinic. I'll send an invite."],
+      ["B", "Good. Also, what dose would you recommend for a twelve year old?"],
+      ["A", "I can't advise on off label dosing, but I can arrange for our medical information team to send you the product information."]
+    ]
+  },
+  {
+    "id": "ndis_shift_handover", "field": "ndis", "noteType": "ndis_progress_note",
+    "speakers": { "A": "Support worker (Liam)", "B": "Incoming support worker (Grace)" },
+    "turns": [
+      ["A", "Hi Grace, quick handover for Ben before I head off."],
+      ["B", "Thanks Liam. How was the morning?"],
+      ["A", "Pretty good. We went to the shopping centre and Ben paid for his own lunch using his card, which is one of his goals."],
+      ["B", "That's great progress. Did he manage the bus as well?"],
+      ["A", "Yes, he caught the 610 bus with only one prompt. He got a bit anxious when the bus was late, but he used his breathing exercise."],
+      ["B", "Okay. Any medication issues?"],
+      ["A", "He had his morning meds at eight. His mum called and said the evening dose of his epilepsy medication has changed, but I haven't seen a new chart yet."],
+      ["B", "So I shouldn't give the new dose until the chart is updated?"],
+      ["A", "Correct. Please call the coordinator, Michelle, before six tonight to confirm. Also, he had a small fall in the bathroom around eleven. No injury, but I logged it."],
+      ["B", "Did you write an incident report?"],
+      ["A", "Not yet. Can you remind me tomorrow? I'll do it first thing."],
+      ["B", "Sure. Anything for dinner?"],
+      ["A", "He wants to cook pasta tonight. He's working on his cooking skills, so let him lead with supervision near the stove."]
+    ]
+  },
+  {
+    "id": "council_meeting", "field": "council", "noteType": "meeting_minutes",
+    "speakers": { "A": "Chair (Councillor Patel)", "B": "Director of works (Sandra Lee)" },
+    "turns": [
+      ["A", "Let's open the infrastructure committee meeting. Apologies from Councillor Brooks. First item is the Smith Street footpath upgrade."],
+      ["B", "The tender closed last Friday. We received four submissions. The recommended contractor is Greenline Civil at three hundred and eighty thousand dollars."],
+      ["A", "That's above the budget of three hundred and fifty thousand. Where does the difference come from?"],
+      ["B", "Mostly the drainage works. We could defer the eastern section to next financial year to stay within budget."],
+      ["A", "I'd prefer we do the full length now. Can we fund the gap from the roads reserve?"],
+      ["B", "Finance says there's about sixty thousand available in the reserve."],
+      ["A", "Then I'll move that we award the contract to Greenline Civil and fund the gap from the roads reserve. All in favour? That's carried, five to one."],
+      ["B", "Next item, residents on Hill Road have complained about speeding near the primary school."],
+      ["A", "How many complaints?"],
+      ["B", "Twelve since August. We'd like to install temporary speed counters for two weeks."],
+      ["A", "Agreed. Please report the results back at the December meeting. Anything else?"],
+      ["B", "Just a reminder that the community consultation on the skate park closes on the thirtieth of November."]
+    ]
+  },
+  {
+    "id": "sales_call", "field": "sales", "noteType": "client_call",
+    "speakers": { "A": "Account exec (Chris)", "B": "Prospect, ops manager (Natalie)" },
+    "turns": [
+      ["A", "Thanks for jumping on, Natalie. Last time you mentioned your team loses time on dispatch scheduling."],
+      ["B", "Yes, we have twenty two technicians and the schedule lives in spreadsheets. We double book at least twice a week."],
+      ["A", "Our platform syncs with your job system and flags double bookings automatically. What system are you on now?"],
+      ["B", "ServiceM8. And we need it to work offline because some of our sites have no reception."],
+      ["A", "Offline mode is on the roadmap for the first quarter next year, but it's not available today."],
+      ["B", "That's a concern. What's the pricing?"],
+      ["A", "It's forty nine dollars per technician per month, billed annually. For twenty two technicians that's about thirteen thousand a year."],
+      ["B", "Our budget is closer to ten thousand. Is there any flexibility?"],
+      ["A", "I can ask about a discount if you sign before the end of December. I'll come back to you by Friday."],
+      ["B", "Okay. I'll also need our IT manager, Raj, to review your security documents."],
+      ["A", "I'll send the security pack and our SOC two report today. Shall we book a demo for Raj next Tuesday at two?"],
+      ["B", "Tuesday at two works."]
+    ]
+  },
+  {
+    "id": "medical_consult", "field": "healthcare", "noteType": "medical_consult",
+    "speakers": { "A": "GP (Dr Amir Hassan)", "B": "Patient (Mrs Julie Roberts)" },
+    "turns": [
+      ["A", "Hi Julie, what brings you in today?"],
+      ["B", "I've had a cough for about three weeks. It's worse at night and I've been a bit short of breath walking up stairs."],
+      ["A", "Any fever, chest pain or coughing up blood?"],
+      ["B", "No blood. A mild fever in the first week, but none since. No chest pain."],
+      ["A", "Do you smoke?"],
+      ["B", "I quit five years ago. I smoked for about twenty years before that."],
+      ["A", "Okay. Your temperature today is thirty six point eight, oxygen saturation ninety six percent, and I can hear some wheeze on the left side."],
+      ["B", "Is it something serious?"],
+      ["A", "I'd like to get a chest x-ray and some blood tests to find out. I'll also give you a trial of a ventolin puffer, two puffs when you're short of breath."],
+      ["B", "Should I take antibiotics?"],
+      ["A", "Not at this stage. Let's see the x-ray first. Come back in one week with the results, or sooner if you get chest pain or the breathing gets worse."],
+      ["B", "Thank you, doctor. I'll book the x-ray this afternoon."]
+    ]
+  },
+  {
+    "id": "toolbox_talk", "field": "construction", "noteType": "construction_toolbox",
+    "speakers": { "A": "Safety officer (Steve)", "B": "Leading hand (Kylie)" },
+    "turns": [
+      ["A", "Righto everyone, today's toolbox talk is about working at heights on the roof."],
+      ["B", "We've got eight on the crew today, plus two from the electrical subbie."],
+      ["A", "Good. Rule one, harnesses on and clipped to the static line at all times past the edge protection."],
+      ["B", "One of the lanyards failed inspection this morning. The tag was out of date."],
+      ["A", "Tag it out and put it in the quarantine bin. Don't use it. I'll order two new lanyards today."],
+      ["B", "Also the wind is meant to pick up to forty kilometres an hour after lunch."],
+      ["A", "If gusts go over thirty five, we stop sheet laying and come down. I'll check the gauge at twelve."],
+      ["B", "What about the heat? It's meant to hit thirty four."],
+      ["A", "Water breaks every hour, and there's shade at the site shed. Look out for each other for signs of heat stress."],
+      ["B", "Got it. And the near miss yesterday, the dropped drill?"],
+      ["A", "Yes, a drill fell from the roof onto the walkway. Nobody was hurt, but from today all tools on the roof must be tethered. I'll put it in the incident register."],
+      ["B", "Everyone needs to sign the attendance sheet before we start."]
+    ]
+  },
+  {
+    "id": "hospitality_handover", "field": "hospitality", "noteType": "hospitality_shift_handover",
+    "speakers": { "A": "Day manager (Tony)", "B": "Night manager (Mei)" },
+    "turns": [
+      ["A", "Hey Mei, handover time. Lunch was busy, we did about two hundred and ten covers."],
+      ["B", "Nice. How did the kitchen go?"],
+      ["A", "The coolroom temperature was reading seven degrees at two o'clock. The technician is coming tomorrow at nine."],
+      ["B", "Seven is too high. Did you move the dairy and seafood?"],
+      ["A", "Yes, into the reach-in fridges. Please log the temperature every two hours tonight."],
+      ["B", "Okay. Any staff issues?"],
+      ["A", "Josh called in sick for tonight, so you're one short on the floor. Emma said she can come in at six."],
+      ["B", "Great. What about stock?"],
+      ["A", "We're out of the house pinot and low on oat milk. I've ordered both, they arrive Thursday."],
+      ["B", "And the booking for the birthday party?"],
+      ["A", "Table of fourteen at seven thirty. One guest has a severe peanut allergy, so the kitchen needs to be told."],
+      ["B", "I'll brief the chef at five. Anything else?"],
+      ["A", "A customer complained about a long wait at lunch. I gave them a voucher for a free dessert."]
+    ]
+  },
+  {
+    "id": "numbers_names_dates", "field": "property", "noteType": "client_call",
+    "speakers": { "A": "Property manager (Rebecca Thompson)", "B": "Landlord (Mr Kowalczyk)" },
+    "turns": [
+      ["A", "Hi Mr Kowalczyk, it's Rebecca from Harbourside Realty about your unit at 14 Wattle Crescent, Chatswood."],
+      ["B", "Yes, hello. Is this about the lease renewal?"],
+      ["A", "It is. The current lease ends on the fifteenth of January 2027. The tenants, Siobhan and Aoife Gallagher, want to renew for twelve months."],
+      ["B", "What rent are you suggesting?"],
+      ["A", "They pay six hundred and eighty dollars a week now. Comparable units are renting for seven hundred and twenty. I'd suggest seven hundred and five."],
+      ["B", "Seven oh five sounds fair. What about the hot water system?"],
+      ["A", "The plumber, Mohammed Al-Rashid, quoted two thousand three hundred and forty dollars including GST to replace it."],
+      ["B", "Can we get a second quote?"],
+      ["A", "Yes, I'll get one from Hydroflow by the twenty eighth of October. The bond is held with the Rental Bond Board, reference number 4471 9032."],
+      ["B", "Fine. Please send me the renewal paperwork."],
+      ["A", "I'll email it by Wednesday the twenty second. Your management fee stays at five point five percent."]
+    ]
+  },
+  {
+    "id": "crosstalk_short_turns", "field": "general", "noteType": "meeting_minutes",
+    "speakers": { "A": "Team lead (Sam)", "B": "Coordinator (Jess)" },
+    "turns": [
+      ["A", "Quick stand up. Website launch?"],
+      ["B", "Friday."],
+      ["A", "Still Friday?"],
+      ["B", "Yes, unless QA finds blockers."],
+      ["A", "Who's on QA?"],
+      ["B", "Aisha."],
+      ["A", "Okay. Newsletter?"],
+      ["B", "Drafted. Needs your sign off."],
+      ["A", "Send it."],
+      ["B", "Done. Budget?"],
+      ["A", "Approved. Twelve thousand."],
+      ["B", "Twelve or twenty?"],
+      ["A", "Twelve."],
+      ["B", "Got it. Printer's broken again."],
+      ["A", "Call IT."],
+      ["B", "I did. Monday."],
+      ["A", "Fine. Client visit Wednesday?"],
+      ["B", "Moved to Thursday, ten am."],
+      ["A", "Who's presenting?"],
+      ["B", "You are."],
+      ["A", "Right. Anything else?"],
+      ["B", "No, that's it."]
+    ]
+  }
+]

@@ -25,7 +25,7 @@ export interface FieldDef {
 export const FIELDS: FieldDef[] = [
   {
     key: 'general', label: 'General (any work)', defaultNoteType: 'general',
-    profile: 'General professional context. Write clear, neutral business notes that any colleague could follow. Prioritise decisions, action items with owners and dates, and open questions.',
+    profile: 'General professional context. Write clear, neutral business notes that any colleague could follow. Prioritise decisions, action items with owners and dates, and open questions. Flag only genuine safety, legal, privacy or compliance risks.',
   },
   {
     key: 'healthcare', label: 'Healthcare / medical', defaultNoteType: 'medical_consult',
@@ -45,7 +45,7 @@ export const FIELDS: FieldDef[] = [
   },
   {
     key: 'aged_care', label: 'Aged care', defaultNoteType: 'aged_care_note',
-    profile: 'Australian aged-care context (residential or Support at Home). Person-centred, objective notes: care delivered, wellbeing, food/fluid intake, mobility, skin, continence, behaviour, family contact. Flag falls, pressure injuries, weight loss, medication issues, restrictive practices and any possible serious incident (SIRS) for the RN/manager.',
+    profile: 'Australian aged-care context (residential or Support at Home). Say "resident" or "client". Person-centred, objective notes: care delivered, wellbeing, food/fluid intake, mobility, skin, continence, behaviour, family contact. Flag falls, pressure injuries/skin tears, weight loss, medication issues, restrictive practices (including bed rails and PRN for behaviour; consent/authorisation status) and any possible serious incident under the Serious Incident Response Scheme (SIRS) for the RN/manager. Priority 1 incidents are generally due to the Aged Care Quality and Safety Commission within 24 hours. Never refer to the NDIS Commission for aged-care residents.',
   },
   {
     key: 'allied_health', label: 'Allied health & therapy', defaultNoteType: 'medical_consult',
@@ -77,7 +77,7 @@ export const FIELDS: FieldDef[] = [
   },
   {
     key: 'education', label: 'Education & training', defaultNoteType: 'general',
-    profile: 'Education / training context. Capture learners or cohort, topics covered, progress and concerns, adjustments, communication with families, and follow-ups. Flag wellbeing or child-safety concerns for the appropriate staff member.',
+    profile: 'Education / training context. Capture learners or cohort, topics covered, progress and concerns, adjustments, communication with families, and follow-ups. Flag wellbeing or child-safety concerns for the appropriate staff member. Child-safety or self-harm risk statements are always urgent flags for the wellbeing/child-safety lead; the note never assesses the risk itself.',
   },
   {
     key: 'property', label: 'Real estate & property', defaultNoteType: 'client_call',

@@ -2,6 +2,7 @@ import { requirePageProfile } from '@/lib/workspace/server';
 import { noteTypesForField, NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
 import { FIELD_MAP, fieldLabel } from '@/lib/workspace/fields';
 import NewNote from '@/components/workspace/NewNote';
+import { keytermsForField } from '@/lib/workspace/keyterms';
 
 export const metadata = { title: 'New note' };
 
@@ -19,6 +20,7 @@ export default async function NewNotePage() {
       types={types}
       defaultType={preferred}
       consentAcked={!!p.recording_consent_ack_at}
+      keyterms={keytermsForField(p.field)}
     />
   );
 }

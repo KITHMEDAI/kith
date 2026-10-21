@@ -23,7 +23,7 @@ export default function WorkspaceNav({ name }: { name: string }) {
   const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 
   const signOut = async () => {
-    await createClient().auth.signOut();
+    await createClient().auth.signOut({ scope: 'local' }); // this device only; other devices stay signed in
     router.replace('/login');
     router.refresh();
   };

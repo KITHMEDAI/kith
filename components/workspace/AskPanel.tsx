@@ -64,6 +64,13 @@ export default function AskPanel({ initialQuestion }: { initialQuestion: string 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestion]);
 
+  // Only the notes the answer actually cites; none for a "not in your notes" answer.
+  const shown = (t: Turn) => {
+    if (t.a.trim().startsWith("That isn't in your notes.")) return [];
+    const cited = new Set(Array.from(t.a.matchAll(/\[(\d+)\]/g)).map(m => Number(m[1])));
+    return t.sources.filter(s => cited.has(s.n));
+  };
+
   // Inline: [n] citations become links to the source note; **bold** / *italic* render.
   const renderInline = (text: string, sources: Source[], keyBase: string) =>
     text.split(/(\[\d+\]|\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g).map((part, i) => {
@@ -108,11 +115,11 @@ export default function AskPanel({ initialQuestion }: { initialQuestion: string 
             <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-relaxed shadow-sm">
               {t.a ? <div className="space-y-1">{renderAnswer(t.a, t.sources)}</div>
                 : <span className="flex items-center gap-2 text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Searching your notes…</span>}
-              {t.done && t.sources.length > 0 && (
+              {t.done && shown(t).length > 0 && (
                 <div className="mt-4 border-t border-slate-100 pt-3">
                   <p className="mb-2 text-xs font-medium text-slate-500">Sources</p>
                   <div className="flex flex-wrap gap-2">
-                    {t.sources.map(s => (
+                    {shown(t).map(s => (
                       <Link key={s.id} href={`/notes/${s.id}`} className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-2 py-1 text-xs hover:border-violet-300">
                         <span className="font-semibold text-violet-700">{s.n}</span><FileText className="h-3 w-3 text-slate-400" />
                         <span className="max-w-[180px] truncate">{s.title}</span>

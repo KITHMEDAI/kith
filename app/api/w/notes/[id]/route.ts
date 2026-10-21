@@ -3,7 +3,11 @@ import { waitUntil } from '@vercel/functions';
 import { requireApiUser, indexNote, processNote } from '@/lib/workspace/server';
 import { noteToText, type NoteContent } from '@/lib/workspace/generate';
 
-export const maxDuration = 60;
+export const maxDuration = 300;
+
+// A note still 'processing' after this long was lost (e.g. a function timeout):
+// surface it as failed so the user can retry instead of waiting forever.
+const STUCK_AFTER_MS = 5 * 60 * 1000;
 
 const COLS = 'id, title, note_type, field, input_mode, status, content, summary, error, duration_seconds, created_at, updated_at';
 
@@ -12,6 +16,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   if ('error' in auth) return auth.error;
   const { data } = await auth.supabase.from('ws_notes').select(COLS).eq('id', params.id).maybeSingle();
   if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (data.status === 'processing' && Date.now() - new Date(data.updated_at).getTime() > STUCK_AFTER_MS) {
+    await auth.supabase.from('ws_notes').update({ status: 'failed', error: 'Timed out' }).eq('id', params.id).eq('status', 'processing');
+    data.status = 'failed';
+  }
   return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -58,7 +66,7 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
   const auth = await requireApiUser();
   if ('error' in auth) return auth.error;
   const { data } = await auth.supabase.from('ws_notes')
-    .update({ status: 'processing', error: null }).eq('id', params.id).eq('status', 'failed').select('id').maybeSingle();
+    .update({ status: 'processing', error: null, updated_at: new Date().toISOString() }).eq('id', params.id).eq('status', 'failed').select('id').maybeSingle();
   if (!data) return NextResponse.json({ error: 'Nothing to retry' }, { status: 409 });
   waitUntil(processNote(params.id));
   return NextResponse.json({ ok: true });

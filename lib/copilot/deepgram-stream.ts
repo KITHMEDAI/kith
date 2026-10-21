@@ -33,12 +33,13 @@ const KEYTERMS = [
   'heads of agreement', 'Essential Eight', 'allied health', 'participant', 'Anurag',
 ];
 
-function wsUrl(): string {
+function wsUrl(diarize = false, keyterms: string[] = KEYTERMS): string {
   return 'wss://api.deepgram.com/v1/listen' +
     '?model=nova-3&language=en&smart_format=true&interim_results=true' +
+    (diarize ? '&diarize=true' : '') +
     '&utterance_end_ms=1200&endpointing=400&vad_events=true&filler_words=false' +
     '&encoding=linear16&sample_rate=16000&channels=1' +
-    KEYTERMS.map(t => `&keyterm=${encodeURIComponent(t)}`).join('');
+    keyterms.map(t => `&keyterm=${encodeURIComponent(t)}`).join('');
 }
 
 export type StreamStatus = 'connecting' | 'live' | 'reconnecting' | 'failed' | 'stopped';
@@ -47,23 +48,49 @@ export function startDeepgramStream(opts: {
   token: string;
   media: MediaStream;
   onPartial: (text: string) => void;
-  onUtterance: (text: string) => void;
+  /** speaker = Deepgram's diarized speaker index (only when diarize is on). */
+  onUtterance: (text: string, speaker?: number) => void;
   onStatus: (s: StreamStatus) => void;
-}): () => void {
-  const { token, media, onPartial, onUtterance, onStatus } = opts;
+  /** Separate voices within this one stream (e.g. several people in a meeting tab). */
+  diarize?: boolean;
+  /** Vocabulary to boost (defaults to the copilot's list). */
+  keyterms?: string[];
+}): () => Promise<void> {
+  const { token, media, onPartial, onUtterance, onStatus, diarize = false, keyterms } = opts;
   let ws: WebSocket | null = null;
   let stopped = false;
   let retries = 0;
-  let buffer: string[] = [];
+  // Finalised words grouped into consecutive same-speaker runs, so one
+  // utterance never mixes two people's words.
+  let runs: Array<{ speaker?: number; text: string }> = [];
 
   const audioCtx = new AudioContext({ sampleRate: 16000, latencyHint: 'interactive' });
   let worklet: AudioWorkletNode | null = null;
 
+  const runsText = () => runs.map(r => r.text).join(' ').trim();
+
   const flush = () => {
-    const text = buffer.join(' ').trim();
-    buffer = [];
+    const out = runs.filter(r => r.text.trim());
+    runs = [];
     onPartial('');
-    if (text) onUtterance(text);
+    for (const r of out) onUtterance(r.text.trim(), r.speaker);
+  };
+
+  const addFinal = (alt: { transcript?: string; words?: Array<{ word: string; punctuated_word?: string; speaker?: number }> }) => {
+    const words = alt.words ?? [];
+    if (!diarize || !words.length) {
+      const t = (alt.transcript || '').trim();
+      if (!t) return;
+      const last = runs[runs.length - 1];
+      if (last) last.text += ` ${t}`; else runs.push({ text: t });
+      return;
+    }
+    for (const w of words) {
+      const word = w.punctuated_word || w.word;
+      const last = runs[runs.length - 1];
+      if (last && last.speaker === w.speaker) last.text += ` ${word}`;
+      else runs.push({ speaker: w.speaker, text: word });
+    }
   };
 
   const setupAudio = async () => {
@@ -80,20 +107,21 @@ export function startDeepgramStream(opts: {
 
   const open = () => {
     onStatus(retries ? 'reconnecting' : 'connecting');
-    ws = new WebSocket(wsUrl(), ['token', token]);
+    ws = new WebSocket(wsUrl(diarize, keyterms), ['token', token]);
     ws.binaryType = 'arraybuffer';
     ws.onopen = () => { retries = 0; onStatus('live'); };
     ws.onmessage = (event) => {
       let data: Record<string, any>;
       try { data = JSON.parse(event.data as string); } catch { return; }
       if (data.type === 'Results') {
-        const text: string = data.channel?.alternatives?.[0]?.transcript || '';
+        const alt = data.channel?.alternatives?.[0] ?? {};
+        const text: string = alt.transcript || '';
         if (!data.is_final) {
-          onPartial([...buffer, text].join(' ').trim());
+          onPartial(`${runsText()} ${text}`.trim());
           return;
         }
-        if (text.trim()) buffer.push(text.trim());
-        onPartial(buffer.join(' '));
+        addFinal(alt);
+        onPartial(runsText());
         if (data.speech_final) flush();
       } else if (data.type === 'UtteranceEnd') {
         flush();
@@ -113,14 +141,25 @@ export function startDeepgramStream(opts: {
 
   setupAudio().then(open).catch(() => onStatus('failed'));
 
-  return () => {
+  // Graceful stop: stop sending audio, ask Deepgram to finalise what it has
+  // (CloseStream), wait briefly for those last results, then flush. Without
+  // this the final few words of a recording can be lost.
+  return async () => {
     stopped = true;
-    flush();
-    try { ws?.send(JSON.stringify({ type: 'CloseStream' })); } catch { /* already closed */ }
-    ws?.close();
     worklet?.disconnect();
-    audioCtx.close().catch(() => {});
     media.getTracks().forEach(t => t.stop());
+    const sock = ws;
+    if (sock && sock.readyState === WebSocket.OPEN) {
+      await new Promise<void>(resolve => {
+        const done = () => resolve();
+        sock.addEventListener('close', done, { once: true });
+        try { sock.send(JSON.stringify({ type: 'CloseStream' })); } catch { resolve(); }
+        setTimeout(done, 2500);
+      });
+    }
+    flush();
+    try { sock?.close(); } catch { /* already closed */ }
+    audioCtx.close().catch(() => {});
     onStatus('stopped');
   };
 }

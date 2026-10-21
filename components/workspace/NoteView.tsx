@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Copy, Check, Printer, Pencil, Trash2, Loader2, RotateCcw, AlertTriangle, Info, OctagonAlert,
-  CircleDashed, Mic, Keyboard,
+  CircleDashed, Mic, Keyboard, Sparkles, Undo2,
 } from 'lucide-react';
 import type { NoteContent } from '@/lib/workspace/generate';
 import type { WsNote } from '@/lib/workspace/server';
@@ -60,6 +60,10 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [request, setRequest] = useState('');
+  const [revising, setRevising] = useState(false);
+  const [reviseMsg, setReviseMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [undoContent, setUndoContent] = useState<NoteContent | null>(null);
 
   // Poll while the note is being written.
   useEffect(() => {
@@ -105,6 +109,33 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
     const res = await fetch(`/api/w/notes/${note.id}`, { method: 'POST' });
     setBusy(false);
     if (res.ok) { setStage(0); setNote(n => ({ ...n, status: 'processing', error: null })); }
+  };
+
+  const revise = async (text?: string) => {
+    const r = (text ?? request).trim();
+    if (!r || !c || revising) return;
+    setRevising(true); setReviseMsg(null);
+    const res = await fetch(`/api/w/notes/${note.id}/revise`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request: r }),
+    });
+    const j = await res.json().catch(() => ({}));
+    setRevising(false);
+    if (!res.ok) { setReviseMsg({ kind: 'err', text: j.error || 'Could not update the note' }); return; }
+    if (!j.changed) { setReviseMsg({ kind: 'err', text: 'No change was needed for that request.' }); return; }
+    setUndoContent(c);
+    setNote(n => ({ ...n, content: j.content, title: j.content.title, summary: j.content.summary }));
+    setRequest('');
+    setReviseMsg({ kind: 'ok', text: 'Note updated.' });
+    router.refresh();
+  };
+
+  const undo = async () => {
+    if (!undoContent) return;
+    const prev = undoContent;
+    setUndoContent(null);
+    setNote(n => ({ ...n, content: prev, title: prev.title, summary: prev.summary }));
+    setReviseMsg({ kind: 'ok', text: 'Change undone.' });
+    await fetch(`/api/w/notes/${note.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: prev }) });
   };
 
   return (
@@ -253,6 +284,46 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
           </div>
         )}
       </article>
+
+      {note.status === 'completed' && c && !editing && (
+        <section className="mt-4 rounded-2xl border border-violet-200 bg-white p-4 shadow-sm print:hidden">
+          <label htmlFor="revise" className="flex items-center gap-1.5 text-sm font-medium text-slate-800">
+            <Sparkles className="h-4 w-4 text-violet-600" /> Add details or ask for changes
+          </label>
+          <textarea
+            id="revise"
+            value={request}
+            onChange={e => setRequest(e.target.value)}
+            onKeyDown={e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') revise(); }}
+            disabled={revising}
+            placeholder="e.g. 'Also, Sarah confirmed the pump for 7am Thursday' or 'Dave owns the handrail fix' or 'Make the action items shorter'"
+            className="mt-2 min-h-[72px] w-full resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm leading-relaxed outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100 disabled:bg-slate-50"
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap gap-1.5">
+              {['Make it shorter', 'Make it more formal', 'Fix spelling and grammar'].map(s => (
+                <button key={s} onClick={() => revise(s)} disabled={revising}
+                  className="rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-600 transition hover:border-violet-300 hover:text-violet-800 disabled:opacity-50">
+                  {s}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => revise()} disabled={!request.trim() || revising}
+              className="flex h-9 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.98] disabled:opacity-50">
+              {revising ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {revising ? 'Updating…' : 'Update note'}
+            </button>
+          </div>
+          {reviseMsg && (
+            <p className={cn('mt-2 flex items-center gap-2 text-sm', reviseMsg.kind === 'ok' ? 'text-emerald-700' : 'text-rose-700')}>
+              {reviseMsg.text}
+              {reviseMsg.kind === 'ok' && undoContent && (
+                <button onClick={undo} className="flex items-center gap-1 font-medium text-violet-700 hover:underline"><Undo2 className="h-3.5 w-3.5" /> Undo</button>
+              )}
+            </p>
+          )}
+        </section>
+      )}
     </div>
   );
 }

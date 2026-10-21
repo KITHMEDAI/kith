@@ -1,0 +1,1474 @@
+[
+  {
+    "id": "construction_site_walk",
+    "area": "recording",
+    "pass": false,
+    "scores": {
+      "faithfulness": 4,
+      "coverage": 5,
+      "speaker_attribution": 3,
+      "stt_robustness": 4
+    },
+    "issues": [
+      "[STT] The STT transcript merged Speaker A's line ('Good. I noticed the edge protection on the north side is missing two panels near the hoist.') into Speaker B's turn, causing a diarization error. The note does not reproduce this as a Speaker B statement, so no faithfulness damage, but the attribution ambiguity persists.",
+      "[STT] 'bathroom set downs' was transcribed as 'bathroom shutdowns'; the note repeats 'bathroom shutdowns' throughout (e.g., 'bathroom shutdowns' in site areas, defects, flags, and action items). This is a wrong term derived from a mis-transcription — the correct term from the script is 'set downs'.",
+      "[MODEL] Speaker A is identified in the 'Missing information' section as having an unknown name, yet all instructions attributed to 'Priya' are correct. However, the note never names Speaker A as Mark (the site manager), which is acceptable since the name was not spoken in the transcript. No error here, noted for completeness.",
+      "[MODEL] The note attributes the instruction to reinstate edge protection and erect barricade to 'Priya', which is correct per the script (Priya commits to doing it). However, the script shows Mark gave the instruction ('Please do… Put a barricade…') and Priya accepted — the note's action-item framing correctly assigns ownership to Priya, so this is acceptable.",
+      "[MODEL] 'Missing information' flags that Speaker A's identity is unknown, which is reasonable given the transcript, but the note could have inferred the site manager role from context. This is a minor omission, not an error."
+    ],
+    "ms": 22543,
+    "output": {
+      "wer": 0.020100502512562814,
+      "sub": 3,
+      "del": 1,
+      "ins": 0,
+      "refWords": 199,
+      "speakerAcc": 0.9128205128205128,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "reo→rio",
+        "pencilled→penciled",
+        "-set",
+        "downs→shutdowns"
+      ],
+      "transcript": "Speaker A: Morning, Priya. Let's start on Level 2. How are the steel fixers going with the slab?\nSpeaker B: They finished the rio yesterday afternoon. The engineer, Tom Nguyen, is booked to inspect at eight tomorrow morning. Good. I noticed the edge protection on the north side is missing two panels near the hoist.\nSpeaker B: Yes. I saw that too. Scaffold crew pulled them out to land the formwork. I'll get them back in before lunch today.\nSpeaker A: Please do. Nobody goes past the hoist until it's fixed. Put a barricade and a sign up now.\nSpeaker B: Will do. Also, the concrete pour for Level two is penciled for Thursday, but the forecast says 30 millimeters of rain.\nSpeaker A: Then we push it to Friday. Can you call Boral and move the pump booking?\nSpeaker B: Sure.\nSpeaker B: One more thing, the plumber hasn't finished the penetrations in the bathroom shutdowns.\nSpeaker A: That has to be done before the engineer's inspection. Ring Dave from Coastal Plumbing and tell him we need it finished by close of business today.\nSpeaker B: Okay. And there's a defect in the stair void. The formwork is about 15 millimeters out of level.\nSpeaker A: Photograph it and send it to the formwork foreman. I want it corrected before the inspection as well.",
+      "note": {
+        "title": "Level 2 Slab Inspection – 21 October 2026",
+        "summary": "Site walkthrough conducted on Level 2 on 21 October 2026. Steel fixing is complete and engineer inspection is booked for tomorrow morning. Several issues require resolution before that inspection, including missing edge protection at the hoist, incomplete plumbing penetrations, and an out-of-level formwork defect in the stair void.",
+        "sections": [
+          {
+            "heading": "Site & areas inspected",
+            "points": [
+              "Level 2 slab area inspected, including north side hoist zone, bathroom shutdowns, and stair void."
+            ]
+          },
+          {
+            "heading": "Progress observed",
+            "points": [
+              "Steel fixers completed reinforcement (reo) on Level 2 slab yesterday afternoon.",
+              "Engineer Tom Nguyen booked to inspect Level 2 slab at 8:00 am tomorrow (22 October 2026).",
+              "Level 2 concrete pour pencilled for Thursday; rescheduled to Friday due to 30 mm rain forecast."
+            ]
+          },
+          {
+            "heading": "Defects / issues",
+            "points": [
+              "Level 2 – north side hoist zone: two edge protection panels missing; scaffold crew removed them to land formwork.",
+              "Level 2 – bathroom shutdowns: plumber (Coastal Plumbing) has not completed slab penetrations; must be done before engineer inspection.",
+              "Level 2 – stair void: formwork approximately 15 mm out of level; requires photographic record and correction before inspection."
+            ]
+          },
+          {
+            "heading": "Safety observations",
+            "points": [
+              "Level 2 – north side hoist: two edge protection panels missing, creating an open-edge fall hazard.",
+              "Instruction given: barricade and signage to be erected immediately; no personnel to pass the hoist until panels are reinstated."
+            ]
+          },
+          {
+            "heading": "Instructions given",
+            "points": [
+              "Priya to reinstate missing edge protection panels on north side hoist before lunch today and erect barricade and sign immediately.",
+              "Priya to contact Boral to move concrete pump booking from Thursday to Friday.",
+              "Priya to contact Dave at Coastal Plumbing and require penetrations completed by close of business today.",
+              "Priya to photograph stair void formwork defect and send to formwork foreman for correction before engineer inspection."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Erect barricade and signage at north side hoist immediately – no personnel past hoist until edge protection reinstated.",
+            "owner": "Priya",
+            "due": "Immediately – 21 October 2026"
+          },
+          {
+            "task": "Reinstate two missing edge protection panels at north side hoist, Level 2.",
+            "owner": "Priya (scaffold crew)",
+            "due": "Before lunch – 21 October 2026"
+          },
+          {
+            "task": "Call Dave at Coastal Plumbing to have bathroom slab penetrations completed by close of business.",
+            "owner": "Priya",
+            "due": "COB – 21 October 2026"
+          },
+          {
+            "task": "Photograph stair void formwork defect (15 mm out of level) and send to formwork foreman for correction.",
+            "owner": "Priya",
+            "due": "Before engineer inspection – 22 October 2026"
+          },
+          {
+            "task": "Contact Boral to move Level 2 concrete pump booking from Thursday to Friday.",
+            "owner": "Priya",
+            "due": "21 October 2026"
+          }
+        ],
+        "decisions": [
+          "Level 2 concrete pour rescheduled from Thursday to Friday due to 30 mm rain forecast.",
+          "No personnel permitted past the north side hoist until missing edge protection panels are reinstated."
+        ],
+        "follow_ups": [
+          "Confirm engineer Tom Nguyen inspection proceeds at 8:00 am on 22 October 2026 once all pre-inspection defects are resolved.",
+          "Confirm Boral pump booking successfully moved to Friday.",
+          "Verify formwork foreman has corrected stair void level defect before inspection."
+        ],
+        "flags": [
+          {
+            "level": "urgent",
+            "text": "Level 2 – north side hoist: two edge protection panels removed by scaffold crew, creating open-edge fall hazard. Barricade and signage ordered immediately; panels to be reinstated before lunch. Responsible area: Priya / scaffold crew. Check WHS compliance and confirm close-out."
+          },
+          {
+            "level": "attention",
+            "text": "Level 2 – stair void: formwork reported ~15 mm out of level. Requires correction and sign-off before engineer inspection on 22 October 2026."
+          },
+          {
+            "level": "attention",
+            "text": "Level 2 – bathroom shutdowns: plumbing penetrations incomplete ahead of engineer inspection. Coastal Plumbing (Dave) required to complete by COB today."
+          }
+        ],
+        "missing_info": [
+          "Identity and role of Speaker A (inspector/site manager name not stated).",
+          "Confirmation of Friday concrete pour date and whether Boral booking was successfully moved.",
+          "Name or company of the scaffold crew responsible for removing edge protection panels.",
+          "Whether a formal WHS incident or near-miss report is required for the missing edge protection."
+        ],
+        "tags": [
+          "level 2 slab",
+          "edge protection",
+          "concrete pour",
+          "formwork defect",
+          "whs"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 5,
+          "coverage": 5,
+          "speaker_attribution": 4
+        },
+        "issues": [
+          "[MODEL] Speaker attribution for 'Photograph stair void formwork defect and send to formwork foreman' is assigned to Priya in the action items, but in the script this instruction was given by Speaker A (Mark) to the group — and it is not explicitly stated who will take the photograph; the script does not assign it to Priya specifically.",
+          "[MODEL] The 'Missing information' section notes 'assumed next day after Thursday but not explicitly stated' regarding the Friday date — this is a minor self-inconsistency since the note correctly records Friday as the rescheduled date, matching the script, and no assumption was required.",
+          "[MODEL] 'WHS non-compliance — check whether incident reporting obligations apply' in the Flags section is an inference/addition not supported by anything in the script; however, this is flagged as a speculative note rather than a stated fact, so it is marginal rather than a clear hallucination."
+        ],
+        "pass": true
+      },
+      "judgeNotes": "The note is comprehensive and well-structured, but the STT mis-transcription of 'set downs' as 'shutdowns' propagates throughout as a repeated factual error; all other content is faithful and coverage is excellent."
+    }
+  },
+  {
+    "id": "pharma_hcp_call",
+    "area": "recording",
+    "pass": false,
+    "scores": {
+      "faithfulness": 3,
+      "coverage": 4,
+      "speaker_attribution": 3,
+      "stt_robustness": 3
+    },
+    "issues": [
+      "[STT] 'Paramedic clinic' in the note: the STT transcript garbled 'Parramatta clinic' as 'Paramedic clinic'; the note reproduces this error as fact in multiple places ('Rep to send calendar invite for the asthma guidelines lunch education session on 12 November at the Paramedic clinic', 'Send calendar invite to Dr Carter for asthma guidelines lunch education session on 12 November at the Paramedic clinic'). The correct venue is Parramatta clinic.",
+      "[MODEL] 'Dr Carter to complete and email the adverse event report form today' is wrong on two counts: (1) the script says the rep will email the form to Dr Carter (not that Dr Carter emails it); (2) Dr Carter said she would 'send the details through the form', not email a completed form. The note inverts who sends the form to whom and adds 'email' without basis.",
+      "[MODEL] 'Collect completed adverse event form from Dr Carter. (Speaker A (rep)), due 21 October 2026' — the script does not say the rep collects the form; Dr Carter said she would send the details through the form. This action item is an invention.",
+      "[STT] Diarization error: the STT merges Dr Carter's adverse event report speech with Speaker A's lines, causing the note to treat the adverse event disclosure as if it might be ambiguous. The note does not flag this diarization confusion explicitly but also does not misattribute the adverse event itself — partial credit.",
+      "[STT] Diarization error: the STT merges Speaker B's lines to include 'I'll email you the adverse event form today. Would you like more patient leaflets…' and 'Yes, maybe 50 copies. And I'd like to know…', collapsing both speakers into one turn. The note does not flag this confusion, silently assigning the leaflet request and education session request to Dr Carter (correct per script), but also silently assigning 'I'll email you the adverse event form today' — which belongs to the rep — to the same block. The note's action item 'Rep to deliver 50 patient leaflets' is correct, but the failure to flag or resolve the diarization error is a robustness shortcoming.",
+      "[MODEL] The note states 'started two weeks ago' (correct per script) in the Flags section but elsewhere says 'approximately two weeks prior to this call' — this is consistent and acceptable. No error here, but the note also says the patient 'started it last week' is absent — the script says 'after starting it last week' (referring to when headache/palpitations began), while 'started two weeks ago' refers to when the inhaler was initiated. The note conflates these two timelines in the Flags section by only referencing 'two weeks prior', omitting that the adverse symptoms began last week."
+    ],
+    "ms": 21120,
+    "output": {
+      "wer": 0.0196078431372549,
+      "sub": 3,
+      "del": 1,
+      "ins": 0,
+      "refWords": 204,
+      "speakerAcc": 0.74,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "-twelfth",
+        "of→november",
+        "november→twelve",
+        "parramatta→paramedic"
+      ],
+      "transcript": "Speaker A: Thanks for seeing me, Doctor Carter. I wanted to follow-up on the patient support program for our asthma inhaler.\nSpeaker B: Happy to chat for ten minutes. I've enrolled three patients so far and the feedback has been positive.\nSpeaker A: That's great to hear. Have any of them had trouble with the device technique?\nSpeaker A: One elderly patient struggled with the dose counter. Actually, she mentioned she had a bad headache and palpitations after starting it last week. Thanks for telling me. I'm required to report that to our pharmacovigilance team within one business day. Can I take a few details?\nSpeaker B: Sure. She's in her seventies, started two weeks ago, and the palpitations settled after three days. I'll send the details through the form.\nSpeaker B: I'll email you the adverse event form today. Would you like more patient leaflets for the waiting room? Yes, maybe 50 copies. And I'd like to know if there's a lunch education session about the new asthma guidelines.\nSpeaker A: There's one on the November 12 at the Paramedic clinic. I'll send an invite.\nSpeaker A: Good. Also, what dose would you recommend for a 12 year old? I can't advise on off label dosing, but I can arrange for our medical information team to send you the product information.",
+      "note": {
+        "title": "Dr Carter Asthma Inhaler PSP Follow-Up – 21 Oct 2026",
+        "summary": "Visit to Dr Carter to follow up on the patient support programme (PSP) for the asthma inhaler. Dr Carter has enrolled three patients with positive feedback, though one elderly patient reported headache and palpitations after starting the inhaler. Two compliance matters require urgent action: pharmacovigilance reporting of the adverse event and a medical information referral for an off-label dosing question.",
+        "sections": [
+          {
+            "heading": "HCP & setting",
+            "points": [
+              "HCP: Dr Carter.",
+              "Call date: 21 October 2026; ten-minute in-clinic visit."
+            ]
+          },
+          {
+            "heading": "Products / topics discussed",
+            "points": [
+              "Asthma inhaler (product name not stated) — patient support programme enrolment and device technique.",
+              "New asthma guidelines — education session discussed.",
+              "Three patients enrolled in PSP to date; HCP reports positive patient feedback overall.",
+              "One elderly patient (seventies) had difficulty with the dose counter on the device."
+            ]
+          },
+          {
+            "heading": "HCP questions & objections",
+            "points": [
+              "Asked about dosing for a 12-year-old patient — rep declined to advise and offered to refer to the medical information team.",
+              "Requested information on an upcoming asthma guidelines education session.",
+              "Noted one elderly patient experienced headache and palpitations after starting the inhaler; palpitations resolved after three days."
+            ]
+          },
+          {
+            "heading": "Materials / samples provided",
+            "points": [
+              "Dr Carter requested 50 copies of patient leaflets for the waiting room — to be provided."
+            ]
+          },
+          {
+            "heading": "Agreed next steps",
+            "points": [
+              "Dr Carter to complete and email the adverse event report form today.",
+              "Rep to send calendar invite for the asthma guidelines lunch education session on 12 November at the Paramedic clinic.",
+              "Rep to arrange medical information team response regarding dosing query for 12-year-old patient.",
+              "Rep to deliver 50 patient leaflets to the practice."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Report adverse event (headache and palpitations in elderly patient) to pharmacovigilance team — within one business day of 21 October 2026.",
+            "owner": "Speaker A (rep)",
+            "due": "22 October 2026"
+          },
+          {
+            "task": "Collect completed adverse event form from Dr Carter.",
+            "owner": "Speaker A (rep)",
+            "due": "21 October 2026"
+          },
+          {
+            "task": "Send calendar invite to Dr Carter for asthma guidelines lunch education session on 12 November at the Paramedic clinic.",
+            "owner": "Speaker A (rep)",
+            "due": null
+          },
+          {
+            "task": "Arrange for medical information team to send product information to Dr Carter regarding dosing in a 12-year-old patient.",
+            "owner": "Speaker A (rep)",
+            "due": null
+          },
+          {
+            "task": "Deliver 50 patient leaflets to Dr Carter's practice for the waiting room.",
+            "owner": "Speaker A (rep)",
+            "due": null
+          }
+        ],
+        "decisions": [
+          "Rep will not provide off-label dosing advice; medical information team to respond formally instead."
+        ],
+        "follow_ups": [
+          "Confirm Dr Carter has submitted the adverse event form and that pharmacovigilance team has received it.",
+          "Check whether medical information team response on 12-year-old dosing has been sent to Dr Carter.",
+          "Follow up on patient leaflet delivery and whether additional PSP enrolments are planned."
+        ],
+        "flags": [
+          {
+            "level": "urgent",
+            "text": "Adverse event reported: elderly patient (seventies) experienced headache and palpitations after starting the asthma inhaler approximately two weeks prior to this call; palpitations reportedly resolved after three days. Rep stated a one-business-day pharmacovigilance reporting obligation. Causality not assessed here — requires pharmacovigilance team review immediately. Confirm adverse event form receipt from Dr Carter."
+          },
+          {
+            "level": "attention",
+            "text": "Off-label dosing question raised: Dr Carter asked about the appropriate dose for a 12-year-old patient. Rep appropriately declined to advise. Medical information team referral initiated — compliance and medical affairs should ensure a formal, documented response is provided."
+          }
+        ],
+        "missing_info": [
+          "Full product name and formulation of the asthma inhaler discussed.",
+          "Patient identifiers or reference number for the adverse event report (headache/palpitations case).",
+          "Whether the adverse event had already been reported to Dr Carter's clinic or any other party prior to this call.",
+          "Name of the clinic or practice where Dr Carter is based.",
+          "Rep's full name and territory/employee ID for pharmacovigilance record-keeping."
+        ],
+        "tags": [
+          "hcp call",
+          "asthma",
+          "adverse event",
+          "patient support programme",
+          "off-label query"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 5,
+          "coverage": 5,
+          "speaker_attribution": 5
+        },
+        "issues": [],
+        "pass": true
+      },
+      "judgeNotes": "The note's most significant errors are reproducing the STT hallucination 'Paramedic clinic' instead of 'Parramatta clinic' as a stated fact, and incorrectly inverting who sends the adverse event form; speaker attribution suffers from the STT diarization collapse that the note does not flag."
+    }
+  },
+  {
+    "id": "ndis_shift_handover",
+    "area": "recording",
+    "pass": true,
+    "scores": {
+      "faithfulness": 4,
+      "coverage": 5,
+      "speaker_attribution": 4,
+      "stt_robustness": 4
+    },
+    "issues": [
+      "[STT] The STT transcript rendered '610 bus' as 'six and ten bus'; the note writes '6:10 bus' — this is a plausible correction (610 as a route number vs 6:10 as a time) but the note presents it as '6:10' (a time format) rather than '610' (a route number). The script says '610 bus', so the note's '6:10' subtly misrepresents the route number as a time, though the meaning is close enough not to constitute a clear factual error.",
+      "[STT] Diarization collapses Liam and Grace into mostly Speaker A, causing the 'Did you write an incident report?' line to be attributed to Speaker A (Liam) in the transcript, when it was Grace who asked. The note correctly attributes the question to Grace implicitly, but the 'Missing information' section says 'Identity and role of the person who logged the bathroom fall (assumed Liam, but not explicitly confirmed)' — the script explicitly confirms Liam logged it, so flagging this as uncertain is a minor unnecessary hedge, not an error per se.",
+      "[MODEL] The note states 'Ben is reported to be in good spirits overall' — this is not stated anywhere in the script. Liam describes the morning as 'pretty good' but does not make any statement about Ben's emotional state being positive overall. This is a minor inference presented as a reported fact.",
+      "[MODEL] The 'Flags' section references the 'NDIS Commission framework' and a '24-hour reportable incident' rule — this is information not present in the script and is an added model inference/external knowledge. While potentially useful, it is not grounded in the provided content.",
+      "[STT] Speaker attribution in the STT transcript is significantly garbled (Grace's lines are often merged into Speaker A), but the note correctly reconstructs most attributions from context, mitigating the impact."
+    ],
+    "ms": 27666,
+    "output": {
+      "wer": 0.015625,
+      "sub": 2,
+      "del": 1,
+      "ins": 0,
+      "refWords": 192,
+      "speakerAcc": 0.8835978835978836,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "centre→center",
+        "-hundred",
+        "mum→mom"
+      ],
+      "transcript": "Speaker A: Hi, Grace. Quick handover for Ben before I head off. Thanks, Liam. How was the morning?\nSpeaker A: Pretty good. We went to the shopping center, and Ben paid for his own lunch using his card, which is one of his goals.\nSpeaker A: That's great progress. Did he manage the bus as well? Yes, he caught the six and ten bus with only one prompt. He got a bit anxious when the bus was late, but he used his breathing exercise.\nSpeaker B: Okay. Any medication issues?\nSpeaker A: He had his morning meds at eight. His mom called and said the evening dose of his epilepsy medication has changed, but I haven't seen a new chart yet.\nSpeaker B: So, I shouldn't give the new dose until the chart is updated?\nSpeaker A: Correct. Please call the coordinator, Michelle, before six tonight to confirm. Also, he had a small fall in the bathroom around eleven. No injury, but I logged it. Did you write an incident report?\nSpeaker A: Not yet. Can you remind me tomorrow? I'll do it first thing.\nSpeaker B: Sure. Anything for dinner?\nSpeaker A: He wants to cook pasta tonight. He's working on his cooking skills, so let him lead with supervision near the stove.",
+      "note": {
+        "title": "Ben – Morning Shift Handover, 21 October 2026",
+        "summary": "Liam handed over to Grace following a morning shift with Ben. Ben successfully used public transport and paid for his own lunch independently, showing progress toward community participation goals. A bathroom fall and an unconfirmed medication change require prompt follow-up.",
+        "sections": [
+          {
+            "heading": "Supports provided",
+            "points": [
+              "Accompanied Ben to the shopping centre for a community outing.",
+              "Supported Ben to catch the 6:10 bus with one verbal prompt.",
+              "Administered morning medications at 08:00.",
+              "Supervised Ben in the community, including lunch purchase."
+            ]
+          },
+          {
+            "heading": "Participant's response & wellbeing",
+            "points": [
+              "Ben paid for his own lunch independently using his card – positive engagement.",
+              "Became anxious when the bus was late; self-managed by using his breathing exercise.",
+              "Sustained a small fall in the bathroom at approximately 11:00; no injury reported.",
+              "Ben has expressed interest in cooking pasta for dinner tonight.",
+              "Ben is reported to be in good spirits overall."
+            ]
+          },
+          {
+            "heading": "Progress towards goals",
+            "points": [
+              "Independent payment at lunch links to Ben's stated goal of managing his own finances/community participation.",
+              "Catching the bus with one prompt links to Ben's stated goal of independent community travel.",
+              "Cooking dinner with support (leading with supervision near stove) links to Ben's stated goal of developing cooking skills."
+            ]
+          },
+          {
+            "heading": "Concerns / changes noticed",
+            "points": [
+              "Ben's mother advised his evening epilepsy medication dose has changed; no updated medication chart has been sighted.",
+              "Evening dose must not be administered until the updated chart is received and confirmed with coordinator Michelle.",
+              "Incident report for the bathroom fall has not yet been completed by Liam."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Call coordinator Michelle to confirm updated epilepsy medication chart before administering evening dose.",
+            "owner": "Grace",
+            "due": "Before 18:00, 21 October 2026"
+          },
+          {
+            "task": "Complete incident report for Ben's bathroom fall at approximately 11:00.",
+            "owner": "Liam",
+            "due": "First thing, 22 October 2026"
+          },
+          {
+            "task": "Supervise Ben to lead cooking of pasta dinner; maintain supervision near stove.",
+            "owner": "Grace",
+            "due": "This evening, 21 October 2026"
+          }
+        ],
+        "decisions": [
+          "Evening epilepsy medication dose is not to be given until an updated medication chart is sighted and confirmed with the coordinator."
+        ],
+        "follow_ups": [
+          "Confirm receipt of updated epilepsy medication chart from prescriber or pharmacy.",
+          "Verify incident report for bathroom fall is submitted and filed.",
+          "Monitor Ben's anxiety around public transport delays and note any patterns."
+        ],
+        "flags": [
+          {
+            "level": "urgent",
+            "text": "Bathroom fall at approximately 11:00 – no injury reported, but an incident report has not yet been completed. Supervisor should confirm whether this meets the threshold for a reportable incident under the NDIS Commission framework (generally reportable within 24 hours). Liam to complete report first thing 22 October 2026."
+          },
+          {
+            "level": "urgent",
+            "text": "Epilepsy medication dose change communicated verbally by participant's mother; no updated medication chart sighted. Administering an unverified dose change poses a medication safety risk. Coordinator Michelle must be contacted before 18:00 to confirm and provide updated chart before any evening dose is given."
+          }
+        ],
+        "missing_info": [
+          "Details of the updated epilepsy medication (new dose, medication name, prescribing doctor) not documented.",
+          "Outcome of the logged bathroom fall entry – location of the log and whether a supervisor was notified at the time.",
+          "Ben's full NDIS plan goals are not listed; goal links rely only on what was mentioned in the handover.",
+          "Identity and role of the person who logged the bathroom fall (assumed Liam, but not explicitly confirmed)."
+        ],
+        "tags": [
+          "shift note",
+          "community access",
+          "medication safety",
+          "incident",
+          "independent living skills"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 3,
+          "coverage": 5,
+          "speaker_attribution": 4
+        },
+        "issues": [
+          "[MODEL] The note states the fall was 'logged by Liam' and attributes the logging to him specifically — the script says 'I logged it' (Speaker A / Liam), which is correct, but the Flags section says 'Supervisor should confirm whether this meets the threshold for a reportable incident under the NDIS Commission framework (report generally due within 24 hours of the incident)' — the 24-hour NDIS reportable incident rule is not mentioned anywhere in the script and is an invented regulatory claim, constituting a hallucination.",
+          "[MODEL] The note states Ben paid for lunch using a card linked to 'a stated NDIS plan goal' — the script says only 'one of his goals', not specifically an NDIS plan goal. The specific characterisation as 'NDIS' is an addition not supported by the transcript.",
+          "[MODEL] Speaker attribution: The note correctly identifies Liam as Speaker A and Grace as Speaker B (names were spoken in the transcript), but the introductory summary says 'Liam provided morning supports' — while correct, the note does not clearly flag that in the raw transcript only 'Speaker A/B' labels were given; however, since names were actually spoken in the transcript ('Hi Grace', 'Thanks Liam'), this attribution is valid and not an error.",
+          "[MODEL] 'No injury was reported or observed' — the script says 'no injury', not 'no injury was observed.' Adding 'observed' implies direct observation by Liam; the script does not specify this. Minor invention.",
+          "[MODEL] 'Confirm receipt of updated medication chart from prescriber or pharmacy via coordinator Michelle' — the script says only to call Michelle to confirm; 'from prescriber or pharmacy' is invented detail not in the script."
+        ],
+        "pass": false
+      },
+      "judgeNotes": "The note is thorough and well-structured with strong coverage and mostly correct attribution; minor issues include one soft hallucination ('good spirits'), an unsupported regulatory reference, and the 610 route number rendered in time format."
+    }
+  },
+  {
+    "id": "council_meeting",
+    "area": "recording",
+    "pass": true,
+    "scores": {
+      "faithfulness": 5,
+      "coverage": 5,
+      "speaker_attribution": 4,
+      "stt_robustness": 5
+    },
+    "issues": [
+      "[MODEL] Speaker attribution is incomplete: the script identifies Speaker A as 'Chair (Councillor Patel)' and Speaker B as 'Director of Works (Sandra Lee)', but in the STT transcript their names were never spoken, so the note correctly uses Speaker A/B labels — this is acceptable per the rubric, not a true error, but their functional roles ('Chair' and 'Officer presenting items') could be more precisely described (e.g., Director of Works vs generic 'Officer').",
+      "[STT] The STT diarization incorrectly assigns 'Next item. Residents on Hill Road...' and 'How many complaints?' to Speaker A (Chair/Councillor Patel), when in the script the Hill Road item is introduced by Speaker B (Sandra Lee) and the question is from the Chair. The note correctly places the Hill Road complaint introduction under the agenda without misattributing it to the wrong speaker as a decision-maker, so no material harm resulted."
+    ],
+    "ms": 19667,
+    "output": {
+      "wer": 0.04891304347826087,
+      "sub": 6,
+      "del": 1,
+      "ins": 2,
+      "refWords": 184,
+      "speakerAcc": 0.9209039548022598,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "councillor→counselor",
+        "+green",
+        "greenline→line",
+        "+green",
+        "greenline→line",
+        "favour→favor",
+        "-thirtieth",
+        "of→november",
+        "november→thirty"
+      ],
+      "transcript": "Speaker A: Let's open the infrastructure committee meeting. Apologies from counselor Brooks. First item is the Smith Street footpath upgrade.\nSpeaker B: The tender closed last Friday. We received four submissions. The recommended contractor is Green Line Civil at $380,000.\nSpeaker A: That's above the budget of 350,000.\nSpeaker A: Where does the difference come from?\nSpeaker B: Mostly, the drainage works. We could defer the eastern section to next financial year to stay within budget.\nSpeaker A: I'd prefer we do the full length now. Can we fund the gap from the roads reserve?\nSpeaker B: Finance says there's about 60,000 available in the reserve.\nSpeaker A: Then I'll move that we award the contract to Green Line Civil and fund the gap from the roads reserve. All in favor? That's carried. Five to one. Next item. Residents on Hill Road have complained about speeding near the primary school. How many complaints?\nSpeaker B: 12 since August. We'd like to install temporary speed counters for two weeks.\nSpeaker A: Agreed. Please report the results back at the December meeting. Anything else?\nSpeaker B: Just a reminder that the community consultation on the skate park closes on the November 30.",
+      "note": {
+        "title": "Infrastructure Committee Meeting – 21 October 2026",
+        "summary": "The Infrastructure Committee met on 21 October 2026 to consider a footpath upgrade tender, a speeding complaint on Hill Road, and a community consultation reminder. The contract for the Smith Street footpath upgrade was awarded to Green Line Civil at $380,000, with the $30,000 budget shortfall to be funded from the roads reserve. A traffic speed count on Hill Road near the primary school was approved, with results to be reported at the December meeting.",
+        "sections": [
+          {
+            "heading": "Attendees",
+            "points": [
+              "Speaker A – Chair (presiding).",
+              "Speaker B – Officer presenting items.",
+              "Councillor Brooks – Apology noted."
+            ]
+          },
+          {
+            "heading": "Agenda items discussed",
+            "points": [
+              "Smith Street Footpath Upgrade – Tender closed the previous Friday; four submissions received. Recommended contractor: Green Line Civil at $380,000.",
+              "Budget of $350,000 exceeded by $30,000; overage attributed primarily to drainage works.",
+              "Option to defer the eastern section to the next financial year was raised but not preferred by the Chair.",
+              "Finance confirmed approximately $60,000 available in the roads reserve to cover the shortfall.",
+              "Contract award motion moved by the Chair; carried five to one.",
+              "Hill Road Speeding – 12 complaints received from residents near the primary school since August.",
+              "Temporary speed counters proposed for a two-week installation period; approved by the Chair.",
+              "Speed counter results to be reported at the December committee meeting.",
+              "Skate Park Community Consultation – Reminder noted that consultation closes 30 November 2026."
+            ]
+          },
+          {
+            "heading": "Risks & issues",
+            "points": [
+              "Contract value ($380,000) exceeds approved project budget ($350,000) by $30,000; funding gap to be drawn from roads reserve.",
+              "Volume of speeding complaints near a primary school (12 since August) indicates an ongoing road safety concern pending data collection."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Execute contract with Green Line Civil for Smith Street footpath upgrade at $380,000; process roads reserve funding allocation for $30,000 shortfall.",
+            "owner": null,
+            "due": null
+          },
+          {
+            "task": "Install temporary speed counters on Hill Road near the primary school for a two-week period.",
+            "owner": null,
+            "due": null
+          },
+          {
+            "task": "Report speed counter results to the Infrastructure Committee.",
+            "owner": null,
+            "due": "December 2026 committee meeting"
+          },
+          {
+            "task": "Close and collate community consultation on the skate park.",
+            "owner": null,
+            "due": "30 November 2026"
+          }
+        ],
+        "decisions": [
+          "Contract for Smith Street footpath upgrade awarded to Green Line Civil at $380,000 (carried five to one).",
+          "Budget shortfall of $30,000 to be funded from the roads reserve.",
+          "Temporary speed counters approved for installation on Hill Road near the primary school for two weeks."
+        ],
+        "follow_ups": [
+          "Speed counter data on Hill Road to be presented at the December infrastructure committee meeting.",
+          "Outcome of skate park community consultation (closing 30 November 2026) to be reported to committee."
+        ],
+        "flags": [
+          {
+            "level": "attention",
+            "text": "Contract award ($380,000) exceeds the approved project budget ($350,000). Supervisor should confirm that drawing $30,000 from the roads reserve is within delegated authority and complies with council's procurement and budget variation policies."
+          },
+          {
+            "level": "attention",
+            "text": "Twelve speeding complaints near a primary school since August — responsible officer should check whether any incidents or near-misses have been reported and whether a formal road safety referral is required."
+          }
+        ],
+        "missing_info": [
+          "Full names, titles, and roles of Speaker A and Speaker B not stated.",
+          "Names of the five councillors who voted in favour and the one who voted against the contract award not recorded.",
+          "Delegated authority limit for the Chair or committee to approve expenditure above the approved project budget not referenced.",
+          "Responsible officer or team assigned to the Hill Road speed count and skate park consultation not identified."
+        ],
+        "tags": [
+          "infrastructure committee",
+          "tender award",
+          "road safety",
+          "footpath upgrade",
+          "community consultation"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 3,
+          "coverage": 5,
+          "speaker_attribution": 5
+        },
+        "issues": [
+          "[MODEL] The note repeatedly states the shortfall is '$30,000' (e.g., 'funding a $30,000 budget shortfall', 'fund the $30,000 shortfall', 'roads reserve funding transfer of $30,000'). The script states the budget is $350,000 and the contract is $380,000, making the gap $30,000 — this arithmetic is correct. However, the script states Finance confirmed 'about sixty thousand available in the reserve' to cover the gap, implying the gap was understood as needing up to $60,000 or that the reserve had $60k available. The gap itself is $30,000 which is arithmetically correct, so this is not an error per se.",
+          "[MODEL] The 'Flags' and 'Missing information' sections include the invented assertion that 'Responsible officer should confirm the roads reserve drawdown and contract award are within the delegated authority limits applicable to this committee before execution' and 'Confirmation that the roads reserve drawdown falls within the committee's financial delegation has not been recorded.' No mention of financial delegation or delegated authority appears anywhere in the transcript or script. This is an invented procedural concern presented as a factual flag, constituting a hallucination.",
+          "[MODEL] The 'Flags' section states 'Supervisor should review whether an interim safety measure or notification to the relevant road authority is required pending counter data.' No mention of notifying a road authority or any interim safety measure appears in the script. This is an invented recommendation presented as a factual follow-up, constituting a hallucination."
+        ],
+        "pass": false
+      },
+      "judgeNotes": "The note is highly accurate and comprehensive; all figures, decisions, and risks are correctly captured; the STT transcript had no material factual distortions that leaked into the note; speaker-role labelling is appropriately cautious given names were not spoken."
+    }
+  },
+  {
+    "id": "sales_call",
+    "area": "recording",
+    "pass": true,
+    "scores": {
+      "faithfulness": 4,
+      "coverage": 5,
+      "speaker_attribution": 4,
+      "stt_robustness": 4
+    },
+    "issues": [
+      "[MODEL] 'Client contact: Natalie (role not stated)' — Natalie's role as ops manager was not spoken aloud in the transcript, so this is acceptable as 'not stated', but the note misses that Speaker A is the account exec (Chris), which is also not spoken — minor omission rather than error.",
+      "[STT] The transcript garbles the budget line, attributing 'Our budget is closer to 10,000' to Speaker A (Chris) rather than Speaker B (Natalie). The note correctly attributes the $10,000 budget to Natalie, silently correcting this diarization error — this is good STT robustness, but worth flagging as a diarization issue the model navigated correctly.",
+      "[STT] The transcript merges Speaker A's last two utterances into one, attributing 'Tuesday at two works' (Natalie's line) to Speaker A. The note correctly treats the demo as mutually agreed rather than one-sided, avoiding a speaker attribution error — again corrected silently.",
+      "[MODEL] 'Natalie's role not stated' — in the transcript the role is indeed not spoken, so listing it as unknown is technically correct, but it slightly undersells what was recoverable; not a factual error.",
+      "[MODEL] No material invented facts detected; all numbers, dates, and commitments are accurate and well-supported by the script."
+    ],
+    "ms": 24517,
+    "output": {
+      "wer": 0.027777777777777776,
+      "sub": 4,
+      "del": 0,
+      "ins": 1,
+      "refWords": 180,
+      "speakerAcc": 0.9375,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "+service",
+        "servicem8→m",
+        "we→eight",
+        "need→we",
+        "it→needed"
+      ],
+      "transcript": "Speaker A: Thanks for jumping on, Natalie. Last time, you mentioned your team loses time on dispatch scheduling.\nSpeaker B: Yes. We have 22 technicians, and the schedule lives in spreadsheets. We double book at least twice a week.\nSpeaker A: Our platform syncs with your job system and flags double bookings automatically.\nSpeaker A: What system are you on now?\nSpeaker B: Service m eight. And we needed to work offline because some of our sites have no reception.\nSpeaker A: Offline mode is on the roadmap for the first quarter next year, but it's not available today.\nSpeaker B: That's a concern. What's the pricing?\nSpeaker A: It's $49 per technician per month billed annually. For 22 technicians, that's about 13,000 a year. Our budget is closer to 10,000.\nSpeaker B: Is there any flexibility?\nSpeaker A: I can ask about a discount if you sign before the end of December. I'll come back to you by Friday.\nSpeaker B: Okay. I'll also need our IT manager, Raj, to review your security documents.\nSpeaker A: I'll send the security pack and our SOC two report today. Shall we book a demo for Raj next Tuesday at two? Tuesday at two works.",
+      "note": {
+        "title": "Natalie – Dispatch Scheduling Platform Demo Call",
+        "summary": "Natalie's team of 22 technicians is losing time to manual, spreadsheet-based dispatch scheduling with regular double-bookings. She is interested in the platform's scheduling features but has concerns about offline mode availability and price. Next steps include a pricing flexibility check, security document review by IT manager Raj, and a demo booked for Tuesday 27 October.",
+        "sections": [
+          {
+            "heading": "Who & context",
+            "points": [
+              "Client contact: Natalie (role not stated).",
+              "IT manager Raj will need to review security documents before any decision.",
+              "Follow-on call from a previous conversation where dispatch scheduling pain was first raised."
+            ]
+          },
+          {
+            "heading": "What they need",
+            "points": [
+              "Replace spreadsheet-based dispatch scheduling for 22 technicians.",
+              "Automatic double-booking detection — currently experiencing at least two double-bookings per week.",
+              "Integration with their current job system, ServiceM8.",
+              "Offline mode for sites with no mobile reception — flagged as a concern (feature not yet available).",
+              "Budget is approximately $10,000 per year; quoted price is ~$13,000 per year ($49/technician/month, billed annually)."
+            ]
+          },
+          {
+            "heading": "What we discussed",
+            "points": [
+              "Platform syncs with job systems and flags double-bookings automatically.",
+              "Offline mode is on the roadmap for Q1 next year but is not currently available.",
+              "Pricing for 22 technicians: ~$13,000/year — approximately $3,000 over Natalie's stated budget.",
+              "Possible discount if contract is signed before end of December; to be confirmed by Friday 23 October.",
+              "SOC 2 report and security pack to be sent to Natalie today for Raj's review."
+            ]
+          },
+          {
+            "heading": "Commitments made",
+            "points": [
+              "Speaker A to check on discount availability and respond by Friday 23 October 2026.",
+              "Speaker A to send security pack and SOC 2 report to Natalie today (21 October 2026).",
+              "Demo for Raj booked for Tuesday 27 October 2026 at 2:00 pm."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Check whether a discount is available for a pre-end-of-December sign; respond to Natalie with outcome.",
+            "owner": "Speaker A",
+            "due": "23 October 2026"
+          },
+          {
+            "task": "Send security pack and SOC 2 report to Natalie for Raj's review.",
+            "owner": "Speaker A",
+            "due": "21 October 2026"
+          },
+          {
+            "task": "Host platform demo with Raj (IT manager) and Natalie.",
+            "owner": "Speaker A",
+            "due": "27 October 2026 at 2:00 pm"
+          }
+        ],
+        "decisions": [
+          "Demo with IT manager Raj agreed for Tuesday 27 October 2026 at 2:00 pm.",
+          "Security documents to be sent immediately to allow Raj's review ahead of demo."
+        ],
+        "follow_ups": [
+          "Confirm discount outcome to Natalie by Friday 23 October 2026.",
+          "Confirm Raj's attendance and any specific security questions ahead of the 27 October demo.",
+          "Clarify whether offline mode timeline (Q1 next year) would meet Natalie's requirements."
+        ],
+        "flags": [
+          {
+            "level": "attention",
+            "text": "Offline mode is a stated client requirement; feature is not currently available and is only roadmap-scheduled for Q1 next year. Sales team should clarify whether this is a deal-breaker before progressing further."
+          },
+          {
+            "level": "attention",
+            "text": "Budget gap of ~$3,000/year between quoted price ($13,000) and client's budget ($10,000). Discount approval needed before Friday to maintain momentum."
+          }
+        ],
+        "missing_info": [
+          "Natalie's surname, company name, and job title not stated.",
+          "Speaker A's name and role not stated.",
+          "Whether offline mode being unavailable until Q1 next year is acceptable to Natalie, or a potential blocker.",
+          "Raj's surname and specific security/compliance requirements he will be assessing.",
+          "Decision-making process and timeline — who has final sign-off beyond Raj's technical review?"
+        ],
+        "tags": [
+          "dispatch scheduling",
+          "field service",
+          "servicem8",
+          "pricing negotiation",
+          "demo"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 3,
+          "coverage": 5,
+          "speaker_attribution": 4
+        },
+        "issues": [
+          "[MODEL] 'Offline mode is on the roadmap for Q1 next year' is correctly stated in the 'What we discussed' section, but in 'Follow-ups' and 'Flags' the note renders this as 'Q1 2027'. The call date is 21 October 2026, so Q1 next year would be Q1 2027 — this is an acceptable inference and not an error per se, but it is an addition beyond what was spoken.",
+          "[MODEL] 'Friday 23 October' — 21 October 2026 is a Wednesday, so the next Friday is 23 October 2026. This date resolution is correct.",
+          "[MODEL] 'Tuesday 27 October' — 21 October 2026 is a Wednesday, so 'next Tuesday' would be 27 October 2026. This date resolution is correct.",
+          "[MODEL] Speaker attribution: The note correctly uses 'Speaker A' and 'Speaker B' since names were not given in the transcript, except that it refers to 'Natalie' in the title and opening summary. Natalie's name was spoken aloud by Speaker A in the transcript ('Thanks for jumping on, Natalie'), so using her name is supported. However, Natalie's role as 'ops manager' is never stated in the transcript — the note hedges with 'role not stated', which is appropriate.",
+          "[MODEL] 'Raj to review security documents before or during the Tuesday demo' — the script does not specify whether Raj reviews before or during the demo; the note introduces 'or during' as speculation, though it is minor.",
+          "[MODEL] 'Host demo for Raj (IT manager) focused on security and platform capabilities' — the script only mentions a demo for Raj, not that it is focused on 'security and platform capabilities'. Adding 'platform capabilities' goes slightly beyond the transcript.",
+          "[MODEL] 'Discount discussion to proceed only if sign-up occurs before end of December 2026' — the year '2026' is added; this is the obvious upcoming December from the call date and is acceptable."
+        ],
+        "pass": false
+      },
+      "judgeNotes": "The note is comprehensive and accurate; it silently corrects two significant STT diarization errors (budget speaker swap, merged closing lines) without introducing any hallucinated facts, and all dates are correctly resolved from the 21 October 2026 anchor."
+    }
+  },
+  {
+    "id": "medical_consult",
+    "area": "recording",
+    "pass": true,
+    "scores": {
+      "faithfulness": 4,
+      "coverage": 5,
+      "speaker_attribution": 4,
+      "stt_robustness": 4
+    },
+    "issues": [
+      "[MODEL] '~20 pack-year history' — the script states Julie smoked for approximately 20 years, not 20 pack-years. Pack-years requires cigarettes-per-day data never provided; this is an invented clinical calculation.",
+      "[STT] The STT transcript has severe diarization errors (Speaker B given the GP's lines and vice-versa, and the patient's presenting complaint merged into Speaker B alongside GP lines). The note silently ignores speaker labels and reconstructs the exchange correctly from context, which is appropriate, but the diarization errors are material and worth noting.",
+      "[MODEL] The note header says only 'Julie' without the surname 'Roberts' from the script — minor omission but the script does supply the full name.",
+      "[MODEL] 'Referring clinician's name and provider details not stated' listed under Missing Information — in context this is a GP consultation, not a referral; framing it this way is mildly misleading, though not a factual error about the script content."
+    ],
+    "ms": 19482,
+    "output": {
+      "wer": 0.011764705882352941,
+      "sub": 1,
+      "del": 1,
+      "ins": 0,
+      "refWords": 170,
+      "speakerAcc": 0.8035714285714286,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "-up",
+        "stairs→upstairs"
+      ],
+      "transcript": "Speaker B: Hi, Julie. What brings you in today? I've had a cough for about three weeks. It's worse at night and I've been a bit short of breath walking upstairs.\nSpeaker A: Any fever, chest pain, or coughing up blood?\nSpeaker B: No blood. A mild fever in the first week, but none since. No chest pain. Do you smoke?\nSpeaker B: I quit five years ago. I smoked for about twenty years before that. Okay. Your temperature today is 36.8,\nSpeaker A: oxygen saturation 96%,\nSpeaker A: and I can hear some wheeze on the left side. Is it something serious?\nSpeaker A: I'd like to get a chest X-ray and some blood tests to find out. I'll also give you a trial of a Ventolin puffer, two puffs when you're short of breath.\nSpeaker B: Should I take antibiotics?\nSpeaker A: Not at this stage. Let's see the X-ray first. Come back in one week with the results, or sooner if you get chest pain or the breathing gets worse. Thank you, doctor. I'll book the X-ray this afternoon.",
+      "note": {
+        "title": "Consult Note – Julie, Cough and Dyspnoea, 21 Oct 2026",
+        "summary": "Julie presents with a three-week cough, worse at night, and exertional dyspnoea. Examination revealed oxygen saturation of 96% and left-sided wheeze. Chest X-ray and blood tests ordered; salbutamol (Ventolin) puffer commenced as a trial.",
+        "sections": [
+          {
+            "heading": "Subjective",
+            "points": [
+              "Three-week history of cough, worse at night.",
+              "Shortness of breath on exertion (walking upstairs).",
+              "Mild fever during the first week; no fever since.",
+              "No haemoptysis, no chest pain.",
+              "Ex-smoker — quit five years ago; approximately 20 pack-year history."
+            ]
+          },
+          {
+            "heading": "Objective",
+            "points": [
+              "Temperature: 36.8°C.",
+              "Oxygen saturation: 96%.",
+              "Auscultation: wheeze heard on the left side."
+            ]
+          },
+          {
+            "heading": "Assessment",
+            "points": [
+              "Clinician did not state a diagnosis. Further investigation required to determine aetiology."
+            ]
+          },
+          {
+            "heading": "Plan",
+            "points": [
+              "Chest X-ray ordered — patient to book this afternoon.",
+              "Blood tests ordered.",
+              "Trial of salbutamol (Ventolin) inhaler — 2 puffs as needed for shortness of breath.",
+              "Antibiotics not commenced at this stage; to be reconsidered pending X-ray results.",
+              "Return in one week with results, or sooner if chest pain develops or breathing worsens."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Book chest X-ray",
+            "owner": "Julie (patient)",
+            "due": "21 October 2026 (this afternoon)"
+          },
+          {
+            "task": "Obtain blood test results",
+            "owner": null,
+            "due": null
+          },
+          {
+            "task": "Follow-up appointment with results",
+            "owner": "Julie (patient)",
+            "due": "28 October 2026 (one week), or sooner if symptoms worsen"
+          }
+        ],
+        "decisions": [
+          "Antibiotics not prescribed at this stage; decision deferred pending chest X-ray results.",
+          "Salbutamol (Ventolin) 2 puffs PRN commenced as a trial."
+        ],
+        "follow_ups": [
+          "Review chest X-ray and blood test results at one-week appointment.",
+          "Reassess need for antibiotics once imaging results available."
+        ],
+        "flags": [
+          {
+            "level": "urgent",
+            "text": "Patient instructed to present sooner than one week if chest pain develops or breathlessness worsens — clinician to ensure patient has clear pathway for unplanned review."
+          },
+          {
+            "level": "attention",
+            "text": "Unilateral left-sided wheeze noted — clinician to review chest X-ray results promptly given this finding and significant smoking history (~20 pack-years)."
+          },
+          {
+            "level": "attention",
+            "text": "Oxygen saturation 96% — clinician to monitor; may warrant reassessment if symptoms progress before follow-up."
+          }
+        ],
+        "missing_info": [
+          "Patient's date of birth / age not recorded.",
+          "Referring clinician's name and provider details not stated.",
+          "Specific blood tests ordered not named.",
+          "Salbutamol allergy / previous inhaler use not documented.",
+          "Full medication history and current regular medications not recorded."
+        ],
+        "tags": [
+          "respiratory",
+          "cough",
+          "dyspnoea",
+          "wheeze",
+          "chest x-ray"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 4,
+          "coverage": 5,
+          "speaker_attribution": 5
+        },
+        "issues": [
+          "[MODEL] The note refers to '20-pack-year history' — the script states the patient smoked for twenty years but never mentions the quantity smoked per day, so pack-years cannot be calculated. The script only supports '20-year smoking history', not '20-pack-year history'.",
+          "[MODEL] 'Salbutamol' is used as a synonym for 'Ventolin puffer' — this is a clinical equivalence not stated in the transcript. While salbutamol is the generic name for Ventolin, the transcript only said 'ventolin puffer'; introducing 'salbutamol' adds a fact not spoken. Minor but technically an addition beyond the source."
+        ],
+        "pass": true
+      },
+      "judgeNotes": "Excellent structured note with near-complete coverage and correct facts, but the '20 pack-year' inference is an unsupported clinical invention from the raw '20 years' smoking history, preventing a perfect faithfulness score."
+    }
+  },
+  {
+    "id": "toolbox_talk",
+    "area": "recording",
+    "pass": false,
+    "scores": {
+      "faithfulness": 4,
+      "coverage": 5,
+      "speaker_attribution": 3,
+      "stt_robustness": 3
+    },
+    "issues": [
+      "[STT] Speaker diarization error: the STT transcript incorrectly assigns Kylie's line 'We've got eight on the crew today, plus two from the electrical subbie' to Speaker A (Steve), and the note faithfully reproduces this misattribution without flagging it.",
+      "[STT] Speaker diarization error: the STT transcript collapses Kylie's line 'Also the wind is meant to pick up...' into Speaker A, and similarly collapses 'Got it. And the near miss yesterday...' and 'Yes. A drill fell...' all under Speaker A — the note does not flag this confusion or correct it.",
+      "[MODEL] Speaker attribution error: the note assigns the near-miss query ('Got it. And the near miss yesterday, the dropped drill?') to Speaker A in the transcript, which is wrong per the script (it was Kylie/Speaker B). The note does not flag this specific misattribution.",
+      "[STT] 'sight shed' in transcript (vs correct 'site shed') — the note correctly writes 'site shed', which is a good silent correction, but worth noting the STT error was present.",
+      "[MODEL] The 'Missing information' section states 'Identity of the person who conducted the talk (Speaker A's name/role not stated)' — this is defensible given only speaker labels in the transcript, but it slightly undersells the note's own acknowledgment that the transcript had diarization issues without explicitly flagging the collapsed speaker turns as a reliability concern.",
+      "[STT] Diarization collapse: in the STT transcript, Speaker A delivers both sides of the near-miss exchange ('Got it. And the near miss yesterday...' AND 'Yes. A drill fell...'), which is a material error the note does not flag as suspicious or potentially garbled."
+    ],
+    "ms": 16039,
+    "output": {
+      "wer": 0.02127659574468085,
+      "sub": 3,
+      "del": 0,
+      "ins": 1,
+      "refWords": 188,
+      "speakerAcc": 0.8054054054054054,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "+sub",
+        "subbie→e",
+        "clipped→clip",
+        "site→sight"
+      ],
+      "transcript": "Speaker A: Righto, everyone. Today's toolbox talk is about working at heights on the roof.\nSpeaker A: We've got eight on the crew today, plus two from the electrical sub e. Good. Rule one, harnesses on and clip to the static line at all times past the edge protection.\nSpeaker B: One of the lanyards failed inspection this morning. The tag was out of date.\nSpeaker A: Tag it out and put it in the quarantine bin. Don't use it. I'll order two new lanyards today.\nSpeaker A: Also, the wind is meant to pick up to 40 kilometers an hour after lunch. If gusts go over 35, we stop sheet laying and come down. I'll check the gauge at twelve.\nSpeaker B: What about the heat? It's meant to hit 34.\nSpeaker A: Water breaks every hour, and there's shade at the sight shed. Look out for each other for signs of heat stress.\nSpeaker A: Got it. And the near miss yesterday, the dropped drill? Yes. A drill fell from the roof onto the walkway. Nobody was hurt, but from today, all tools on the roof must be tethered. I'll put it in the incident register.\nSpeaker B: Everyone needs to sign the attendance sheet before we start.",
+      "note": {
+        "title": "Working at Heights – Roof Safety Toolbox Talk",
+        "summary": "Toolbox talk held on 21 October 2026 covering working at heights on the roof, including harness and static line requirements, a failed lanyard quarantine, wind and heat protocols, and a dropped-tool near miss from the previous day. All tools on the roof must now be tethered. Attendance sheet sign-on required before work commences.",
+        "sections": [
+          {
+            "heading": "Topic",
+            "points": [
+              "Working at heights on the roof.",
+              "Date: 21 October 2026."
+            ]
+          },
+          {
+            "heading": "Attendees",
+            "points": [
+              "Eight crew members on site.",
+              "Two workers from the electrical subcontractor.",
+              "Attendance sheet to be signed by all before work starts."
+            ]
+          },
+          {
+            "heading": "Hazards & controls discussed",
+            "points": [
+              "Fall hazard: harnesses must be worn and clipped to the static line at all times past edge protection.",
+              "Defective lanyard: one lanyard failed inspection this morning (out-of-date tag) — tagged out and placed in quarantine bin; two replacement lanyards to be ordered today.",
+              "Wind hazard: forecast 40 km/h winds this afternoon — sheet laying to cease and workers to descend if gusts exceed 35 km/h; wind gauge to be checked at 12:00.",
+              "Heat stress: forecast 34°C — water breaks every hour; shade available at site shed; workers to monitor each other for signs of heat stress.",
+              "Dropped-tool near miss (previous day): a drill fell from the roof onto the walkway; no injuries sustained — new control from today: all tools on the roof must be tethered.",
+              "Near miss to be recorded in the incident register by Speaker A."
+            ]
+          },
+          {
+            "heading": "Worker questions / concerns",
+            "points": [
+              "Worker (Speaker B) raised the failed lanyard identified during morning inspection.",
+              "Worker (Speaker B) raised concern about forecast heat of 34°C — addressed with hourly water breaks and shade access.",
+              "Worker (Speaker B) reminded crew that attendance sheet must be signed before starting work."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Order two new lanyards to replace quarantined unit.",
+            "owner": "Speaker A",
+            "due": "21 October 2026"
+          },
+          {
+            "task": "Check wind gauge and assess conditions; stand down sheet laying if gusts exceed 35 km/h.",
+            "owner": "Speaker A",
+            "due": "21 October 2026 – 12:00"
+          },
+          {
+            "task": "Record dropped-drill near miss in the incident register.",
+            "owner": "Speaker A",
+            "due": "21 October 2026"
+          },
+          {
+            "task": "Ensure all workers sign the attendance sheet before commencing work.",
+            "owner": null,
+            "due": "21 October 2026"
+          }
+        ],
+        "decisions": [
+          "Defective lanyard (out-of-date inspection tag) quarantined immediately; not to be used.",
+          "Sheet laying to cease and workers to descend if wind gusts exceed 35 km/h.",
+          "All tools used on the roof must be tethered, effective immediately."
+        ],
+        "follow_ups": [
+          "Confirm two replacement lanyards have been received and inspected before use.",
+          "Verify dropped-drill near miss has been entered in the incident register.",
+          "Review wind conditions at 12:00 and communicate go/no-go decision to crew."
+        ],
+        "flags": [
+          {
+            "level": "urgent",
+            "text": "Dropped-drill near miss (previous day): drill fell from roof onto walkway. Near miss register entry required — confirm Speaker A has logged this. Location and responsible person not fully identified in recording; supervisor should verify details."
+          },
+          {
+            "level": "urgent",
+            "text": "Defective lanyard with out-of-date inspection tag found in use on site this morning. Quarantined; check whether lanyard was used prior to inspection and whether any other lanyards are overdue for inspection."
+          },
+          {
+            "level": "attention",
+            "text": "Forecast wind speeds of 40 km/h with sheet laying in progress — wind monitoring and stand-down procedure in place; supervisor to confirm gauge check occurs at 12:00 and decision is communicated promptly."
+          },
+          {
+            "level": "attention",
+            "text": "Forecast temperature of 34°C on a roof work day — heat stress risk. Confirm hourly water break schedule is being observed and workers know the signs of heat stress."
+          }
+        ],
+        "missing_info": [
+          "Full names or identifiers of attendees (crew members and electrical subcontractor workers) for the attendance record.",
+          "Project name, site address or specific roof area where the talk was conducted.",
+          "Identity of the person who conducted the talk (Speaker A's name/role not stated).",
+          "Exact location on site where the dropped-drill near miss occurred and who was the responsible person or supervisor at the time."
+        ],
+        "tags": [
+          "working at heights",
+          "whs",
+          "toolbox talk",
+          "near miss",
+          "heat stress"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 5,
+          "coverage": 5,
+          "speaker_attribution": 5
+        },
+        "issues": [],
+        "pass": true
+      },
+      "judgeNotes": "Coverage is excellent and faithfulness is mostly solid, but the STT diarization errors cause real speaker-attribution mistakes that the note does not detect or flag, dropping both stt_robustness and speaker_attribution scores."
+    }
+  },
+  {
+    "id": "hospitality_handover",
+    "area": "recording",
+    "pass": false,
+    "scores": {
+      "faithfulness": 3,
+      "coverage": 5,
+      "speaker_attribution": 3,
+      "stt_robustness": 3
+    },
+    "issues": [
+      "[STT] 'two and ten covers' was mis-transcribed from 'two hundred and ten covers'; note correctly recovers '210' — this is handled well (no faithfulness penalty, credit to stt_robustness).",
+      "[STT] Diarization error: Speaker A delivers both sides of a turn ('Josh called in sick… Emma said she can come in at six. Great. What about stock?'); note does not flag this anomaly.",
+      "[STT] 'reach and fridges' mis-transcribed from 'reach-in fridges'; note correctly uses 'reach-in fridges' — handled well.",
+      "[STT] 'Lowe on oat milk' mis-transcribed from 'low on oat milk'; note renders this as 'Lowe oat milk' (treating 'Lowe' as a brand name), which is a factual invention — the script says plain 'oat milk', not a brand called 'Lowe'. This is a hallucinated brand name.",
+      "[MODEL] Speaker attribution of actions to 'May' (Mei) is reasonable given the diarization, but the script shows it is Mei who commits to briefing the chef and logging temperatures — assigning logging to 'May' is acceptable, but Mei is spelled 'May' throughout the note, which is a minor consistent misspelling (not a factual error per se, but notable).",
+      "[MODEL] The note does not identify or note the diarization anomaly where Speaker A appears to say both Josh/Emma staffing info AND 'Great. What about stock?' — this conflation should have been flagged.",
+      "[MODEL] 'Lowe oat milk' listed as a brand in Stock & suppliers and Follow-ups — invented brand name not present in original script; script says only 'oat milk'.",
+      "[MODEL] The note states the technician visit is 'tomorrow at 09:00' and pins it to '22 October 2026' — the date context is 21 October 2026 (Wednesday), so tomorrow is Thursday 22 October 2026, which is also the stock delivery day. The note does not flag the potential conflict or coincidence, but this is not an error per se."
+    ],
+    "ms": 21936,
+    "output": {
+      "wer": 0.04430379746835443,
+      "sub": 3,
+      "del": 3,
+      "ins": 1,
+      "refWords": 158,
+      "speakerAcc": 0.9342105263157895,
+      "speakerAccWordLevel": 1,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "mei→may",
+        "-hundred",
+        "+cool",
+        "coolroom→room",
+        "-o'clock",
+        "-in",
+        "low→lowe"
+      ],
+      "transcript": "Speaker A: Hey, May. Handover time. Lunch was busy. We did about two and ten covers.\nSpeaker A: Nice. How did the kitchen go? The cool room temperature was reading seven degrees at 02:00. The technician is coming tomorrow at nine.\nSpeaker B: Seven is too high. Did you move the dairy and seafood?\nSpeaker A: Yes. Into the reach and fridges. Please log the temperature every two hours tonight.\nSpeaker B: Okay. Any staff issues?\nSpeaker A: Josh called in sick for tonight, so you're one short on the floor. Emma said she can come in at six. Great. What about stock?\nSpeaker A: We're out of the house, Pinot and Lowe on oat milk. I've ordered both. They arrive Thursday.\nSpeaker B: And the booking for the birthday party?\nSpeaker A: Table of 14 at 07:30. One guest has a severe peanut allergy, so the kitchen needs to be told.\nSpeaker B: I'll brief the chef at five. Anything else?\nSpeaker A: A customer complained about a long wait at lunch. I gave them a voucher for a free dessert.",
+      "note": {
+        "title": "Lunch to Evening Handover – 21 October 2026",
+        "summary": "Lunch service ran approximately 210 covers. A cool room temperature excursion was identified at 14:00 (7°C); perishables have been relocated and a technician is booked for tomorrow morning. The evening shift is one staff member short, with a replacement confirmed from 18:00.",
+        "sections": [
+          {
+            "heading": "Trading summary",
+            "points": [
+              "Lunch covers: approximately 210.",
+              "One customer complaint about long wait time at lunch; resolved with a complimentary dessert voucher."
+            ]
+          },
+          {
+            "heading": "Staffing",
+            "points": [
+              "Josh called in sick — floor is one short for the evening shift.",
+              "Emma confirmed to come in at 18:00 to cover."
+            ]
+          },
+          {
+            "heading": "Stock & suppliers",
+            "points": [
+              "House Pinot Noir: out of stock, order placed, delivery expected Thursday.",
+              "Lowe oat milk: out of stock, order placed, delivery expected Thursday."
+            ]
+          },
+          {
+            "heading": "Equipment & maintenance",
+            "points": [
+              "Cool room reading 7°C at 14:00 — above safe range.",
+              "Dairy and seafood relocated to reach-in fridges.",
+              "Cool room temperature to be logged every two hours throughout the evening.",
+              "Refrigeration technician booked for tomorrow at 09:00."
+            ]
+          },
+          {
+            "heading": "Customer feedback",
+            "points": [
+              "One complaint: excessive wait time at lunch. Complimentary dessert voucher issued as resolution."
+            ]
+          },
+          {
+            "heading": "For next shift",
+            "points": [
+              "Table of 14 booked at 19:30 for a birthday party.",
+              "One guest in the birthday party has a severe peanut allergy — kitchen must be briefed before service.",
+              "May to brief the chef at 17:00 regarding the peanut allergy."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Log cool room temperature every two hours throughout the evening shift.",
+            "owner": "May",
+            "due": "Throughout evening shift, 21 October 2026"
+          },
+          {
+            "task": "Brief chef on severe peanut allergy for birthday party booking (table of 14, 19:30).",
+            "owner": "May",
+            "due": "17:00, 21 October 2026"
+          },
+          {
+            "task": "Ensure technician attends to cool room.",
+            "owner": null,
+            "due": "09:00, 22 October 2026"
+          }
+        ],
+        "decisions": [
+          "Dairy and seafood moved from cool room to reach-in fridges due to temperature excursion.",
+          "Complimentary dessert voucher issued to customer who complained about long wait at lunch."
+        ],
+        "follow_ups": [
+          "Confirm cool room is restored to safe temperature following technician visit tomorrow.",
+          "Confirm Thursday delivery of house Pinot Noir and Lowe oat milk."
+        ],
+        "flags": [
+          {
+            "level": "urgent",
+            "text": "Cool room recorded at 7°C at 14:00 — potential temperature excursion affecting food safety. Dairy and seafood relocated. Verify relocated items are holding at safe temperatures and continue two-hourly logging. Supervisor should review food safety log and assess whether any affected stock requires disposal per food safety plan."
+          },
+          {
+            "level": "urgent",
+            "text": "Severe peanut allergy reported for a guest in the 19:30 birthday party (table of 14). Kitchen must be briefed before service to prevent an allergen incident."
+          }
+        ],
+        "missing_info": [
+          "Safe temperature threshold for the cool room per the venue's food safety plan — needed to assess severity of the 7°C reading.",
+          "Which specific products were stored in the cool room at the time of the excursion, beyond dairy and seafood.",
+          "Duration of the temperature excursion — unknown when the cool room began reading 7°C.",
+          "Whether the customer complaint and voucher were recorded in the incident or feedback log."
+        ],
+        "tags": [
+          "shift handover",
+          "food safety",
+          "cool room",
+          "allergen",
+          "staffing"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 4,
+          "coverage": 5,
+          "speaker_attribution": 4
+        },
+        "issues": [
+          "[MODEL] 'House pinot noir' — the script says 'house pinot'; the note expands this to 'pinot noir', which is an invented specification not supported by the transcript or script.",
+          "[MODEL] Speaker attribution for action item 'Confirm Emma is coming in to cover Josh's shift' is assigned to Mei, but no such commitment was made by Mei in the script; this is an inferred task not attributed to anyone in the source.",
+          "[MODEL] 'Missing information' section contains editorially generated content (e.g., 'whether the relocated dairy and seafood have been checked') that goes beyond what the script states, though this is inferential framing rather than a direct factual invention — minor concern."
+        ],
+        "pass": true
+      },
+      "judgeNotes": "The note is thorough and recovers most STT errors well, but invents 'Lowe' as an oat-milk brand name from the mis-transcription 'Lowe on oat milk', which is a clear hallucination that caps faithfulness; speaker attribution is broadly correct but the diarization anomaly is unaddressed."
+    }
+  },
+  {
+    "id": "numbers_names_dates",
+    "area": "recording",
+    "pass": false,
+    "scores": {
+      "faithfulness": 2,
+      "coverage": 3,
+      "speaker_attribution": 3,
+      "stt_robustness": 2
+    },
+    "issues": [
+      "[STT] The proposed rent is stated as '$775.05 per week' throughout the note (summary, discussion, commitments, decisions, action items). The STT garbled '$705' as '$775.05'; the correct figure per the script is $705 per week. This is a material invented fact repeated multiple times.",
+      "[STT] The property address is rendered as '14 Waddle Crescent' in the note heading and body, copied from the STT error. The script says '14 Wattle Crescent'. The note should have flagged this or corrected it.",
+      "[STT] The agency name is rendered as 'Harbyside Realty' throughout. The script says 'Harbourside Realty'. The note silently propagates the STT error rather than correcting or flagging it.",
+      "[STT] The bond reference number is stated as '4400-719000-32'. The script states '4471 9032'. The STT garbled this number and the note reproduces the garbled version as fact without flagging uncertainty.",
+      "[STT] The note states 'GST status unclear — Mr Kowalczyk raised the GST question mid-transcript', implying ambiguity and mis-attributing the GST statement. Per the script, Rebecca stated the quote was '$2,340 including GST'; the STT split the sentence across speakers, but the note should have recognised this as a likely diarization error and not treated GST inclusion as uncertain.",
+      "[MODEL] Because the note accepts the garbled '$775.05' rent figure and states Mr Kowalczyk agreed it 'sounds fair', it misattributes an approval of a figure he never heard or agreed to.",
+      "[STT] Tenant names 'Siobhan and Aoife Gallagher' are completely lost; the note reproduces 'A of Gallagher' as the tenant name without adequately flagging that TWO tenants are named, only that the name is garbled.",
+      "[MODEL] The note flags GST inclusion as a follow-up action item ('Confirm whether Mohammed Al Rashid's $2,340 quote includes or excludes GST'), but per the script this was already confirmed as inclusive of GST — this is an unnecessary and misleading action item."
+    ],
+    "ms": 19909,
+    "output": {
+      "wer": 0.1130952380952381,
+      "sub": 15,
+      "del": 2,
+      "ins": 2,
+      "refWords": 168,
+      "speakerAcc": 0.9602649006622517,
+      "speakerAccWordLevel": 0.9933774834437086,
+      "hypSpeakers": 2,
+      "sttErrors": [
+        "mr→mister",
+        "harbourside→harbyside",
+        "wattle→waddle",
+        "-fifteenth",
+        "of→one",
+        "january→fifteen",
+        "siobhan→a",
+        "aoife→of",
+        "+seventy",
+        "seven→point",
+        "oh→zero",
+        "+dollars",
+        "-twenty",
+        "eighth→october",
+        "of→twenty",
+        "october→eight",
+        "seventy→seven",
+        "one→hundred",
+        "nine→nineteen"
+      ],
+      "transcript": "Speaker A: Hi, mister Kowalczyk. It's Rebecca from Harbyside Realty about your unit at 14, Waddle Crescent Chatswood.\nSpeaker B: Yes. Hello. Is this about the lease renewal?\nSpeaker A: It is. The current lease ends on the 01/15/2027.\nSpeaker A: The tenants, and A of Gallagher, want to renew for twelve months.\nSpeaker B: What rent are you suggesting?\nSpeaker A: They pay $680\nSpeaker A: a week now. Comparable units are renting for 720.\nSpeaker A: I'd suggest $775.05\nSpeaker B: sounds fair. What about the hot water system?\nSpeaker A: The plumber, Mohammed Al Rashid, quoted $2,340\nSpeaker B: including GST to replace it. Can we get a second quote?\nSpeaker A: Yes. I'll get one from HydroFlow by the October 28. The bond is held with the rental bond board, reference number 4400 and 719000 and 32.\nSpeaker B: Fine. Please send me the renewal paperwork.\nSpeaker A: I'll email it by Wednesday, the twenty second. Your management fee stays at 5.5%.",
+      "note": {
+        "title": "Lease Renewal Discussion – 14 Waddle Crescent Chatswood",
+        "summary": "Rebecca from Harbyside Realty spoke with owner Mr Kowalczyk regarding the lease renewal for 14 Waddle Crescent, Chatswood. The current tenants wish to renew for 12 months and a rent increase to $775.05 per week was discussed. A second quote for hot water system replacement is to be obtained before a decision is made.",
+        "sections": [
+          {
+            "heading": "Who & context",
+            "points": [
+              "Call between Rebecca (Harbyside Realty) and Mr Kowalczyk (property owner).",
+              "Property: 14 Waddle Crescent, Chatswood.",
+              "Current tenants: referred to as 'A of Gallagher' (name unclear in transcript).",
+              "Bond held with the Rental Bond Board, reference number 4400-719000-32.",
+              "Management fee: 5.5% (unchanged)."
+            ]
+          },
+          {
+            "heading": "What they need",
+            "points": [
+              "Mr Kowalczyk requested a second quote for hot water system replacement before committing.",
+              "Mr Kowalczyk requested renewal paperwork be sent to him promptly."
+            ]
+          },
+          {
+            "heading": "What we discussed",
+            "points": [
+              "Current lease expires 15 January 2027; tenants wish to renew for 12 months.",
+              "Current rent is $680 per week; comparable units are achieving $720 per week.",
+              "Proposed renewal rent: $775.05 per week.",
+              "Hot water system requires replacement; plumber Mohammed Al Rashid quoted $2,340 (GST status unclear — Mr Kowalczyk raised the GST question mid-transcript)."
+            ]
+          },
+          {
+            "heading": "Commitments made",
+            "points": [
+              "Rebecca to obtain a second hot water system quote from HydroFlow by 28 October 2026.",
+              "Rebecca to email lease renewal paperwork to Mr Kowalczyk by Wednesday 22 October 2026.",
+              "Mr Kowalczyk indicated the proposed rent of $775.05 per week 'sounds fair' — formal approval pending receipt of paperwork."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Obtain second quote for hot water system replacement from HydroFlow",
+            "owner": "Rebecca",
+            "due": "28 October 2026"
+          },
+          {
+            "task": "Email lease renewal paperwork to Mr Kowalczyk",
+            "owner": "Rebecca",
+            "due": "22 October 2026"
+          },
+          {
+            "task": "Confirm whether Mohammed Al Rashid's $2,340 quote includes or excludes GST",
+            "owner": "Rebecca",
+            "due": null
+          }
+        ],
+        "decisions": [
+          "Proposed rent increase to $775.05 per week provisionally agreed by Mr Kowalczyk, subject to formal execution of renewal paperwork.",
+          "A second quote for the hot water system to be sought before replacement is authorised."
+        ],
+        "follow_ups": [
+          "Confirm Mr Kowalczyk's approval of renewal terms once paperwork is reviewed and returned.",
+          "Advise Mr Kowalczyk of HydroFlow quote outcome and seek instruction on hot water system replacement."
+        ],
+        "flags": [
+          {
+            "level": "attention",
+            "text": "Hot water system requires replacement — a failed system may affect tenant amenity and landlord obligations under residential tenancy legislation. Confirm urgency of replacement with plumber."
+          },
+          {
+            "level": "info",
+            "text": "GST inclusion in the $2,340 plumbing quote is ambiguous in the transcript — verify before presenting to owner for approval."
+          }
+        ],
+        "missing_info": [
+          "Tenant's full name — transcript renders it as 'A of Gallagher', which appears incomplete or garbled.",
+          "Whether Mohammed Al Rashid's $2,340 quote is inclusive or exclusive of GST.",
+          "Condition of other property fixtures or any other outstanding maintenance items.",
+          "Whether smoke alarms and any other compliance items (e.g. pool fencing if applicable) have been checked ahead of lease renewal."
+        ],
+        "tags": [
+          "lease renewal",
+          "rent increase",
+          "maintenance",
+          "chatswood",
+          "hot water system"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 5,
+          "coverage": 5,
+          "speaker_attribution": 5
+        },
+        "issues": [],
+        "pass": true
+      },
+      "judgeNotes": "The note's core failing is uncritically accepting two critical STT hallucinations — the rent figure ($775.05 vs $705) and the bond reference number — and propagating them as confirmed facts, which caps faithfulness at 2; stt_robustness is also low because the model corrected nothing material and silently inherited all major STT errors."
+    }
+  },
+  {
+    "id": "crosstalk_short_turns",
+    "area": "recording",
+    "pass": false,
+    "scores": {
+      "faithfulness": 3,
+      "coverage": 5,
+      "speaker_attribution": 4,
+      "stt_robustness": 3
+    },
+    "issues": [
+      "[MODEL] 'Thursday 22 October 2026' is a wrong calendar date — 22 October 2026 is a Thursday, but the context date is Wednesday 21 October 2026, making Thursday 22 October 2026 correct. Wait — 21 October 2026 IS a Wednesday, so the next day (Thursday) is 22 October 2026. This is actually correct. Retracting this issue.",
+      "[MODEL] 'Friday 23 October 2026' — 21 Oct 2026 is Wednesday, so Friday is 23 October 2026. This is correct. Retracting.",
+      "[MODEL] Newsletter sign-off: the note states 'requires sign-off from Speaker A before sending' but per the script Sam (Speaker A / Team Lead) said 'Send it' — meaning sign-off was given in the meeting and the newsletter was already sent ('Done'). The note incorrectly treats sign-off as a pending action item ('Sign off on newsletter draft (Speaker A)') and lists 'Send newsletter once sign-off is received' as a future action, when in fact both were completed during the meeting.",
+      "[STT] Diarization collapsed both speakers into 'Speaker A', causing all dialogue to appear as one speaker. The note correctly flags this limitation but cannot correct it.",
+      "[STT] 'Fun' in the transcript vs 'Fine' in the script — the note does not reflect 'Fun' as a stated fact, so no error propagated.",
+      "[MODEL] 'Monday 19 October 2026' — 21 Oct 2026 is Wednesday, so the preceding Monday is 19 October 2026. This resolution is correct.",
+      "[MODEL] The action item 'Sign off on newsletter draft (Speaker A)' and 'Send newsletter once sign-off is received' are fabricated pending actions; the script shows sign-off was given ('Send it') and sending was confirmed ('Done') during the meeting. These are hallucinated open actions."
+    ],
+    "ms": 22645,
+    "output": {
+      "wer": 0.03125,
+      "sub": 2,
+      "del": 0,
+      "ins": 0,
+      "refWords": 64,
+      "speakerAcc": 0.5483870967741935,
+      "speakerAccWordLevel": 0.5483870967741935,
+      "hypSpeakers": 1,
+      "sttErrors": [
+        "fine→fun",
+        "moved→move"
+      ],
+      "transcript": "Speaker A: Quick stand up. Website launch?\nSpeaker A: Friday.\nSpeaker A: Still Friday?\nSpeaker A: Yes. Unless QA finds blockers.\nSpeaker A: Who's on QA?\nSpeaker A: Aisha.\nSpeaker A: Okay. Newsletter.\nSpeaker A: Drafted. Needs your sign off. Send it. Done. Budget?\nSpeaker A: Approved. 12,000.\nSpeaker A: 12 or 20?\nSpeaker A: 12.\nSpeaker A: Got it. Printer's broken again. Call IT.\nSpeaker A: I did. Monday.\nSpeaker A: Fun.\nSpeaker A: Client visit, Wednesday?\nSpeaker A: Move to Thursday, 10AM.\nSpeaker A: Who's presenting?\nSpeaker A: You are. Right. Anything else?\nSpeaker A: No. That's it.",
+      "note": {
+        "title": "Weekly Stand-Up – 21 October 2026",
+        "summary": "Brief stand-up covering website launch status, newsletter sign-off, budget approval, a printer outage, and a rescheduled client visit. Key decisions included confirming the Friday launch target, approving a $12,000 budget, and moving the client visit to Thursday at 10AM.",
+        "sections": [
+          {
+            "heading": "Attendees",
+            "points": [
+              "Attendees not individually identified in transcript; Aisha referenced as QA lead."
+            ]
+          },
+          {
+            "heading": "Agenda items discussed",
+            "points": [
+              "Website launch: target date remains Friday, contingent on QA finding no blockers. Aisha is handling QA.",
+              "Newsletter: draft is complete and requires sign-off from Speaker A before sending.",
+              "Budget: approved at $12,000.",
+              "Printer outage: printer is broken; IT was contacted on Monday.",
+              "Client visit: rescheduled from Wednesday to Thursday at 10AM; Speaker A confirmed as presenter."
+            ]
+          },
+          {
+            "heading": "Risks & issues",
+            "points": [
+              "Website launch may slip if QA identifies blockers before Friday.",
+              "Printer outage reported; IT notified Monday — resolution status unknown."
+            ]
+          }
+        ],
+        "action_items": [
+          {
+            "task": "Complete QA for website and flag any blockers ahead of Friday launch",
+            "owner": "Aisha",
+            "due": "Friday 23 October 2026"
+          },
+          {
+            "task": "Sign off on newsletter draft",
+            "owner": "Speaker A",
+            "due": null
+          },
+          {
+            "task": "Send newsletter once sign-off is received",
+            "owner": null,
+            "due": null
+          },
+          {
+            "task": "Present at client visit",
+            "owner": "Speaker A",
+            "due": "Thursday 22 October 2026, 10AM"
+          },
+          {
+            "task": "Follow up with IT on printer repair status",
+            "owner": null,
+            "due": null
+          }
+        ],
+        "decisions": [
+          "Website launch target remains Friday 23 October 2026, unless QA identifies blockers.",
+          "Budget approved at $12,000.",
+          "Client visit moved from Wednesday to Thursday at 10AM.",
+          "Speaker A confirmed as presenter for the client visit."
+        ],
+        "follow_ups": [
+          "Confirm printer is repaired and operational.",
+          "Confirm newsletter is sent after sign-off.",
+          "Confirm no QA blockers found before Friday launch."
+        ],
+        "flags": [
+          {
+            "level": "info",
+            "text": "Printer outage reported; IT contacted Monday 19 October 2026. Resolution not confirmed — supervisor may wish to verify before client visit Thursday."
+          },
+          {
+            "level": "attention",
+            "text": "Website launch is conditionally set for Friday. If QA raises blockers, launch date will change — escalation path not discussed."
+          }
+        ],
+        "missing_info": [
+          "Names and roles of all attendees beyond Aisha are not identified in the transcript.",
+          "Newsletter sign-off deadline and send date not specified.",
+          "IT ticket status and expected printer repair timeline not confirmed.",
+          "Client visit location and attendees (client name/organisation) not mentioned."
+        ],
+        "tags": [
+          "stand-up",
+          "website launch",
+          "client visit",
+          "newsletter",
+          "budget"
+        ]
+      },
+      "control": {
+        "scores": {
+          "faithfulness": 3,
+          "coverage": 5,
+          "speaker_attribution": 4
+        },
+        "issues": [
+          "[MODEL] 'sent to Speaker A for sign-off during the meeting' — the script says the newsletter 'Needs your sign off' (still pending) and Speaker A said 'Send it' (instructing Speaker B to send the newsletter, not to send it to Speaker A). The note misrepresents both the sign-off status and the direction of sending.",
+          "[MODEL] 'due Friday 24 October 2026' — 21 October 2026 is a Wednesday, so Friday is 23 October 2026, not 24 October 2026. This is an invented/wrong calendar date resolution.",
+          "[MODEL] 'Printer fault reported; IT contacted Monday 19 October' — 21 October 2026 being a Wednesday makes the preceding Monday 19 October 2026, which is a reasonable resolution, but Monday could also refer to a future Monday (22 Oct is Thursday... actually 19 Oct is correct). This is acceptable.",
+          "[MODEL] Speaker attribution issue: 'Review and sign off newsletter (Speaker A)' — in the script Speaker A said 'Send it' meaning the newsletter should be sent (presumably to its recipients), not that Speaker A still needs to sign it off. The sign-off instruction was pre-existing; Sam said 'Send it' as approval/instruction to send."
+        ],
+        "pass": false
+      },
+      "judgeNotes": "The note is thorough and well-structured with correct date math, but critically misrepresents the newsletter as awaiting sign-off and sending when both were completed during the meeting — a meaningful faithfulness error introduced by the model, not the STT."
+    }
+  }
+]

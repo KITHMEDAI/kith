@@ -42,3 +42,8 @@ Thumbs.db
 docs/partnerships/*/call-notes/*-transcript.md
 scripts/copilot-test/*.wav
 .next-workspace/
+
+# Workspace eval run outputs (regenerable; reports live in docs/product/eval-reports)
+scripts/workspace-eval/*/out/
+scripts/workspace-eval/*/audio/
+scripts/workspace-eval/**/*.log

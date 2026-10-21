@@ -8,7 +8,10 @@ import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import { encrypt, decrypt } from '@/lib/encryption';
-import { embedDocument, embedQuery } from '@/lib/embeddings';
+import { embedDocument } from '@/lib/embeddings';
+import { withTimeout, embedQueryFast } from './embed';
+
+export { embedQueryFast };
 import { generateNote, noteToText, type NoteContent } from './generate';
 
 export const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
@@ -78,15 +81,6 @@ export function openInput(stored: string | null): string {
   try { return decrypt(stored.slice(4)); } catch { return ''; }
 }
 
-function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
-  return Promise.race([p, new Promise<null>(r => setTimeout(() => r(null), ms))]).catch(() => null);
-}
-
-/** Query embedding that never blocks search for long — null means "use keyword fallback". */
-export async function embedQueryFast(q: string): Promise<number[] | null> {
-  return withTimeout(embedQuery(q), 4000);
-}
-
 /** Generate the note for a row in "processing" state, then index it. Safe to call twice. */
 export async function processNote(noteId: string): Promise<void> {
   const service = createServiceRoleClient();
@@ -116,6 +110,7 @@ export async function processNote(noteId: string): Promise<void> {
       styleExamples: (edits ?? []).map(e => ({ before: e.before_text, after: e.after_text })),
       userName: p?.name,
       date: new Date(note.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
+      dateISO: note.created_at,
     });
     const text = noteToText(content);
     await service.from('ws_notes').update({
