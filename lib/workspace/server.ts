@@ -13,6 +13,7 @@ import { withTimeout, embedQueryFast } from './embed';
 
 export { embedQueryFast };
 import { generateNote, noteToText, type NoteContent } from './generate';
+import { polishTranscript, parseAudioPaths } from './polish';
 
 export const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
 
@@ -85,7 +86,7 @@ export function openInput(stored: string | null): string {
 export async function processNote(noteId: string): Promise<void> {
   const service = createServiceRoleClient();
   const { data: note } = await service.from('ws_notes')
-    .select('id, user_id, note_type, custom_instruction, field, input_mode, input_enc, status, created_at')
+    .select('id, user_id, note_type, custom_instruction, field, input_mode, input_enc, audio_paths, status, created_at')
     .eq('id', noteId).single();
   if (!note || note.status !== 'processing') return;
 
@@ -97,9 +98,29 @@ export async function processNote(noteId: string): Promise<void> {
   ]);
   const p = profile as WsProfile | null;
 
+  // Polish pass: re-transcribe the uploaded recording as a whole file (more
+  // accurate, better speakers). Falls back to the live transcript on failure.
+  let input = openInput(note.input_enc);
+  const audio = parseAudioPaths(note.audio_paths);
+  if (audio.length) {
+    try {
+      const polished = await polishTranscript(service, audio, p?.field || note.field, (p?.name || 'Me').split(' ')[0]);
+      const liveWords = input.split(/\s+/).length;
+      if (polished && polished.split(/\s+/).length >= Math.min(20, liveWords * 0.5)) {
+        input = polished;
+        await service.from('ws_notes').update({ input_enc: sealInput(polished), transcript_source: 'polished', audio_paths: [] }).eq('id', noteId);
+      } else {
+        await service.from('ws_notes').update({ audio_paths: [] }).eq('id', noteId);
+      }
+    } catch (err) {
+      console.warn('[workspace] polish pass failed, using live transcript:', (err as Error).message);
+      await service.from('ws_notes').update({ audio_paths: [] }).eq('id', noteId);
+    }
+  }
+
   try {
     const content = await generateNote({
-      input: openInput(note.input_enc),
+      input,
       inputMode: note.input_mode,
       noteType: note.note_type,
       customInstruction: note.custom_instruction ?? undefined,

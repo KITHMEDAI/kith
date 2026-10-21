@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MonitorSpeaker, Square, Loader2, Info } from 'lucide-react';
 import { startDeepgramStream, type StreamStatus } from '@/lib/copilot/deepgram-stream';
+import { startCapture, uploadTrack, type Capture } from '@/lib/workspace/audio-capture';
 
 // Records an online meeting (Google Meet / Teams / Zoom in the browser) with
 // no bot: the meeting tab's audio = everyone else, the microphone = you. Two
@@ -35,11 +36,12 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
   disabled: boolean;
   /** Returns true when the user has confirmed everyone agreed to be recorded. */
   ensureConsent: () => boolean;
-  onDone: (transcript: string, durationSec: number) => void;
+  onDone: (transcript: string, durationSec: number, audio: Array<{ track: 'room' | 'tab' | 'mic'; path: string }>) => void;
 }) {
   const [running, setRunning] = useState(false);
   const [starting, setStarting] = useState(false);
   const [stopping, setStopping] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [segments, setSegments] = useState<Seg[]>([]);
   const [partial, setPartial] = useState<{ them: string; you: string }>({ them: '', you: '' });
   const [status, setStatus] = useState<{ them: StreamStatus | 'off'; you: StreamStatus | 'off' }>({ them: 'off', you: 'off' });
@@ -48,6 +50,7 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
 
   const segRef = useRef<Seg[]>([]);
   const stops = useRef<Array<() => Promise<void>>>([]);
+  const captures = useRef<{ tab: Capture | null; mic: Capture | null }>({ tab: null, mic: null });
   const startedAt = useRef(0);
   const stoppingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -85,6 +88,7 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
       }
       const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
 
+      captures.current = { tab: startCapture(display), mic: startCapture(mic) }; // audio for the polish pass
       segRef.current = []; setSegments([]);
       startedAt.current = Date.now(); setElapsed(0);
       const stopThem = startDeepgramStream({
@@ -116,7 +120,10 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
     stoppingRef.current = true;
     setStopping(true);
     const duration = Math.round((Date.now() - startedAt.current) / 1000);
+    const blobs = Promise.all([captures.current.tab?.stop() ?? null, captures.current.mic?.stop() ?? null]);
+    captures.current = { tab: null, mic: null };
     await Promise.all(stops.current.map(fn => fn()));
+    const [tabBlob, micBlob] = await blobs;
     stops.current = [];
     setRunning(false); setStopping(false); stoppingRef.current = false;
     setPartial({ them: '', you: '' });
@@ -125,7 +132,10 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
       setError("We didn't catch enough of the meeting. Check you shared the meeting tab with audio, then try again.");
       return;
     }
-    onDone(transcript, duration);
+    setUploading(true);
+    const refs = (await Promise.all([uploadTrack(tabBlob, 'tab'), uploadTrack(micBlob, 'mic')])).filter(Boolean) as Array<{ track: 'tab' | 'mic'; path: string }>;
+    setUploading(false);
+    onDone(transcript, duration, refs);
   };
 
   if (!supported) {
@@ -168,6 +178,7 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
         <p className="mt-3 text-sm text-slate-500">
           {disabled ? 'Creating your note…'
             : stopping ? 'Finishing the transcript…'
+            : uploading ? 'Uploading audio for the most accurate transcript…'
             : running ? <>Recording meeting <b className="tabular-nums text-slate-800">{mmss(elapsed)}</b>. Tap stop when it ends</>
             : starting ? 'Waiting for you to choose the meeting tab…'
             : 'Tap to start recording the meeting'}

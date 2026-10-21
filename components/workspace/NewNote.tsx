@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mic, Square, Keyboard, Loader2, Sparkles, ShieldCheck, MonitorSpeaker } from 'lucide-react';
 import MeetingRecorder from './MeetingRecorder';
+import { startCapture, uploadTrack, type Capture } from '@/lib/workspace/audio-capture';
 import { startDeepgramStream, type StreamStatus } from '@/lib/copilot/deepgram-stream';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +40,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   const [recording, setRecording] = useState(false);
   const [starting, setStarting] = useState(false);
   const [stopping, setStopping] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [showAll, setShowAll] = useState(false);
 
@@ -50,6 +52,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   const [connectionStatus, setConnectionStatus] = useState<StreamStatus | 'idle'>('idle');
   const segRef = useRef<Seg[]>([]);
   const stopStream = useRef<null | (() => Promise<void>)>(null);
+  const capture = useRef<Capture | null>(null);
   const startedAt = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -66,13 +69,14 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   const visibleTypes = showAll ? types : types.slice(0, 8);
   const selected = types.find(t => t.key === noteType);
 
-  const create = async (input: string, inputMode: 'typed' | 'recorded', duration?: number) => {
+  type AudioRef = { track: 'room' | 'tab' | 'mic'; path: string };
+  const create = async (input: string, inputMode: 'typed' | 'recorded', duration?: number, audio: AudioRef[] = []) => {
     if (noteType === 'custom' && !custom.trim()) { setError('Describe the note you want (Custom)'); return; }
     setSubmitting(true); setError('');
     const res = await fetch('/api/w/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input, input_mode: inputMode, note_type: noteType, custom_instruction: custom, duration_seconds: duration }),
+      body: JSON.stringify({ input, input_mode: inputMode, note_type: noteType, custom_instruction: custom, duration_seconds: duration, audio }),
     });
     const j = await res.json().catch(() => ({}));
     if (!res.ok) { setSubmitting(false); setError(j.error || 'Could not create the note'); return; }
@@ -87,6 +91,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || 'Could not start recording');
       const mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      capture.current = startCapture(mic); // audio copy for the polish pass
       segRef.current = []; setSegments([]); setPartialText('');
       startedAt.current = Date.now();
       setElapsed(0);
@@ -114,13 +119,19 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   const stopRecording = async () => {
     const duration = Math.round((Date.now() - startedAt.current) / 1000);
     setStopping(true);
+    const blobPromise = capture.current?.stop() ?? Promise.resolve(null);
+    capture.current = null;
     await stopStream.current?.(); // waits for the final words
+    const blob = await blobPromise;
     stopStream.current = null;
     setStopping(false);
     setRecording(false);
     const transcript = segRef.current.map(s => `${s.speaker}: ${s.text}`).join('\n');
     if (transcript.split(/\s+/).length < 4) { setError('We didn\'t catch enough speech. Try again a little closer to the mic.'); return; }
-    create(transcript, 'recorded', duration);
+    setUploading(true);
+    const ref = await uploadTrack(blob, 'room');
+    setUploading(false);
+    create(transcript, 'recorded', duration, ref ? [ref] : []);
   };
 
   const acceptConsent = async () => {
@@ -242,6 +253,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
               <p className="mt-3 text-sm text-slate-500">
                 {submitting ? 'Creating your note…'
                   : stopping ? 'Finishing the transcript…'
+                  : uploading ? 'Uploading audio for the most accurate transcript…'
                   : recording ? <>Recording <b className="tabular-nums text-slate-800">{mmss(elapsed)}</b>. Tap stop when you&apos;re done</>
                   : starting ? 'Starting microphone…'
                   : <>Tap to record your <b className="font-medium text-slate-700">{selected?.label.toLowerCase()}</b></>}
@@ -264,7 +276,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
               youName={firstName}
               disabled={submitting}
               ensureConsent={ensureConsent}
-              onDone={(transcript, duration) => create(transcript, 'recorded', duration)}
+              onDone={(transcript, duration, audio) => create(transcript, 'recorded', duration, audio)}
             />
           </div>
         ) : (

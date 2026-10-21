@@ -34,6 +34,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'You have created a lot of notes in the last hour. Try again shortly.' }, { status: 429 });
   }
 
+  // Audio uploaded for the polish pass: only files in this user's own folder.
+  const audio = (Array.isArray(body.audio) ? body.audio : [])
+    .filter((a: { track?: string; path?: string }) =>
+      a && ['room', 'tab', 'mic'].includes(String(a.track)) && typeof a.path === 'string'
+      && a.path.startsWith(`${user.id}/`) && !a.path.includes('..'))
+    .slice(0, 2)
+    .map((a: { track: string; path: string }) => `${a.track}:${a.path}`);
+
   const profile = await getProfile(user.id);
   if (!profile) return NextResponse.json({ error: 'Finish onboarding first' }, { status: 409 });
 
@@ -45,6 +53,8 @@ export async function POST(req: Request) {
     input_mode: inputMode,
     input_enc: sealInput(input),
     duration_seconds: duration,
+    audio_paths: inputMode === 'recorded' ? audio : [],
+    transcript_source: inputMode === 'recorded' ? 'live' : null,
     status: 'processing',
   }).select('id').single();
   if (error || !data) return NextResponse.json({ error: error?.message || 'Could not save' }, { status: 500 });
