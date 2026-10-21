@@ -1,43 +1,59 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, Mail, CheckCircle2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
 import { createClient } from '@/lib/supabase/client';
+import { cn } from '@/lib/utils';
 
-// Google sign-in shows only once the provider is configured in Supabase.
-const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_WS_GOOGLE === 'true';
+const inputCls = 'h-11 w-full rounded-xl border border-slate-300 px-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100';
 
 export default function LoginForm({ linkError }: { linkError: boolean }) {
+  const router = useRouter();
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
-  const [busy, setBusy] = useState<'email' | 'google' | null>(null);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState(linkError ? 'That sign-in link has expired or was already used. Send a new one.' : '');
+  const [password, setPassword] = useState('');
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(linkError ? 'That link has expired. Sign in with your email and password.' : '');
 
-  const callback = () => `${window.location.origin}/api/w/auth/callback`;
+  const switchMode = (m: 'signin' | 'signup') => { setMode(m); setError(''); };
 
-  const sendLink = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) { setError('Enter a valid email'); return; }
-    setBusy('email'); setError('');
-    const res = await fetch('/api/w/auth/magic', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.trim() }),
-    });
-    const j = await res.json().catch(() => ({}));
-    setBusy(null);
-    if (!res.ok) setError(j.error || 'Could not send the email. Try again.');
-    else setSent(true);
-  };
+    const em = email.trim();
+    if (!/^\S+@\S+\.\S+$/.test(em)) { setError('Enter a valid email'); return; }
+    if (password.length < (mode === 'signup' ? 8 : 1)) {
+      setError(mode === 'signup' ? 'Use a password of at least 8 characters' : 'Enter your password');
+      return;
+    }
+    setBusy(true); setError('');
 
-  const google = async () => {
-    setBusy('google'); setError('');
-    const { error } = await createClient().auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: callback() },
-    });
-    if (error) { setBusy(null); setError(error.message); }
+    if (mode === 'signup') {
+      const res = await fetch('/api/w/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em, password }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setBusy(false);
+        setError(j.error || 'Could not create the account');
+        if (res.status === 409) setMode('signin');
+        return;
+      }
+    }
+
+    const { error } = await createClient().auth.signInWithPassword({ email: em, password });
+    if (error) {
+      setBusy(false);
+      setError(/invalid/i.test(error.message) ? 'Wrong email or password.' : error.message);
+      return;
+    }
+    // New users land on onboarding; returning users on New note.
+    router.replace('/');
+    router.refresh();
   };
 
   return (
@@ -49,56 +65,63 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          {sent ? (
-            <div className="py-4 text-center">
-              <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
-              <h1 className="mt-3 text-lg font-semibold">Check your inbox</h1>
-              <p className="mt-1 text-sm text-slate-500">We sent a sign-in link to <b className="text-slate-700">{email}</b>. Open it on this device.</p>
-              <button onClick={() => setSent(false)} className="mt-4 text-sm text-violet-700 hover:underline">Use a different email</button>
-            </div>
-          ) : (
-            <>
-              <h1 className="text-lg font-semibold">Sign in or create your account</h1>
-              <p className="mt-1 text-sm text-slate-500">No password needed.</p>
-
-              {GOOGLE_ENABLED && (<>
+          <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-sm font-medium">
+            {(['signin', 'signup'] as const).map(m => (
               <button
-                onClick={google}
-                disabled={busy !== null}
-                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white text-sm font-medium transition hover:bg-slate-50 active:scale-[0.99] disabled:opacity-60"
+                key={m}
+                type="button"
+                onClick={() => switchMode(m)}
+                className={cn('rounded-lg py-2 transition', mode === m ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-800')}
               >
-                {busy === 'google' ? <Loader2 className="h-4 w-4 animate-spin" /> : (
-                  <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
-                )}
-                Continue with Google
+                {m === 'signin' ? 'Sign in' : 'Create account'}
               </button>
+            ))}
+          </div>
 
-              <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-                <div className="h-px flex-1 bg-slate-200" /> or <div className="h-px flex-1 bg-slate-200" />
-              </div>
-              </>)}
+          <form onSubmit={submit} className="space-y-3">
+            <input
+              type="email"
+              autoComplete="email"
+              placeholder="you@company.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className={inputCls}
+              autoFocus
+            />
+            <div className="relative">
+              <input
+                type={show ? 'text' : 'password'}
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                placeholder={mode === 'signup' ? 'Choose a password (8+ characters)' : 'Password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className={`${inputCls} pr-10`}
+              />
+              <button
+                type="button"
+                onClick={() => setShow(s => !s)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:text-slate-700"
+                aria-label={show ? 'Hide password' : 'Show password'}
+              >
+                {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <button
+              type="submit"
+              disabled={busy}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.99] disabled:opacity-60"
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
+              {mode === 'signin' ? 'Sign in' : 'Create account'}
+            </button>
+          </form>
 
-              <form onSubmit={sendLink} className={GOOGLE_ENABLED ? 'space-y-3' : 'mt-5 space-y-3'}>
-                <input
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@company.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-                />
-                <button
-                  type="submit"
-                  disabled={busy !== null}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.99] disabled:opacity-60"
-                >
-                  {busy === 'email' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-                  Email me a sign-in link
-                </button>
-              </form>
-            </>
-          )}
           {error && <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+          {mode === 'signin' && (
+            <p className="mt-4 text-center text-xs text-slate-500">
+              New here? <button type="button" onClick={() => switchMode('signup')} className="font-medium text-violet-700 hover:underline">Create an account</button>
+            </p>
+          )}
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">

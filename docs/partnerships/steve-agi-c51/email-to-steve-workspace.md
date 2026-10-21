@@ -12,12 +12,12 @@ note-taker rather than a therapy tool. It's ready for you to try:
 **https://work.kith.space**
 
 **Try it in 3 minutes**
-1. Sign in with your email (you'll get a one-click link, no password) or Google.
+1. Click **Create account** and sign up with your email and a password.
 2. Pick your field. There's a list (NDIS, aged care, construction, pharma, councils,
    hospitality, retail, agriculture and more), "General", or type your own and
    Kith learns how notes are written in that line of work.
 3. Choose a note type (a sensible default is pre-selected), then hit **Record** or
-   **Type / paste** some rough notes. You get a structured note in about 15 seconds,
+   **Type / paste** some rough notes. You get a structured note in about 20 seconds,
    with action items, decisions and anything that needs a second look flagged.
 4. After a few notes, open **Ask** and ask a question across them, e.g. "What are
    my open action items?". Answers link back to the source notes.
@@ -50,9 +50,8 @@ Anurag
 
 ---
 Notes for Anurag (don't send):
-- Don't send before: DNS is live, a magic-link sign-in works from a fresh browser,
-  Google sign-in works (or remove the Google mention), and one recorded + one typed
-  note + one Ask work end to end on work.kith.space.
+- Don't send before: you've created your own account on work.kith.space and done one
+  recorded note (live mic) + one typed note + one Ask.
 - Optionally seed your own account with demo construction notes
   (`scripts/workspace-test/seed-demo.ts`) to show Ask on a screen share.
 - Vercel Hobby is non-commercial. Upgrade the kith-workspace project to Pro before real

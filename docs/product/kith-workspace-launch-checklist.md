@@ -35,19 +35,26 @@ Status as of 2026-10-21. ✅ done by Claude · 👤 needs Anurag · 🤝 Claude 
   search → Ask (cited answer) → edit. Input encrypted, note embedded.
 - ✅ Vercel env complete; **production deployment READY** on project kith-workspace.
 
-## Still to do
-1. 👤 **DNS** (Claude was blocked from changing DNS). kith.space isn't in the GoDaddy account
-   signed in to Chrome, so log in to the account that owns it and add:
-   **Type CNAME · Name `work` · Value `cname.vercel-dns.com` · TTL default**.
-   Vercel then issues HTTPS automatically (a few minutes).
-2. 👤 **Live recording test** (needs a human voice): on work.kith.space → New note → Record →
-   talk ~30 s → stop.
-3. 👤 Optional Google sign-in: Supabase → Auth → Providers → Google (client ID/secret from
-   Google Cloud `kith-498416`, add Supabase's callback URL to the OAuth client), then ask Claude
-   to set `NEXT_PUBLIC_WS_GOOGLE=true` and redeploy.
-4. 👤 Confirm the deletion contact on the privacy page (`hello@kith.space`).
-5. 👤 Optional demo data: `npx tsx --env-file=.env.local scripts/workspace-test/seed-demo.ts <your email>`
-   (after you've signed up on work.kith.space).
-6. 👤 Review and send the email to Steve.
+## Live (2026-10-21)
+- ✅ DNS: GoDaddy CNAME `work` → `cname.vercel-dns.com`; certificate issued; **https://work.kith.space is live**.
+- ✅ Live checks: sign-in page, redirect when signed out, therapist API 404, dev preview hidden,
+  sign-in email sends (Resend test inbox), sign-in link → app, typed meeting minutes → note in
+  ~22 s (3 actions, 3 flags), Ask across 2 notes with citations in ~6.5 s.
 
-Test account in the Sydney DB: `workspace-test@kith.space` (field: Mining safety officer, 1 note).
+## Sign-in changed to email + password (2026-10-21)
+- The email-link sign-in was replaced: the login page has **Sign in / Create account** with
+  email + password. Accounts are created already confirmed (`/api/w/auth/signup`), so no
+  email is ever needed. Duplicate sign-up → "already exists, sign in instead". Old
+  `/api/w/auth/magic` removed. Verified live. Test accounts cleaned up.
+- No password reset yet (it would need email). If someone forgets, reset it in Supabase →
+  Authentication → Users.
+
+## Still to do
+1. 👤 **Live recording test** (needs a human voice): work.kith.space → New note → Record → talk ~30 s → stop.
+3. 👤 Confirm the deletion contact on the privacy page (`hello@kith.space`).
+4. 👤 Sign up with your own email on work.kith.space; optionally seed demo notes:
+   `npx tsx --env-file=.env.local scripts/workspace-test/seed-demo.ts <your email>`.
+5. 👤 Review and send the email to Steve.
+
+Test account in the Sydney DB: `workspace-test@kith.space` (field: Mining safety officer, 2 notes).
+Known: note generation takes ~15–22 s (Sonnet; progress stages shown). Could be sped up later by streaming.
