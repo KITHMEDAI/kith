@@ -22,7 +22,10 @@ export default function WorkspacePrivacy() {
       <p className="mt-1">You are responsible for getting the agreement of everyone you record. Kith asks you to confirm this before your first recording.</p>
 
       <h2 className="mt-6 font-semibold text-slate-900">Your control</h2>
-      <p className="mt-1">You can edit or delete any note at any time. To delete your account and all data, email hello@kith.space.</p>
+      <p className="mt-1">You can edit or delete any note at any time. To delete your account and all data, email <a href="mailto:kithmedai@gmail.com" className="text-violet-700 underline">kithmedai@gmail.com</a>.</p>
+
+      <h2 className="mt-6 font-semibold text-slate-900">Help &amp; contact</h2>
+      <p className="mt-1">Questions, feedback or problems: <a href="mailto:kithmedai@gmail.com" className="text-violet-700 underline">kithmedai@gmail.com</a>. Business: KITH, Brookfield, Bengaluru, Karnataka 560037, India.</p>
     </div>
   );
 }

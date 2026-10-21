@@ -125,7 +125,7 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          Your notes are stored in Australia (Sydney). <a href="/privacy" className="underline">Privacy</a>
+          Your notes are stored in Australia (Sydney). <a href="/privacy" className="underline">Privacy</a> · <a href="mailto:kithmedai@gmail.com" className="underline">Help</a>
         </p>
       </div>
     </div>

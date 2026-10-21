@@ -51,7 +51,7 @@ Status as of 2026-10-21. ✅ done by Claude · 👤 needs Anurag · 🤝 Claude 
 
 ## Still to do
 1. 👤 **Live recording test** (needs a human voice): work.kith.space → New note → Record → talk ~30 s → stop.
-3. 👤 Confirm the deletion contact on the privacy page (`hello@kith.space`).
+3. ✅ Help/contact email set to kithmedai@gmail.com (privacy page, account menu, sign-in footer).
 4. 👤 Sign up with your own email on work.kith.space; optionally seed demo notes:
    `npx tsx --env-file=.env.local scripts/workspace-test/seed-demo.ts <your email>`.
 5. 👤 Review and send the email to Steve.
