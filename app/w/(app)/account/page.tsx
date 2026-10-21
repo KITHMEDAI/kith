@@ -1,12 +1,10 @@
-import { getAuthUser } from '@/lib/supabase/server';
-import { getProfile } from '@/lib/workspace/server';
+import { requirePageProfile } from '@/lib/workspace/server';
 import ProfileForm from '@/components/workspace/ProfileForm';
 
 export const metadata = { title: 'Profile' };
 
 export default async function AccountPage() {
-  const user = (await getAuthUser())!;
-  const p = (await getProfile(user.id))!;
+  const { profile: p } = await requirePageProfile();
   return (
     <div className="mx-auto max-w-md">
       <h1 className="text-xl font-semibold">Profile &amp; field</h1>

@@ -64,14 +64,28 @@ export default function AskPanel({ initialQuestion }: { initialQuestion: string 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestion]);
 
-  // Turn [n] citations into links to the source note.
-  const renderAnswer = (text: string, sources: Source[]) =>
-    text.split(/(\[\d+\])/g).map((part, i) => {
+  // Inline: [n] citations become links to the source note; **bold** / *italic* render.
+  const renderInline = (text: string, sources: Source[], keyBase: string) =>
+    text.split(/(\[\d+\]|\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g).map((part, i) => {
+      const key = `${keyBase}-${i}`;
       const m = part.match(/^\[(\d+)\]$/);
       const src = m && sources.find(s => s.n === Number(m[1]));
-      return src
-        ? <Link key={i} href={`/notes/${src.id}`} className="mx-0.5 rounded bg-violet-100 px-1 text-xs font-semibold text-violet-800 hover:bg-violet-200">{m![1]}</Link>
-        : <span key={i}>{part}</span>;
+      if (src) return <Link key={key} href={`/notes/${src.id}`} className="mx-0.5 rounded bg-violet-100 px-1 text-xs font-semibold text-violet-800 hover:bg-violet-200">{m![1]}</Link>;
+      if (/^\*\*[^*]+\*\*$/.test(part)) return <strong key={key}>{part.slice(2, -2)}</strong>;
+      if (/^\*[^*]+\*$/.test(part)) return <em key={key}>{part.slice(1, -1)}</em>;
+      return <span key={key}>{part}</span>;
+    });
+
+  // Block: bullets, numbered lines, headings and paragraphs.
+  const renderAnswer = (text: string, sources: Source[]) =>
+    text.split('\n').map((line, i) => {
+      const t = line.trim();
+      if (!t) return <div key={i} className="h-2" />;
+      const bullet = t.match(/^[-•*]\s+(.*)$/);
+      if (bullet) return <p key={i} className="flex gap-2 pl-1"><span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-violet-400" /><span>{renderInline(bullet[1], sources, `b${i}`)}</span></p>;
+      const heading = t.match(/^#{1,4}\s+(.*)$/);
+      if (heading) return <p key={i} className="mt-1 font-semibold">{renderInline(heading[1], sources, `h${i}`)}</p>;
+      return <p key={i}>{renderInline(t, sources, `p${i}`)}</p>;
     });
 
   return (
@@ -92,7 +106,7 @@ export default function AskPanel({ initialQuestion }: { initialQuestion: string 
           <div key={i}>
             <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-sm bg-violet-600 px-4 py-2 text-sm text-white">{t.q}</p>
             <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-relaxed shadow-sm">
-              {t.a ? <div className="whitespace-pre-wrap">{renderAnswer(t.a, t.sources)}</div>
+              {t.a ? <div className="space-y-1">{renderAnswer(t.a, t.sources)}</div>
                 : <span className="flex items-center gap-2 text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Searching your notes…</span>}
               {t.done && t.sources.length > 0 && (
                 <div className="mt-4 border-t border-slate-100 pt-3">

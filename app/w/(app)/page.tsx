@@ -1,5 +1,4 @@
-import { getAuthUser } from '@/lib/supabase/server';
-import { getProfile } from '@/lib/workspace/server';
+import { requirePageProfile } from '@/lib/workspace/server';
 import { noteTypesForField, NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
 import { FIELD_MAP, fieldLabel } from '@/lib/workspace/fields';
 import NewNote from '@/components/workspace/NewNote';
@@ -7,8 +6,7 @@ import NewNote from '@/components/workspace/NewNote';
 export const metadata = { title: 'New note' };
 
 export default async function NewNotePage() {
-  const user = (await getAuthUser())!;
-  const p = (await getProfile(user.id))!;
+  const { profile: p } = await requirePageProfile();
   const types = noteTypesForField(p.field).map(({ key, label, hint }) => ({ key, label, hint }));
   const preferred = p.default_note_type && NOTE_TYPE_MAP[p.default_note_type] && types.some(t => t.key === p.default_note_type)
     ? p.default_note_type

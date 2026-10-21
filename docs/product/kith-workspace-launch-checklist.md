@@ -20,28 +20,34 @@ Status as of 2026-10-21. ✅ done by Claude · 👤 needs Anurag · 🤝 Claude 
 - ✅ Scripts: `setup-check.ts` (verifies DB + security), `seed-demo.ts` (demo notes).
 - ✅ Email draft to Steve: `docs/partnerships/steve-agi-c51/email-to-steve-workspace.md`.
 
-## To do, in order
-1. 👤 **Save `.env.workspace`** in the Kith folder (Notepad → Save as → "All files"):
-   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   (Supabase → Project Settings → API).
-2. 👤 **Sign in to supabase.com in Chrome** (the Chrome with the Claude extension).
-3. 🤝 Claude, in the Supabase dashboard:
-   - runs `supabase/workspace/001_workspace_schema.sql` in the SQL editor
-   - Auth → URL configuration: Site URL `https://work.kith.space`, redirect URLs
-     `https://work.kith.space/**` and `http://localhost:8090/**`
-   - then runs `setup-check.ts` (tables, functions, row-level security)
-4. 👤 **Supabase → Auth → SMTP** (Claude fills the non-secret fields; you paste the key):
-   host `smtp.resend.com`, port `465`, user `resend`, password = **Resend API key**,
-   sender `noreply@kith.space`, name `Kith`. (Without this, sign-in emails are limited
-   to a few per hour.)
-5. 👤 **Google sign-in** (optional, can ship without): Supabase → Auth → Providers →
-   Google: paste the client ID/secret from Google Cloud project `kith-498416`, and
-   add the redirect URI Supabase shows to that OAuth client. Otherwise remove the
-   Google button before sending.
-6. 🤝 **DNS**: sign in to GoDaddy in Chrome; Claude adds `CNAME work → cname.vercel-dns.com`.
-7. 🤝 Claude adds the 3 Supabase env vars to Vercel and deploys to work.kith.space.
-8. 🤝 End-to-end test on the live site: sign-up, onboarding, typed note, recorded
-   note, edit, search, Ask, mobile, sign-out/in.
-9. 👤 Optional: `npx tsx --env-file=.env.local scripts/workspace-test/seed-demo.ts <your email>`
-   to fill your account with demo notes.
-10. 👤 Review and send the email to Steve.
+## Done 2026-10-21 (session 2)
+- ✅ Sydney Supabase project **kith-workspace** created (ref `kwoskqcdbqdybpttmhto`, ap-southeast-2).
+  `.env.workspace` written. The DB password was auto-generated and not stored; reset it in
+  Supabase if ever needed (the app doesn't use it).
+- ✅ Schema applied; `setup-check.ts` all green (tables, search functions, RLS blocks anon).
+- ✅ Auth: Site URL `https://work.kith.space`; redirect URLs `https://work.kith.space/**`,
+  `http://localhost:8090/**`.
+- ✅ Sign-in email is sent by the app itself via Resend (`/api/w/auth/magic` →
+  `/api/w/auth/confirm`), so **no Supabase SMTP setup is needed**. Tested with Resend's test inbox.
+- ✅ Google button hidden until `NEXT_PUBLIC_WS_GOOGLE=true` is set (after configuring Google).
+- ✅ Local end-to-end on the real Sydney DB: sign-in link → onboarding with custom field
+  ("Mining safety officer" → AI field profile) → typed incident report → note page →
+  search → Ask (cited answer) → edit. Input encrypted, note embedded.
+- ✅ Vercel env complete; **production deployment READY** on project kith-workspace.
+
+## Still to do
+1. 👤 **DNS** (Claude was blocked from changing DNS). kith.space isn't in the GoDaddy account
+   signed in to Chrome, so log in to the account that owns it and add:
+   **Type CNAME · Name `work` · Value `cname.vercel-dns.com` · TTL default**.
+   Vercel then issues HTTPS automatically (a few minutes).
+2. 👤 **Live recording test** (needs a human voice): on work.kith.space → New note → Record →
+   talk ~30 s → stop.
+3. 👤 Optional Google sign-in: Supabase → Auth → Providers → Google (client ID/secret from
+   Google Cloud `kith-498416`, add Supabase's callback URL to the OAuth client), then ask Claude
+   to set `NEXT_PUBLIC_WS_GOOGLE=true` and redeploy.
+4. 👤 Confirm the deletion contact on the privacy page (`hello@kith.space`).
+5. 👤 Optional demo data: `npx tsx --env-file=.env.local scripts/workspace-test/seed-demo.ts <your email>`
+   (after you've signed up on work.kith.space).
+6. 👤 Review and send the email to Steve.
+
+Test account in the Sydney DB: `workspace-test@kith.space` (field: Mining safety officer, 1 note).

@@ -5,6 +5,7 @@
  * processing (generate → index), and resilient embeddings for search.
  */
 import { NextResponse } from 'next/server';
+import { redirect } from 'next/navigation';
 import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
 import { encrypt, decrypt } from '@/lib/encryption';
 import { embedDocument, embedQuery } from '@/lib/embeddings';
@@ -46,6 +47,19 @@ export async function requireApiUser() {
   const user = await getAuthUser();
   if (!user) return { error: NextResponse.json({ error: 'Not signed in' }, { status: 401 }) } as const;
   return { user, supabase: createServerSupabaseClient() } as const;
+}
+
+/**
+ * For pages: the signed-in user's profile, or a redirect to sign-in /
+ * onboarding. Next renders layouts and pages in parallel, so each page must
+ * guard itself rather than rely on the layout's redirect.
+ */
+export async function requirePageProfile(): Promise<{ userId: string; profile: WsProfile }> {
+  const user = await getAuthUser();
+  if (!user) redirect('/login');
+  const profile = await getProfile(user.id);
+  if (!profile) redirect('/onboarding');
+  return { userId: user.id, profile };
 }
 
 export async function getProfile(userId: string): Promise<WsProfile | null> {

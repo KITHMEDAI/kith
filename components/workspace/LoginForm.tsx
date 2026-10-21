@@ -5,6 +5,9 @@ import { Loader2, Mail, CheckCircle2 } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
 import { createClient } from '@/lib/supabase/client';
 
+// Google sign-in shows only once the provider is configured in Supabase.
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_WS_GOOGLE === 'true';
+
 export default function LoginForm({ linkError }: { linkError: boolean }) {
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState<'email' | 'google' | null>(null);
@@ -17,12 +20,14 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
     e.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) { setError('Enter a valid email'); return; }
     setBusy('email'); setError('');
-    const { error } = await createClient().auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: callback(), shouldCreateUser: true },
+    const res = await fetch('/api/w/auth/magic', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim() }),
     });
+    const j = await res.json().catch(() => ({}));
     setBusy(null);
-    if (error) setError(error.message);
+    if (!res.ok) setError(j.error || 'Could not send the email. Try again.');
     else setSent(true);
   };
 
@@ -56,6 +61,7 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
               <h1 className="text-lg font-semibold">Sign in or create your account</h1>
               <p className="mt-1 text-sm text-slate-500">No password needed.</p>
 
+              {GOOGLE_ENABLED && (<>
               <button
                 onClick={google}
                 disabled={busy !== null}
@@ -70,8 +76,9 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
               <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
                 <div className="h-px flex-1 bg-slate-200" /> or <div className="h-px flex-1 bg-slate-200" />
               </div>
+              </>)}
 
-              <form onSubmit={sendLink} className="space-y-3">
+              <form onSubmit={sendLink} className={GOOGLE_ENABLED ? 'space-y-3' : 'mt-5 space-y-3'}>
                 <input
                   type="email"
                   autoComplete="email"
