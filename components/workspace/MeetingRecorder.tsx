@@ -11,6 +11,15 @@ import { startDeepgramStream, type StreamStatus } from '@/lib/copilot/deepgram-s
 
 type Seg = { who: string; text: string; at: number };
 
+/** Short-lived Deepgram token for the recorder (never the account key). */
+async function freshToken(): Promise<string> {
+  const r = await fetch('/api/w/token', { cache: 'no-store' });
+  const j = await r.json();
+  if (!r.ok || !j.token) throw new Error(j.error || 'Could not start transcription');
+  return j.token as string;
+}
+
+
 function mmss(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
@@ -79,13 +88,13 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
       segRef.current = []; setSegments([]);
       startedAt.current = Date.now(); setElapsed(0);
       const stopThem = startDeepgramStream({
-        token: j.token, media: display, diarize: true,
+        token: j.token, scheme: 'bearer', refreshToken: freshToken, media: display, diarize: true,
         onPartial: t => setPartial(p => ({ ...p, them: t })),
         onUtterance: (t, spk) => add(`Participant ${typeof spk === 'number' ? spk + 1 : 1}`, t),
         onStatus: s => setStatus(p => ({ ...p, them: s })),
       });
       const stopYou = startDeepgramStream({
-        token: j.token, media: mic,
+        token: j.token, scheme: 'bearer', refreshToken: freshToken, media: mic,
         onPartial: t => setPartial(p => ({ ...p, you: t })),
         onUtterance: t => add(`${youName} (me)`, t),
         onStatus: s => setStatus(p => ({ ...p, you: s })),

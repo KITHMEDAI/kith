@@ -9,6 +9,15 @@ import { cn } from '@/lib/utils';
 
 type TypeOpt = { key: string; label: string; hint: string };
 
+/** Short-lived Deepgram token for the recorder (never the account key). */
+async function freshToken(): Promise<string> {
+  const r = await fetch('/api/w/token', { cache: 'no-store' });
+  const j = await r.json();
+  if (!r.ok || !j.token) throw new Error(j.error || 'Could not start transcription');
+  return j.token as string;
+}
+
+
 function mmss(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
@@ -82,7 +91,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
       startedAt.current = Date.now();
       setElapsed(0);
       stopStream.current = startDeepgramStream({
-        token: j.token, media: mic, diarize: true, keyterms,
+        token: j.token, scheme: 'bearer', refreshToken: freshToken, media: mic, diarize: true, keyterms,
         onPartial: setPartialText,
         onUtterance: (t, spk) => {
           const label = `Speaker ${String.fromCharCode(65 + (typeof spk === 'number' ? spk : 0))}`;

@@ -46,6 +46,10 @@ export type StreamStatus = 'connecting' | 'live' | 'reconnecting' | 'failed' | '
 
 export function startDeepgramStream(opts: {
   token: string;
+  /** 'token' = account API key (copilot, local only); 'bearer' = short-lived access token. */
+  scheme?: 'token' | 'bearer';
+  /** Called before a reconnect to get a fresh short-lived token (bearer tokens expire). */
+  refreshToken?: () => Promise<string>;
   media: MediaStream;
   onPartial: (text: string) => void;
   /** speaker = Deepgram's diarized speaker index (only when diarize is on). */
@@ -56,7 +60,8 @@ export function startDeepgramStream(opts: {
   /** Vocabulary to boost (defaults to the copilot's list). */
   keyterms?: string[];
 }): () => Promise<void> {
-  const { token, media, onPartial, onUtterance, onStatus, diarize = false, keyterms } = opts;
+  const { media, onPartial, onUtterance, onStatus, diarize = false, keyterms, scheme = 'token', refreshToken } = opts;
+  let token = opts.token;
   let ws: WebSocket | null = null;
   let stopped = false;
   let retries = 0;
@@ -107,7 +112,7 @@ export function startDeepgramStream(opts: {
 
   const open = () => {
     onStatus(retries ? 'reconnecting' : 'connecting');
-    ws = new WebSocket(wsUrl(diarize, keyterms), ['token', token]);
+    ws = new WebSocket(wsUrl(diarize, keyterms), [scheme, token]);
     ws.binaryType = 'arraybuffer';
     ws.onopen = () => { retries = 0; onStatus('live'); };
     ws.onmessage = (event) => {
@@ -132,7 +137,10 @@ export function startDeepgramStream(opts: {
       if (retries < 6) {
         retries += 1;
         onStatus('reconnecting');
-        setTimeout(open, 1000 * retries);
+        setTimeout(async () => {
+          if (refreshToken) { try { token = await refreshToken(); } catch { /* retry with the old one */ } }
+          if (!stopped) open();
+        }, 1000 * retries);
       } else {
         onStatus('failed');
       }
