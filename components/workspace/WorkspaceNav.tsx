@@ -64,9 +64,9 @@ export default function WorkspaceNav({ name }: { name: string }) {
               <Link href="/account" onClick={() => setMenu(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100">
                 <UserRound className="h-4 w-4" /> Profile &amp; field
               </Link>
-              <a href="mailto:kithmedai@gmail.com?subject=Kith%20Workspace%20help" onClick={() => setMenu(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100">
+              <Link href="/help" onClick={() => setMenu(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100">
                 <LifeBuoy className="h-4 w-4" /> Help &amp; support
-              </a>
+              </Link>
               <button onClick={signOut} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50">
                 <LogOut className="h-4 w-4" /> Sign out
               </button>

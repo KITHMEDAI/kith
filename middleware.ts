@@ -8,7 +8,7 @@ const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
 // Kith Workspace (generic edition, work.kith.space): every page lives under
 // app/w/ and is served at a clean URL via rewrite (/notes → /w/notes). Nothing
 // from the therapist product is reachable in this edition.
-const WS_PUBLIC = ['/login', '/privacy', '/terms', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
+const WS_PUBLIC = ['/login', '/privacy', '/terms', '/help', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
 
 async function workspaceMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
