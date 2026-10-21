@@ -24,7 +24,9 @@ export async function GET(req: Request) {
     const db = createServiceRoleClient();
     // Cheapest possible query — count-only, no rows returned. Just enough to
     // count as project activity and keep Supabase awake.
-    const { error } = await db.from('therapists').select('id', { head: true, count: 'exact' });
+    // Kith Workspace runs this same cron against its own (Sydney) database.
+    const table = process.env.NEXT_PUBLIC_EDITION === 'workspace' ? 'ws_profiles' : 'therapists';
+    const { error } = await db.from(table).select('*', { head: true, count: 'exact' });
     if (error) throw error;
     return NextResponse.json({ ok: true, pinged_at: new Date().toISOString() });
   } catch (e) {

@@ -3,7 +3,67 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 export const runtime = 'nodejs';
 
+const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
+
+// Kith Workspace (generic edition, work.kith.space): every page lives under
+// app/w/ and is served at a clean URL via rewrite (/notes → /w/notes). Nothing
+// from the therapist product is reachable in this edition.
+const WS_PUBLIC = ['/login', '/privacy', '/terms', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
+
+async function workspaceMiddleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith('/api/')) {
+    // Only the workspace API (plus the shared DB keep-alive cron) exists in this edition.
+    if (!pathname.startsWith('/api/w/') && pathname !== '/api/cron/keepalive') return new NextResponse('Not found', { status: 404 });
+    return NextResponse.next();
+  }
+
+  const cleanPath = pathname.startsWith('/w/') ? pathname.slice(2) : pathname === '/w' ? '/' : pathname;
+  const target = request.nextUrl.clone();
+  target.pathname = cleanPath === '/' ? '/w' : `/w${cleanPath}`;
+
+  let response = NextResponse.rewrite(target);
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll(); },
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.rewrite(target);
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options as Parameters<typeof response.cookies.set>[2]));
+        },
+      },
+    },
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  const isPublic = WS_PUBLIC.some(p => cleanPath === p || cleanPath.startsWith(`${p}/`));
+
+  if (!user && !isPublic) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+  if (user && cleanPath === '/login') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    url.search = '';
+    return NextResponse.redirect(url);
+  }
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
+  if (IS_WORKSPACE) return workspaceMiddleware(request);
+
+  // Therapist edition: the workspace pages/API don't exist here.
+  if (request.nextUrl.pathname === '/w' || request.nextUrl.pathname.startsWith('/w/') || request.nextUrl.pathname.startsWith('/api/w/')) {
+    return new NextResponse('Not found', { status: 404 });
+  }
+
   const modifiedHeaders = new Headers(request.headers);
   modifiedHeaders.set('x-pathname', request.nextUrl.pathname);
 

@@ -1,0 +1,166 @@
+[
+  {
+    "noteType": "construction_site_inspection",
+    "field": "construction",
+    "inputMode": "typed",
+    "input": "walked lvl 3 w/ Sarah (Apex Concrete). slab pour zone B pushed to thurs bc rain, she to confirm pump booking by tmrw 10am. east stair handrail missing lvl 2 landing, temp barricade up, told Dave (foreman) to fix. formwork zone C good. 2 pallets of blocks blocking fire exit corridor lvl1 - labourers to move today. elec rough-in 80% lvl 3.",
+    "content": {
+      "title": "Level 3 Site Walkthrough – 21 October 2026",
+      "summary": "Anurag conducted a walkthrough of Level 3 with Sarah from Apex Concrete on 21 October 2026. The Zone B slab pour has been pushed to Thursday due to rain, and a blocked fire exit corridor on Level 1 and a missing handrail on Level 2 were identified and require immediate attention. Electrical rough-in on Level 3 is progressing at approximately 80% completion.",
+      "sections": [
+        {
+          "heading": "Site & areas inspected",
+          "points": [
+            "Level 3 walked with Sarah (Apex Concrete).",
+            "Level 1 and Level 2 areas also noted during inspection."
+          ]
+        },
+        {
+          "heading": "Progress observed",
+          "points": [
+            "Zone B slab pour delayed to Thursday due to rain; pump booking to be confirmed by Sarah by tomorrow 10:00 am.",
+            "Formwork Zone C in good condition.",
+            "Electrical rough-in approximately 80% complete on Level 3."
+          ]
+        },
+        {
+          "heading": "Defects / issues",
+          "points": [
+            "Level 2 east stair landing: permanent handrail missing; temporary barricade currently in place.",
+            "Level 1 fire exit corridor: 2 pallets of blocks obstructing the exit."
+          ]
+        },
+        {
+          "heading": "Safety observations",
+          "points": [
+            "Level 2 east stair landing – handrail absent; temp barricade installed as interim measure. Dave (foreman) instructed to rectify.",
+            "Level 1 fire exit corridor – 2 pallets of blocks blocking egress route; labourers directed to relocate today."
+          ]
+        },
+        {
+          "heading": "Instructions given",
+          "points": [
+            "Dave (foreman) instructed to install permanent handrail at Level 2 east stair landing.",
+            "Labourers directed to clear pallet obstruction from Level 1 fire exit corridor today.",
+            "Sarah (Apex Concrete) to confirm pump booking by tomorrow 10:00 am."
+          ]
+        }
+      ],
+      "action_items": [
+        {
+          "task": "Confirm pump booking for Zone B slab pour",
+          "owner": "Sarah (Apex Concrete)",
+          "due": "22 October 2026, 10:00 am"
+        },
+        {
+          "task": "Install permanent handrail at Level 2 east stair landing",
+          "owner": "Dave (foreman)",
+          "due": null
+        },
+        {
+          "task": "Remove 2 pallets of blocks obstructing fire exit corridor on Level 1",
+          "owner": "Labourers",
+          "due": "21 October 2026"
+        }
+      ],
+      "decisions": [
+        "Zone B slab pour rescheduled to Thursday due to rain."
+      ],
+      "follow_ups": [
+        "Verify handrail installation at Level 2 east stair landing is completed and compliant.",
+        "Confirm Level 1 fire exit corridor is clear before end of day.",
+        "Confirm Sarah's pump booking once received.",
+        "Check electrical rough-in progress on Level 3 to confirm completion timeline."
+      ],
+      "flags": [
+        {
+          "level": "urgent",
+          "text": "Level 1 fire exit corridor blocked by 2 pallets of blocks – potential WHS non-compliance and egress hazard. Responsible person: labourers/Dave (foreman). Verify cleared today."
+        },
+        {
+          "level": "urgent",
+          "text": "Level 2 east stair landing: permanent handrail missing – fall hazard. Temp barricade in place. Dave (foreman) instructed to rectify. Confirm completion and compliance."
+        }
+      ],
+      "missing_info": [
+        "Confirmed date for Thursday's Zone B slab pour (exact date not stated).",
+        "Identity and company of Dave (foreman) – surname or subcontractor not recorded.",
+        "Responsible subcontractor or trade for handrail installation on Level 2.",
+        "Whether a WHS incident or near-miss report has been raised for the missing handrail or blocked fire exit."
+      ],
+      "tags": [
+        "site inspection",
+        "level 3",
+        "concrete",
+        "safety",
+        "whs"
+      ]
+    }
+  },
+  {
+    "noteType": "meeting_minutes",
+    "field": "general",
+    "inputMode": "recorded",
+    "input": "Speaker A: Quick one, Priya, Tom and me. Website launch, Tom?\nSpeaker B: Design done, dev needs a week. Launch the 4th not the 28th.\nSpeaker A: Lock the 4th. Priya, tell the client?\nSpeaker C: I'll email today. Budget's tight, pause Google ads till launch?\nSpeaker A: Agreed, pause it.",
+    "content": {
+      "title": "Website Launch Date and Budget Discussion",
+      "summary": "A brief meeting between three attendees confirmed the website launch date has moved from the 28th to 4 November 2026. The Google Ads spend will be paused until launch. Priya is to notify the client by end of day.",
+      "sections": [
+        {
+          "heading": "Attendees",
+          "points": [
+            "Speaker A (note author: Anurag)",
+            "Speaker B (Tom)",
+            "Speaker C (Priya)"
+          ]
+        },
+        {
+          "heading": "Agenda items discussed",
+          "points": [
+            "Website launch: development requires one more week; launch date moved from the 28th to the 4th.",
+            "Client communication: Priya to email client today to advise of the updated launch date.",
+            "Google Ads budget: pausing spend until the website launches to manage tight budget."
+          ]
+        }
+      ],
+      "action_items": [
+        {
+          "task": "Email client to notify them of revised launch date (4th instead of 28th)",
+          "owner": "Priya",
+          "due": "21 October 2026"
+        },
+        {
+          "task": "Pause Google Ads campaign until website launch",
+          "owner": null,
+          "due": null
+        }
+      ],
+      "decisions": [
+        "Website launch date confirmed as the 4th (moved from the 28th).",
+        "Google Ads to be paused until after launch due to budget constraints."
+      ],
+      "follow_ups": [
+        "Confirm client has acknowledged the updated launch date following Priya's email.",
+        "Verify development is on track to meet the 4th deadline after one week of work."
+      ],
+      "flags": [
+        {
+          "level": "attention",
+          "text": "Launch month not explicitly stated in the transcript. The 4th has been recorded as-is — supervisor should confirm whether this is November 2026 or another month."
+        }
+      ],
+      "missing_info": [
+        "Month for the launch date — the 4th is referenced but no month was stated.",
+        "Owner responsible for pausing the Google Ads campaign was not identified.",
+        "No confirmation of who is managing the development team or tracking the one-week delivery."
+      ],
+      "tags": [
+        "website launch",
+        "project planning",
+        "client communication",
+        "google ads",
+        "budget"
+      ]
+    }
+  }
+]
