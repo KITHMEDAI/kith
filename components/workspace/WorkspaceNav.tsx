@@ -2,10 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Mic, FileText, Sparkles, LogOut, UserRound, LifeBuoy } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Mic, FileText, Sparkles, LogOut, UserRound, LifeBuoy, Loader2 } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
-import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 const LINKS = [
@@ -14,19 +13,34 @@ const LINKS = [
   { href: '/ask', label: 'Ask', icon: Sparkles },
 ];
 
+const itemCls = 'flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-slate-100 focus:bg-slate-100 focus:outline-none';
+
 export default function WorkspaceNav({ name }: { name: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const [menu, setMenu] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
   // Rewritten paths arrive as /w/... on the client router; normalise.
   const path = pathname.replace(/^\/w(?=\/|$)/, '') || '/';
   const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 
-  const signOut = async () => {
-    await createClient().auth.signOut({ scope: 'local' }); // this device only; other devices stay signed in
-    router.replace('/login');
-    router.refresh();
-  };
+  // Warm the menu's pages so they open instantly.
+  useEffect(() => { router.prefetch('/account'); router.prefetch('/help'); }, [router]);
+
+  // Close on outside click / tap or Escape. (No hover-out closing: that made
+  // the menu vanish while moving the pointer onto an item.)
+  useEffect(() => {
+    if (!menu) return;
+    const onDown = (e: PointerEvent) => { if (!wrapRef.current?.contains(e.target as Node)) setMenu(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false); };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [menu]);
+
+  // Close the menu whenever the page changes.
+  useEffect(() => { setMenu(false); }, [pathname]);
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur print:hidden">
@@ -50,26 +64,37 @@ export default function WorkspaceNav({ name }: { name: string }) {
             </Link>
           ))}
         </nav>
-        <div className="relative">
+        <div className="relative" ref={wrapRef}>
           <button
             onClick={() => setMenu(m => !m)}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-xs font-semibold text-white hover:bg-violet-700"
+            className={cn('flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-95',
+              menu && 'ring-2 ring-violet-200')}
             aria-label="Account menu"
+            aria-expanded={menu}
+            aria-haspopup="menu"
           >
             {name.trim().charAt(0).toUpperCase() || <UserRound className="h-4 w-4" />}
           </button>
           {menu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-lg" onMouseLeave={() => setMenu(false)}>
+            <div role="menu" className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
               <p className="truncate px-3 py-2 text-xs text-slate-500">{name}</p>
-              <Link href="/account" onClick={() => setMenu(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100">
+              <Link href="/account" role="menuitem" className={itemCls} onClick={() => setMenu(false)}>
                 <UserRound className="h-4 w-4" /> Profile &amp; field
               </Link>
-              <Link href="/help" onClick={() => setMenu(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-slate-100">
+              <Link href="/help" role="menuitem" className={itemCls} onClick={() => setMenu(false)}>
                 <LifeBuoy className="h-4 w-4" /> Help &amp; support
               </Link>
-              <button onClick={signOut} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50">
-                <LogOut className="h-4 w-4" /> Sign out
-              </button>
+              <div className="my-1 h-px bg-slate-100" />
+              {/* One request: the server clears the session and redirects to sign-in. */}
+              <a
+                href="/api/w/auth/signout"
+                role="menuitem"
+                onClick={() => setSigningOut(true)}
+                className={cn(itemCls, 'text-rose-600 hover:bg-rose-50 focus:bg-rose-50')}
+              >
+                {signingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                {signingOut ? 'Signing out…' : 'Sign out'}
+              </a>
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowRight, Check } from 'lucide-react';
 import { FIELDS } from '@/lib/workspace/fields';
+import PhoneField from './PhoneField';
 
 export interface ProfileValues {
   name: string;
@@ -59,7 +60,7 @@ export default function ProfileForm({ mode, initial }: { mode: 'onboarding' | 'a
 
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium">Phone <span className="font-normal text-slate-400">(optional)</span></span>
-        <input className={inputCls} value={v.phone} onChange={set('phone')} type="tel" autoComplete="tel" placeholder="+61 4xx xxx xxx" />
+        <PhoneField value={v.phone} onChange={phone => { setSaved(false); setV(prev => ({ ...prev, phone })); }} />
       </label>
 
       <label className="block">
