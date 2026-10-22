@@ -85,16 +85,17 @@ export default function WorkspaceNav({ name }: { name: string }) {
                 <LifeBuoy className="h-4 w-4" /> Help &amp; support
               </Link>
               <div className="my-1 h-px bg-slate-100" />
-              {/* One request: the server clears the session and redirects to sign-in. */}
-              <a
-                href="/api/w/auth/signout"
-                role="menuitem"
-                onClick={() => setSigningOut(true)}
-                className={cn(itemCls, 'text-rose-600 hover:bg-rose-50 focus:bg-rose-50')}
-              >
-                {signingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
-                {signingOut ? 'Signing out…' : 'Sign out'}
-              </a>
+              {/* One POST: the server clears the session and redirects to sign-in. */}
+              <form method="post" action="/api/w/auth/signout" onSubmit={() => setSigningOut(true)}>
+                <button
+                  type="submit"
+                  role="menuitem"
+                  className={cn(itemCls, 'text-rose-600 hover:bg-rose-50 focus:bg-rose-50')}
+                >
+                  {signingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </button>
+              </form>
             </div>
           )}
         </div>

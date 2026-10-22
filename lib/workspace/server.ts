@@ -7,12 +7,13 @@
 import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient, createServiceRoleClient, getAuthUser } from '@/lib/supabase/server';
-import { encrypt, decrypt } from '@/lib/encryption';
+import { seal, open } from './crypto';
+import { sealNote } from './note-fields';
 import { embedDocument } from '@/lib/embeddings';
 import { withTimeout, embedQueryFast } from './embed';
 
 export { embedQueryFast };
-import { generateNote, noteToText, type NoteContent } from './generate';
+import { generateNote, learnStyle, noteToText, type NoteContent } from './generate';
 import { polishTranscript, parseAudioPaths, deleteAudio } from './polish';
 import { rateHit, AUDIO_MINUTES_PER_DAY } from './rate';
 
@@ -29,6 +30,7 @@ export interface WsProfile {
   note_preferences: string | null;
   default_note_type: string | null;
   recording_consent_ack_at: string | null;
+  style_notes: string | null;   // encrypted; read with open()
 }
 
 export interface WsNote {
@@ -73,23 +75,9 @@ export async function getProfile(userId: string): Promise<WsProfile | null> {
   return (data as WsProfile | null) ?? null;
 }
 
-// Encryption is optional in local dev only. In production a missing key or a
-// failed encryption is an error: never silently store plain text.
-export function sealInput(text: string): string {
-  if (!process.env.ENCRYPTION_SECRET) {
-    if (process.env.NODE_ENV === 'production') throw new Error('ENCRYPTION_SECRET is not set');
-    return text;
-  }
-  return `enc:${encrypt(text)}`;
-}
-export function openInput(stored: string | null): string {
-  if (!stored) return '';
-  if (!stored.startsWith('enc:')) return stored;
-  try { return decrypt(stored.slice(4)); } catch {
-    console.error('[workspace] could not decrypt a note input (key changed?)');
-    return '';
-  }
-}
+// Note input (typed text or transcript), encrypted at the field level (crypto.ts).
+export const sealInput = (text: string): string => seal(text);
+export const openInput = (stored: string | null): string => open(stored);
 
 /** Max generation attempts per note (first try + retries). */
 export const MAX_ATTEMPTS = 3;
@@ -102,12 +90,7 @@ export async function processNote(noteId: string): Promise<void> {
     .eq('id', noteId).single();
   if (!note || note.status !== 'processing') return;
 
-  const [{ data: profile }, { data: edits }] = await Promise.all([
-    service.from('ws_profiles').select('*').eq('user_id', note.user_id).maybeSingle(),
-    service.from('ws_note_edits').select('before_text, after_text')
-      .eq('user_id', note.user_id).eq('note_type', note.note_type)
-      .order('created_at', { ascending: false }).limit(3),
-  ]);
+  const { data: profile } = await service.from('ws_profiles').select('*').eq('user_id', note.user_id).maybeSingle();
   const p = profile as WsProfile | null;
 
   // Polish pass: re-transcribe the uploaded recording as a whole file (more
@@ -149,20 +132,19 @@ export async function processNote(noteId: string): Promise<void> {
       input,
       inputMode: note.input_mode,
       noteType: note.note_type,
-      customInstruction: note.custom_instruction ?? undefined,
+      customInstruction: open(note.custom_instruction) || undefined,
       field: p?.field || note.field,
       fieldCustom: p?.field_custom,
       fieldProfile: p?.field_profile,
       preferences: p?.note_preferences,
-      styleExamples: (edits ?? []).map(e => ({ before: e.before_text, after: e.after_text })),
+      styleNotes: open(p?.style_notes) || null,
       userName: p?.name,
       date: new Date(note.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
       dateISO: note.created_at,
     });
     const text = noteToText(content);
     await service.from('ws_notes').update({
-      status: 'completed', content, title: content.title, summary: content.summary,
-      search_text: text, error: null, updated_at: new Date().toISOString(),
+      status: 'completed', ...sealNote(content), error: null, updated_at: new Date().toISOString(),
     }).eq('id', noteId);
     await indexNote(noteId, text);
   } catch (err) {
@@ -170,6 +152,23 @@ export async function processNote(noteId: string): Promise<void> {
     await service.from('ws_notes').update({
       status: 'failed', error: 'Generation failed', updated_at: new Date().toISOString(),
     }).eq('id', noteId).eq('status', 'processing');
+  }
+}
+
+/**
+ * Learns the user's style from one manual edit (best effort, in the
+ * background). Only generic style notes are kept, encrypted, on the profile;
+ * the before/after text itself is never stored.
+ */
+export async function updateStyleNotes(userId: string, noteType: string, before: string, after: string): Promise<void> {
+  try {
+    const service = createServiceRoleClient();
+    const { data } = await service.from('ws_profiles').select('style_notes').eq('user_id', userId).maybeSingle();
+    const current = open(data?.style_notes);
+    const next = await learnStyle(current, before, after, noteType);
+    if (next !== current) await service.from('ws_profiles').update({ style_notes: seal(next) }).eq('user_id', userId);
+  } catch (err) {
+    console.warn('[workspace] style learning failed (non-fatal):', (err as Error).message.slice(0, 200));
   }
 }
 

@@ -15,6 +15,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { anthropic, SONNET } from '@/lib/claude';
 import { embedQueryFast } from './embed';
+import { blindQuery } from './crypto';
+import { openNote } from './note-fields';
+import { noteToText, maskSensitive, type NoteContent } from './generate';
 
 export const NOT_IN_NOTES = "That isn't in your notes.";
 
@@ -37,18 +40,24 @@ Rules:
 
 export interface AskSource { n: number; id: string; title: string; date: string }
 
-type NoteRow = { id: string; title: string | null; note_type: string; created_at: string; search_text: string | null };
+/** A note decrypted for answering: `text` is the whole note as plain text. */
+type NoteRow = { id: string; title: string | null; note_type: string; created_at: string; text: string };
+type DbRow = { id: string; title: string | null; note_type: string; created_at: string; content: unknown };
+
+// Notes are encrypted at rest (crypto.ts): decrypted here, after the
+// user-scoped query.
+function toRow(r: DbRow): NoteRow {
+  const n = openNote(r);
+  return { id: r.id, title: n.title, note_type: r.note_type, created_at: r.created_at, text: n.content ? noteToText(n.content as NoteContent) : '' };
+}
 
 const MAX_ALL_NOTES = 30;
 const MAX_ALL_CHARS = 80_000;
 const PER_NOTE_CHARS = 3500;
 
-const STOP = new Set('a an the and or but to of in on at is are was were be been for with this that what whats which who whom whose when where why how do does did i me my mine we our you your it its any all about tell give list there have has had can could should would will from by as into than then so if not no yes get got go went much many more most last next yet up out still'.split(' '));
-
-/** "How did the level three slab go?" → "level or three or slab" (websearch OR syntax). */
+/** "How did the level three slab go?" → "level or three or slab" (websearch OR syntax), as blind-index tokens. */
 export function orQuery(q: string) {
-  const terms = Array.from(new Set((q.toLowerCase().match(/[a-z0-9][a-z0-9-]*/g) ?? []).filter(t => t.length > 1 && !STOP.has(t))));
-  return terms.join(' or ');
+  return blindQuery(q, 'or');
 }
 
 function rrf(lists: string[][], k = 60) {
@@ -57,7 +66,7 @@ function rrf(lists: string[][], k = 60) {
   return Array.from(score.entries()).sort((a, b) => b[1] - a[1]).map(([id]) => id);
 }
 
-const COLS = 'id, title, note_type, created_at, search_text';
+const COLS = 'id, title, note_type, created_at, content';
 const fmt = (d: string) => new Date(d).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Australia/Sydney' });
 export const todayLabel = () => new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Australia/Sydney' });
 
@@ -65,8 +74,8 @@ export const todayLabel = () => new Date().toLocaleDateString('en-AU', { weekday
 export async function retrieveForAsk(supabase: SupabaseClient, userId: string, q: string) {
   const { data: latest } = await supabase.from('ws_notes').select(COLS)
     .eq('user_id', userId).eq('status', 'completed').order('created_at', { ascending: false }).limit(MAX_ALL_NOTES + 1);
-  const all = (latest ?? []) as NoteRow[];
-  const total = all.reduce((n, r) => n + Math.min(PER_NOTE_CHARS, (r.search_text || '').length), 0);
+  const all = ((latest ?? []) as DbRow[]).map(toRow);
+  const total = all.reduce((n, r) => n + Math.min(PER_NOTE_CHARS, r.text.length), 0);
   if (all.length <= MAX_ALL_NOTES && total <= MAX_ALL_CHARS) {
     return { sources: [...all].sort((a, b) => a.created_at.localeCompare(b.created_at)), recentRows: [] as NoteRow[] };
   }
@@ -83,7 +92,7 @@ export async function retrieveForAsk(supabase: SupabaseClient, userId: string, q
     })(),
   ]);
   if (vector) {
-    const { data } = await supabase.rpc('ws_search_notes', { p_user_id: userId, p_query_embedding: JSON.stringify(vector), p_query_text: q, p_limit: LIMIT });
+    const { data } = await supabase.rpc('ws_search_notes', { p_user_id: userId, p_query_embedding: JSON.stringify(vector), p_query_text: blindQuery(q, 'and'), p_limit: LIMIT });
     lists.push((data ?? []).map((r: { id: string }) => r.id));
   }
   lists.push(kw);
@@ -95,7 +104,7 @@ export async function retrieveForAsk(supabase: SupabaseClient, userId: string, q
   const missing = ids.filter(id => !byId.has(id));
   if (missing.length) {
     const { data } = await supabase.from('ws_notes').select(COLS).eq('user_id', userId).in('id', missing);
-    ((data ?? []) as NoteRow[]).forEach(r => byId.set(r.id, r));
+    ((data ?? []) as DbRow[]).forEach(r => byId.set(r.id, toRow(r)));
   }
   const sources = (ids.map(id => byId.get(id)).filter(Boolean) as NoteRow[])
     .sort((a, b) => a.created_at.localeCompare(b.created_at)); // oldest → newest
@@ -105,7 +114,7 @@ export async function retrieveForAsk(supabase: SupabaseClient, userId: string, q
 /** Build the model request for a question given retrieved notes. */
 export function buildAskMessages(q: string, sources: NoteRow[], recentRows: NoteRow[]) {
   const context = sources.map((s, i) =>
-    `[${i + 1}] ${s.title || 'Untitled'} (written ${fmt(s.created_at)})\n${(s.search_text || '').slice(0, PER_NOTE_CHARS)}`).join('\n\n---\n\n');
+    `[${i + 1}] ${s.title || 'Untitled'} (written ${fmt(s.created_at)})\n${maskSensitive(s.text.slice(0, PER_NOTE_CHARS))}`).join('\n\n---\n\n');
   const index = recentRows.length
     ? `\n\n<index_of_recent_note_titles>\n${recentRows.map(r => `- ${fmt(r.created_at)}: ${r.title || 'Untitled'}`).join('\n')}\n</index_of_recent_note_titles>`
     : '';

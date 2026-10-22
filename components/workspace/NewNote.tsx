@@ -24,8 +24,8 @@ function mmss(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-export default function NewNote({ firstName, fieldName, types, defaultType, consentAcked, keyterms }: {
-  firstName: string; fieldName: string; types: TypeOpt[]; defaultType: string; consentAcked: boolean; keyterms: string[];
+export default function NewNote({ firstName, fieldName, types, defaultType, keyterms }: {
+  firstName: string; fieldName: string; types: TypeOpt[]; defaultType: string; keyterms: string[];
 }) {
   const router = useRouter();
   const [noteType, setNoteTypeState] = useState(defaultType);
@@ -36,7 +36,10 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [consent, setConsent] = useState(consentAcked);
+  // Consent is confirmed for EACH recording: a confirmation is used up by the
+  // recording it starts, and sent with that note (the server requires it).
+  const consentAt = useRef<string | null>(null);
+  const usedConsentAt = useRef<string | null>(null);
   const [askConsent, setAskConsent] = useState(false);
   const [recording, setRecording] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -77,7 +80,10 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
     const res = await fetch('/api/w/notes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input, input_mode: inputMode, note_type: noteType, custom_instruction: custom, duration_seconds: duration, audio }),
+      body: JSON.stringify({
+        input, input_mode: inputMode, note_type: noteType, custom_instruction: custom, duration_seconds: duration, audio,
+        ...(inputMode === 'recorded' ? { recording_consent: !!usedConsentAt.current, recording_consent_at: usedConsentAt.current } : {}),
+      }),
     });
     const j = await res.json().catch(() => ({}));
     if (!res.ok) { setSubmitting(false); setError(j.error || 'Could not create the note'); return; }
@@ -91,7 +97,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
 
   const startRecording = async () => {
     if (customMissing()) return;
-    if (!consent) { setAskConsent(true); return; }
+    if (!takeConsent()) return;
     setStarting(true); setError('');
     try {
       const res = await fetch('/api/w/token');
@@ -117,6 +123,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
       });
       setRecording(true);
     } catch (err) {
+      consentAt.current = usedConsentAt.current; // didn't start: the confirmation still stands
       setError((err as Error).name === 'NotAllowedError' ? 'Microphone access was blocked. Allow it in your browser and try again.' : (err as Error).message);
     } finally {
       setStarting(false);
@@ -143,17 +150,23 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
     create(transcript, 'recorded', duration, ref ? [ref] : []);
   };
 
-  const acceptConsent = async () => {
-    setConsent(true); setAskConsent(false);
-    fetch('/api/w/consent', { method: 'POST' }).catch(() => {});
+  /** Uses up the current confirmation for the recording about to start. */
+  const takeConsent = () => {
+    if (!consentAt.current) { setAskConsent(true); return false; }
+    usedConsentAt.current = consentAt.current;
+    consentAt.current = null;
+    return true;
+  };
+
+  const acceptConsent = () => {
+    consentAt.current = new Date().toISOString();
+    setAskConsent(false);
     if (mode === 'record') setTimeout(startRecording, 0);
   };
 
   const ensureConsent = () => {
     if (customMissing()) return false;
-    if (consent) return true;
-    setAskConsent(true);
-    return false;
+    return takeConsent();
   };
 
   const pickMode = (m: 'record' | 'meeting' | 'type') => {
@@ -167,7 +180,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   const consentBox = askConsent && (
     <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
       <p className="flex items-center gap-2 font-medium text-amber-900"><ShieldCheck className="h-4 w-4" /> Before you record</p>
-      <p className="mt-1 text-amber-900/80">In Australia you generally need everyone&apos;s agreement to record a conversation. Confirm everyone being recorded has agreed.</p>
+      <p className="mt-1 text-amber-900/80">In Australia you generally need everyone&apos;s agreement to record a conversation. Confirm everyone in this recording has agreed. Kith asks before every recording and keeps your confirmation with the note.</p>
       <div className="mt-3 flex gap-2">
         <button onClick={acceptConsent} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700">Everyone has agreed</button>
         <button onClick={() => setAskConsent(false)} className="rounded-lg px-3 py-1.5 text-sm text-amber-900 hover:bg-amber-100">Cancel</button>

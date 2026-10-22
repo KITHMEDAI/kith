@@ -26,6 +26,9 @@ export const LIMITS = {
   signupIp: [[10, HOUR], [30, DAY]],
   signupEmail: [[5, HOUR], [10, DAY]],
   verifyEmail: [[10, HOUR], [30, DAY]],
+  resetEmail: [[5, HOUR], [10, DAY]],
+  export:   [[10, HOUR], [30, DAY]],
+  deleteAccount: [[5, HOUR], [10, DAY]],
 } as const satisfies Record<string, ReadonlyArray<readonly [number, number]>>;
 
 /** Daily budget of recording minutes re-transcribed by the polish pass. */
@@ -56,6 +59,18 @@ export async function limited(key: string, windows: ReadonlyArray<readonly [numb
   const wait = await rateHit(key, windows);
   if (!wait) return null;
   return NextResponse.json({ error: message }, { status: 429, headers: { 'Retry-After': String(wait) } });
+}
+
+/**
+ * True when a state-changing request comes from this site's own pages
+ * (Origin, or failing that Referer, matches the request's host). Browsers
+ * always send Origin on POST, so a cross-site form post is refused.
+ */
+export function sameOrigin(req: Request): boolean {
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+  const from = req.headers.get('origin') || req.headers.get('referer');
+  if (!host || !from) return false;
+  try { return new URL(from).host === host; } catch { return false; }
 }
 
 /** Client IP as seen by Vercel (not spoofable there, unlike x-forwarded-for's first hop). */

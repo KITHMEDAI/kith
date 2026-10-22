@@ -19,7 +19,6 @@ export default async function NewNotePage() {
       fieldName={fieldLabel(p.field, p.field_custom)}
       types={types}
       defaultType={preferred}
-      consentAcked={!!p.recording_consent_ack_at}
       keyterms={keytermsForField(p.field)}
     />
   );

@@ -14,7 +14,11 @@ const SUGGESTIONS = [
   'What did we decide last time?',
 ];
 
-export default function AskPanel({ initialQuestion }: { initialQuestion: string }) {
+// A question handed over from Notes search travels in sessionStorage, never
+// in the URL (keeps it out of history and request logs).
+export const ASK_HANDOFF_KEY = 'ws-ask-question';
+
+export default function AskPanel() {
   const [input, setInput] = useState('');
   const [turns, setTurns] = useState<Turn[]>([]);
   const [busy, setBusy] = useState(false);
@@ -60,9 +64,11 @@ export default function AskPanel({ initialQuestion }: { initialQuestion: string 
   };
 
   useEffect(() => {
-    if (initialQuestion && !asked.current) { asked.current = true; ask(initialQuestion); }
+    let q = '';
+    try { q = sessionStorage.getItem(ASK_HANDOFF_KEY) ?? ''; sessionStorage.removeItem(ASK_HANDOFF_KEY); } catch { /* storage blocked */ }
+    if (q && !asked.current) { asked.current = true; ask(q); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuestion]);
+  }, []);
 
   // Only the notes the answer actually cites; none for a "not in your notes" answer.
   const shown = (t: Turn) => {

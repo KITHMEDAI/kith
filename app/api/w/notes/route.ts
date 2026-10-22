@@ -5,6 +5,7 @@ import { isOwnAudioPath, deleteAudio } from '@/lib/workspace/polish';
 import { NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
 import { realWordCount } from '@/lib/workspace/words';
 import { createServiceRoleClient } from '@/lib/supabase/server';
+import { sealOrNull } from '@/lib/workspace/crypto';
 import { limited, LIMITS } from '@/lib/workspace/rate';
 
 export const maxDuration = 300; // long meetings: generation runs after the response via waitUntil
@@ -25,6 +26,9 @@ export async function POST(req: Request) {
   const customInstruction = noteType === 'custom' ? String(body.custom_instruction ?? '').slice(0, 600) : undefined;
   const rawDuration = Number(body.duration_seconds);
   const duration = Number.isFinite(rawDuration) ? Math.min(Math.max(Math.round(rawDuration), 0), 6 * 3600) : null;
+  // Per-recording consent: the user confirms, for THIS recording, that everyone
+  // recorded agreed. Stored on the note (when they confirmed, else now).
+  const consentAt = consentTime(body.recording_consent, body.recording_consent_at);
 
   // Audio uploaded for the polish pass: only files in this user's own folder.
   const audio = (Array.isArray(body.audio) ? body.audio : [])
@@ -41,6 +45,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error }, { status });
   };
 
+  if (inputMode === 'recorded' && !consentAt) {
+    return reject('Confirm that everyone in the recording agreed to be recorded.', 422);
+  }
   // Real words only: speaker labels and emoji/punctuation don't count.
   if (realWordCount(input) < 3) {
     return reject('Not enough content yet: say or type a little more.', 422);
@@ -58,13 +65,14 @@ export async function POST(req: Request) {
   const { data, error } = await service.from('ws_notes').insert({
     user_id: user.id,
     note_type: noteType,
-    custom_instruction: customInstruction ?? null,
+    custom_instruction: sealOrNull(customInstruction),
     field: profile.field,
     input_mode: inputMode,
     input_enc: sealInput(input),
     duration_seconds: duration,
     audio_paths: inputMode === 'recorded' ? audio : [],
     transcript_source: inputMode === 'recorded' ? 'live' : null,
+    recording_consent_at: inputMode === 'recorded' ? consentAt : null,
     status: 'processing',
   }).select('id').single();
   if (error || !data) return reject('Could not save the note. Try again.', 500);
@@ -75,4 +83,12 @@ export async function POST(req: Request) {
 
   waitUntil(processNote(data.id));
   return NextResponse.json({ id: data.id });
+}
+
+/** The consent timestamp to store: the client's confirm time if it is plausible (within the last 7 hours), else now. */
+function consentTime(given: unknown, at: unknown): string | null {
+  if (given !== true) return null;
+  const t = typeof at === 'string' ? Date.parse(at) : NaN;
+  const now = Date.now();
+  return new Date(Number.isFinite(t) && t <= now && t > now - 7 * 3600_000 ? t : now).toISOString();
 }

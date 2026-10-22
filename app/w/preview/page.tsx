@@ -26,7 +26,7 @@ export default function Preview({ searchParams }: { searchParams: { view?: strin
         {view === 'new' && (
           <NewNote firstName="Steve" fieldName="Construction / trades"
             types={noteTypesForField('construction').map(({ key, label, hint }) => ({ key, label, hint }))}
-            defaultType="construction_site_inspection" consentAcked={false} keyterms={[]} />
+            defaultType="construction_site_inspection" keyterms={[]} />
         )}
         {(view === 'note' || view === 'processing') && <NoteView initial={note} typeLabel={NOTE_TYPE_MAP[note.note_type]?.label ?? 'Note'} />}
       </main>

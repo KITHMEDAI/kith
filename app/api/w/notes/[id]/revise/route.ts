@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { requireApiUser, indexNote, openInput } from '@/lib/workspace/server';
 import { reviseNote, noteToText, type NoteContent } from '@/lib/workspace/generate';
+import { sealNote, openContent } from '@/lib/workspace/note-fields';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { limited, LIMITS } from '@/lib/workspace/rate';
 
@@ -24,7 +25,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const { data: note } = await supabase.from('ws_notes')
     .select('id, note_type, field, content, input_enc, status, created_at').eq('id', params.id).maybeSingle();
   if (!note) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  if (note.status !== 'completed' || !note.content) return NextResponse.json({ error: 'The note is still being written' }, { status: 409 });
+  const current = openContent(note.content);
+  if (note.status !== 'completed' || !current) return NextResponse.json({ error: 'The note is still being written' }, { status: 409 });
 
   const { data: profile } = await supabase.from('ws_profiles')
     .select('field, field_custom, field_profile').eq('user_id', user.id).maybeSingle();
@@ -32,7 +34,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   let updated: NoteContent;
   try {
     updated = await reviseNote({
-      current: note.content as NoteContent,
+      current,
       originalInput: openInput(note.input_enc),
       request: text,
       field: profile?.field || note.field,
@@ -46,21 +48,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: 'Could not update the note. Try again.' }, { status: 502 });
   }
 
-  const before = noteToText(note.content as NoteContent);
+  // Revisions are content (additions/corrections), so they don't teach style.
+  const before = noteToText(current);
   const after = noteToText(updated);
-  const service = createServiceRoleClient();
-  const { error } = await service.from('ws_notes').update({
-    content: updated, title: updated.title, summary: updated.summary,
-    search_text: after, updated_at: new Date().toISOString(),
+  const { error } = await createServiceRoleClient().from('ws_notes').update({
+    ...sealNote(updated), updated_at: new Date().toISOString(),
   }).eq('id', params.id).eq('user_id', user.id);
   if (error) return NextResponse.json({ error: 'Could not save the update. Try again.' }, { status: 500 });
 
-  if (before !== after) {
-    await service.from('ws_note_edits').insert({
-      note_id: params.id, user_id: user.id, note_type: note.note_type,
-      before_text: before.slice(0, 4000), after_text: after.slice(0, 4000),
-    });
-  }
   waitUntil(indexNote(params.id, after));
   return NextResponse.json({ content: updated, changed: before !== after });
 }

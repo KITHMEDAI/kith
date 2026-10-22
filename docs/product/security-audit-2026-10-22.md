@@ -6,7 +6,7 @@ Scope: work.kith.space (workspace edition). There were 4 parallel read-only audi
 - privacy and retention
 - injection, abuse and dependencies
 
-Key findings were re-verified in code. No production requests were made. Nothing has been fixed yet.
+Key findings were re-verified in code. No production requests were made. Items 1–10 are fixed and deployed; items 11–20 are fixed in code (see the two status sections below).
 
 **Bottom line:** there is no cross-user read path today. RLS plus `user_id` filters hold everywhere, Ask included, and there is no XSS and no leaked secret. The serious risks are:
 - account pre-takeover at sign-up
@@ -52,6 +52,33 @@ Regression tests:
 - `scripts/workspace-test/security-check.ts` (38 checks)
 - `scripts/workspace-test/signup-check.ts` (9 checks)
 
+## Status: "fix soon" items 11–20 are FIXED in code (2026-10-22, not yet deployed)
+
+| # | What changed |
+|---|---|
+| 11 | **Field-level encryption of all note text** (`lib/workspace/crypto.ts`, `note-fields.ts`). Encrypted: title, summary, content (an encrypted JSON string in the JSONB column), custom note description, input/transcript and style notes. Format: AES-256-GCM, key derived once per process from `ENCRYPTION_SECRET` (unchanged), prefix `e2:`. Old `enc:` and plain rows still read. `search_text` is now a **blind index**: each word is normalised (lower case, simple plurals), then replaced by a keyed HMAC spelled in letters a–p, so the existing full-text RPCs still match and rank with no schema change. Ask, the list, search, the note page and export decrypt on the server after the user-scoped query. The privacy page now describes this exactly (account details are *not* field-encrypted, and it says so). |
+| 13 | **Per-recording consent.** New `ws_notes.recording_consent_at`. `POST /api/w/notes` refuses a recorded note without `recording_consent: true` (422, audio deleted). The recorder asks before *every* recording; one confirmation is used up by the recording it starts. The profile-level `/api/w/consent` route was removed. |
+| 14 | **No more raw edits in prompts.** `ws_note_edits` is dropped (migration 004) and no longer written. A manual edit now updates short, generic, encrypted **style notes** on the profile (`learnStyle`, Haiku). The prompt forbids names, places, dates, numbers and case facts; only bullet lines are kept, then masked. Revisions ("add details…") are content and don't train style. |
+| 15 | **Search out of URLs.** The notes page searches via `POST /api/w/search`. "Ask your notes" gets the question through `sessionStorage`, and `/ask?q=` is gone. Analytics was already removed. **Sentry is disabled for the workspace edition** in `instrumentation.ts`, whatever `SENTRY_DSN` is set to. |
+| 16 | **Self-serve data rights.** Profile → *Your data & security*: **Download my data** (`GET /api/w/account/export`: profile, style notes, every note decrypted with its original input and consent time), **Delete account** (`POST /api/w/account/delete`: type your email to confirm; same-origin only; deletes every file in the user's storage folder, then the auth user, which cascades to profile and notes). Each note has **View transcript / original typed notes** (`GET /api/w/notes/[id]/transcript`). |
+| 19 | **Password reset** (`/api/w/auth/reset`): an emailed code, the same shape as sign-up, with an identical answer for unknown emails. It keeps this browser signed in and signs out every other device. **Sign out everywhere** (Profile, `scope=global`). **Turnstile CAPTCHA** on sign-up / reset / sign-in. It is off until the keys are set (see the list below). |
+| 20 | **Sign-out is POST-only** and same-origin (GET → 405, other origin → 403). The **middleware matcher** now always runs on `/api/:path*`, so `/api/patients/x.png` returns 404 in the workspace. **Card / TFN / Medicare numbers are masked before every AI call**: generate input, revise (note, input and request), Ask context and style learning. The signed audio URL was already 300 s. |
+
+**Bug found and fixed along the way:** sign-up verification set the password through the admin API, and Supabase revokes *every* session on an admin password change. So people were silently signed out right after verifying, and had to sign in again. Both verify and reset now set the password as the user (`updateUser`), which keeps this session and revokes the others (`lib/workspace/auth.ts`).
+
+**Deploy order (needs your OK; none of it is done):**
+1. Run `supabase/workspace/004_privacy_fixes.sql` in the Sydney SQL editor. It adds `recording_consent_at` and `style_notes`, and **drops `ws_note_edits`**. It is safe with the old code still live.
+2. Deploy (command in `kith-workspace-launch-checklist.md`).
+3. Encrypt existing rows: `npx tsx --env-file=.env.workspace --env-file=.env.workspace.generated scripts/workspace-test/encrypt-backfill.ts` (dry run), then add `--apply`. Until this runs, old notes are still plain text and only semantic search finds them.
+4. Optional CAPTCHA:
+   - Cloudflare → Turnstile → add a site for work.kith.space.
+   - Vercel env: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY`, then redeploy.
+   - Supabase → Auth → Attack Protection → enable CAPTCHA (Turnstile, same secret). This protects direct password sign-in.
+
+Regression tests (run against the local dev server on the Sydney DB):
+- `signup-check.ts`: **20/20** (sign-up, live session after verify, reset, sign out everywhere). Steps that need a CAPTCHA report SKIP when CAPTCHA is on.
+- `security-check.ts`: **65/69 before migration 004**. The 4 that fail need 004: the edit table is gone, style notes can't be written directly, transcript, export. Now run with `--env-file=.env.workspace --env-file=.env.workspace.generated`. It signs users in by emailed-code equivalent and calls the API with their session cookie, and covers encryption at rest, the blind index, consent, search, export, transcript, account deletion, sign-out CSRF and the matcher.
+
 ## Fix now (before Steve or anyone outside uses it)
 
 | # | Sev | Issue | Where | Fix |
@@ -92,8 +119,7 @@ Regression tests:
 - **Supabase SQL:** run `select * from pg_policies where schemaname='storage';` and confirm there are no broad policies on `storage.objects`.
 - **Voyage dashboard:** opt out of training.
 - **Deepgram / Anthropic:** set usage caps and alerts.
-- **Vercel (workspace project):** confirm `SENTRY_DSN` is unset or intended.
-- **Before real client data:**
+- **Vercel (workspace project):** `SENTRY_DSN` no longer matters (Sentry is off in the workspace edition in code), but unset it anyway.- **Before real client data:**
   - paid Supabase plan (backups)
   - breach-response note (NDB: assess within 30 days, notify the OAIC)
   - domain contact email instead of Gmail

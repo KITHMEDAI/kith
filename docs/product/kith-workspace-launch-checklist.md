@@ -46,8 +46,9 @@ Status as of 2026-10-21. ✅ done by Claude · 👤 needs Anurag · 🤝 Claude 
   email + password. Accounts are created already confirmed (`/api/w/auth/signup`), so no
   email is ever needed. Duplicate sign-up → "already exists, sign in instead". Old
   `/api/w/auth/magic` removed. Verified live. Test accounts cleaned up.
-- No password reset yet (it would need email). If someone forgets, reset it in Supabase →
-  Authentication → Users.
+- ~~No password reset yet.~~ Superseded 2026-10-22: sign-up now verifies email with a code, and
+  "Forgot password?" resets with an emailed code. See `security-audit-2026-10-22.md` for the
+  deploy order of the "fix soon" items (migration 004 → deploy → `encrypt-backfill.ts`).
 
 ## Still to do
 1. 👤 **Live recording test** (needs a human voice): work.kith.space → New note → Record → talk ~30 s → stop.

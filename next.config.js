@@ -10,8 +10,9 @@ function workspaceHeaders() {
   })();
   const csp = [
     "default-src 'self'",
-    // Next.js inline bootstrap scripts; blob: for the recorder's AudioWorklet.
-    `script-src 'self' 'unsafe-inline' blob:${isDev ? " 'unsafe-eval'" : ''}`,
+    // Next.js inline bootstrap scripts; blob: for the recorder's AudioWorklet;
+    // Cloudflare Turnstile (CAPTCHA) on the sign-in page.
+    `script-src 'self' 'unsafe-inline' blob: https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
@@ -19,7 +20,7 @@ function workspaceHeaders() {
     `connect-src 'self' https://${supabase} wss://${supabase} https://api.deepgram.com wss://api.deepgram.com${isDev ? ' ws://localhost:* http://localhost:*' : ''}`,
     "worker-src 'self' blob:",
     "frame-ancestors 'none'",
-    "frame-src 'none'",
+    "frame-src https://challenges.cloudflare.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

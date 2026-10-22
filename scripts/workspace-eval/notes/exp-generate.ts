@@ -101,10 +101,8 @@ function noteTypeBlock(input: GenerateInput): string {
 function personalBlock(input: GenerateInput): string {
   const parts: string[] = [];
   if (input.preferences?.trim()) parts.push(`The user's own preferences for their notes: "${input.preferences.trim().slice(0, 500)}"`);
-  if (input.styleExamples?.length) {
-    parts.push('The user previously edited generated notes like this. Match their preferred style and wording:\n' +
-      input.styleExamples.slice(0, 3).map((e, i) =>
-        `Example ${i + 1}\nBEFORE: ${e.before.slice(0, 600)}\nAFTER: ${e.after.slice(0, 600)}`).join('\n\n'));
+  if (input.styleNotes?.trim()) {
+    parts.push(`Style the user prefers, learned from their past edits (formatting and wording only; never a source of facts):\n${input.styleNotes.trim().slice(0, 1200)}`);
   }
   return parts.join('\n\n');
 }

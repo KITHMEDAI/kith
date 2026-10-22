@@ -1,4 +1,9 @@
+// Kith Workspace (work.kith.space) never reports to Sentry: its errors could
+// carry note content, and Sentry isn't a disclosed processor there.
+const SENTRY_ON = process.env.NEXT_PUBLIC_EDITION !== 'workspace';
+
 export async function register() {
+  if (!SENTRY_ON) return;
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const Sentry = await import('@sentry/nextjs');
     Sentry.init({
@@ -33,6 +38,7 @@ export async function register() {
 // never actually routes uncaught errors from Route Handlers/Server Components
 // to it, so nothing ever gets reported regardless of a valid DSN.
 export async function onRequestError(...args: Parameters<typeof import('@sentry/nextjs').captureRequestError>) {
+  if (!SENTRY_ON) return;
   const Sentry = await import('@sentry/nextjs');
   Sentry.captureRequestError(...args);
 }

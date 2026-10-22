@@ -64,6 +64,16 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
   const [revising, setRevising] = useState(false);
   const [reviseMsg, setReviseMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [undoContent, setUndoContent] = useState<NoteContent | null>(null);
+  const [source, setSource] = useState<{ open: boolean; text: string | null; error?: string }>({ open: false, text: null });
+
+  const toggleSource = async () => {
+    if (source.open) { setSource(s => ({ ...s, open: false })); return; }
+    setSource(s => ({ ...s, open: true }));
+    if (source.text !== null) return;
+    const res = await fetch(`/api/w/notes/${note.id}/transcript`, { cache: 'no-store' });
+    const j = await res.json().catch(() => ({}));
+    setSource({ open: true, text: res.ok ? String(j.input ?? '') : null, error: res.ok ? undefined : 'Could not load it. Try again.' });
+  };
 
   // Poll while the note is being written.
   useEffect(() => {
@@ -284,7 +294,7 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Save
               </button>
             </div>
-            <p className="text-xs text-slate-400">Kith learns from your edits and writes future notes of this type more like this.</p>
+            <p className="text-xs text-slate-400">Kith learns your style from edits (formatting and wording only, never what the note is about) and writes future notes more like this.</p>
           </div>
         )}
       </article>
@@ -325,6 +335,21 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
                 <button onClick={undo} className="flex items-center gap-1 font-medium text-violet-700 hover:underline"><Undo2 className="h-3.5 w-3.5" /> Undo</button>
               )}
             </p>
+          )}
+        </section>
+      )}
+
+      {note.status !== 'processing' && !editing && (
+        <section className="mt-4 print:hidden">
+          <button onClick={toggleSource} className="text-sm text-slate-500 hover:text-slate-900 hover:underline">
+            {source.open ? 'Hide' : 'View'} {note.input_mode === 'recorded' ? 'transcript' : 'original typed notes'}
+          </button>
+          {source.open && (
+            <div className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
+              {source.error ? <span className="text-rose-700">{source.error}</span>
+                : source.text === null ? <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                : source.text || 'Nothing was saved.'}
+            </div>
           )}
         </section>
       )}

@@ -35,7 +35,7 @@ export default function WorkspaceTerms() {
       <p className="mt-1">During the pilot the service is provided &quot;as is&quot;. We work to keep it available and your data safe, but we can&apos;t promise it will be uninterrupted or error-free. Keep your own copy of anything critical. To the extent the law allows, we are not liable for indirect or consequential loss. Nothing in these terms excludes rights you have under the Australian Consumer Law that can&apos;t be excluded.</p>
 
       <H>Ending your use</H>
-      <p className="mt-1">You can stop using Kith and ask us to delete your account at any time. If we end the pilot, we will give you reasonable notice and a chance to copy your notes.</p>
+      <p className="mt-1">You can stop using Kith and delete your account yourself (Profile → Your data &amp; security), or ask us to, at any time. If we end the pilot, we will give you reasonable notice and a chance to copy your notes.</p>
 
       <H>Changes and contact</H>
       <p className="mt-1">We may update these terms; if a change is significant we will tell you in the app or by email. Questions: <a href="/help" className="text-violet-700 underline">kithmedai@gmail.com</a>.</p>

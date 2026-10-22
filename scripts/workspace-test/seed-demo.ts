@@ -6,8 +6,12 @@ import { readFileSync, existsSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { generateNote, noteToText } from '../../lib/workspace/generate';
 import { embedDocument } from '../../lib/embeddings';
+import { seal } from '../../lib/workspace/crypto';
+import { sealNote } from '../../lib/workspace/note-fields';
 
-const ws = Object.fromEntries((existsSync('.env.workspace') ? readFileSync('.env.workspace', 'utf8') : '')
+// .env.workspace.generated holds the workspace ENCRYPTION_SECRET: notes are
+// stored encrypted exactly as the app stores them.
+const ws = Object.fromEntries(['.env.workspace', '.env.workspace.generated'].map(f => (existsSync(f) ? readFileSync(f, 'utf8') : '')).join('\n')
   .split(/\r?\n/).map(l => l.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)).filter(Boolean)
   .map(m => [m![1], m![2].replace(/^['"]|['"]$/g, '')])) as Record<string, string>;
 
@@ -24,6 +28,8 @@ const DEMO = [
   const email = process.argv[2];
   if (!email) { console.error('Usage: seed-demo.ts <email of an onboarded workspace user>'); process.exit(1); }
   if (!ws.NEXT_PUBLIC_SUPABASE_URL) { console.error('.env.workspace missing'); process.exit(1); }
+  if (!ws.ENCRYPTION_SECRET) { console.error('.env.workspace.generated (ENCRYPTION_SECRET) missing'); process.exit(1); }
+  process.env.ENCRYPTION_SECRET = ws.ENCRYPTION_SECRET;
   const admin = createClient(ws.NEXT_PUBLIC_SUPABASE_URL, ws.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const { data: profile } = await admin.from('ws_profiles').select('*').eq('email', email).maybeSingle();
   if (!profile) { console.error(`No onboarded workspace profile for ${email}`); process.exit(1); }
@@ -39,8 +45,7 @@ const DEMO = [
     try { embedding = JSON.stringify(await embedDocument(text)); } catch { /* keyword search still works */ }
     const { error } = await admin.from('ws_notes').insert({
       user_id: profile.user_id, note_type: d.noteType, field: 'construction', input_mode: 'typed',
-      input_enc: d.input, status: 'completed', content, title: content.title, summary: content.summary,
-      search_text: text, embedding, created_at: created.toISOString(), updated_at: created.toISOString(),
+      input_enc: seal(d.input), status: 'completed', ...sealNote(content), embedding, created_at: created.toISOString(), updated_at: created.toISOString(),
     });
     console.log(error ? `❌ ${error.message}` : `✅ ${content.title}`);
   }

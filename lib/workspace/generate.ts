@@ -4,7 +4,7 @@
  * Generic, field-aware note generation for Kith Workspace.
  *
  * Prompt = base rules + field profile + note-type template + the user's own
- * preferences + their recent edits (style examples). Output is one structured
+ * preferences + their learned style notes (generic, no client details). Output is one structured
  * JSON shape for every field, so a single renderer handles all of them.
  *
  * AI region: currently the Anthropic API (US). An AU switch (Claude on AWS
@@ -37,7 +37,7 @@ export interface GenerateInput {
   fieldCustom?: string | null;
   fieldProfile?: string | null;  // AI profile for field "other"
   preferences?: string | null;
-  styleExamples?: { before: string; after: string }[];
+  styleNotes?: string | null;    // learned from the user's edits (learnStyle), never client details
   userName?: string;
   date: string;                  // human date of the note, e.g. "21 October 2026"
   dateISO?: string;              // exact timestamp, used to build a weekday calendar
@@ -205,10 +205,8 @@ function noteTypeBlock(input: GenerateInput): string {
 function personalBlock(input: GenerateInput): string {
   const parts: string[] = [];
   if (input.preferences?.trim()) parts.push(`The user's own preferences for their notes: "${input.preferences.trim().slice(0, 500)}"`);
-  if (input.styleExamples?.length) {
-    parts.push('The user previously edited generated notes like this. Match their preferred style and wording:\n' +
-      input.styleExamples.slice(0, 3).map((e, i) =>
-        `Example ${i + 1}\nBEFORE: ${e.before.slice(0, 600)}\nAFTER: ${e.after.slice(0, 600)}`).join('\n\n'));
+  if (input.styleNotes?.trim()) {
+    parts.push(`Style the user prefers, learned from their past edits (formatting and wording only; never a source of facts):\n${input.styleNotes.trim().slice(0, 1200)}`);
   }
   return parts.join('\n\n');
 }
@@ -311,7 +309,8 @@ export async function generateNote(input: GenerateInput): Promise<NoteContent> {
     .filter(Boolean).join('\n\n');
 
   const source = input.inputMode === 'recorded' ? 'RECORDING TRANSCRIPT' : 'TYPED NOTES';
-  const user = `${dateContext(input.dateISO, input.date)}${input.userName ? `\nNote author: ${input.userName}` : ''}\n\n${source}:\n"""\n${input.input.slice(0, 150_000)}\n"""`;
+  // Card, TFN and Medicare numbers are masked before the AI sees the input.
+  const user = `${dateContext(input.dateISO, input.date)}${input.userName ? `\nNote author: ${input.userName}` : ''}\n\n${source}:\n"""\n${maskSensitive(input.input.slice(0, 150_000))}\n"""`;
   return callForNote(client, system, user, noteYearOf(input.dateISO, input.date));
 }
 
@@ -349,20 +348,66 @@ export async function reviseNote(params: {
   const user = `${dateContext(params.dateISO, params.date)}
 
 CURRENT NOTE (JSON):
-${JSON.stringify(params.current)}
+${maskSensitive(JSON.stringify(params.current))}
 
 ORIGINAL INPUT (for reference only):
 """
-${params.originalInput.slice(0, 60_000)}
+${maskSensitive(params.originalInput.slice(0, 60_000))}
 """
 
 USER'S REQUEST:
 """
-${params.request.slice(0, 4000)}
+${maskSensitive(params.request.slice(0, 4000))}
 """
 
 Return the full updated note as JSON.`;
   return callForNote(client, system, user, noteYearOf(params.dateISO, params.date));
+}
+
+const STYLE_RULES = `You maintain a short style guide for an AI note-taker, learned from how one professional edits the notes it writes for them. The guide is shown to the AI when it writes notes about OTHER clients, patients and jobs, so it must never contain anything about a specific person or case.
+
+Update the current guide using the edit below:
+- Keep only general, reusable preferences: formatting, length, tone, wording habits, section use, how action items or dates are written, terms they prefer.
+- NEVER include names, initials, places, organisations, dates, times, amounts, numbers, health or case details, or any fact from the note. Describe the preference in general words instead ("prefers 'client' over 'participant'", not anything about who the client is).
+- If the edit only adds or corrects facts, return the current guide unchanged.
+- Merge with the current guide; drop older points the edit contradicts. At most 8 bullet points, under 120 words in total.
+- Output ONLY the bullet points ("- ..."), or the word NONE if there is no style preference yet.`;
+
+/**
+ * Updates the user's style notes from one edit (before → after). Replaces
+ * the old practice of pasting raw before/after text into future prompts,
+ * which carried one client's details into notes about other clients.
+ */
+export async function learnStyle(current: string, before: string, after: string, noteType: string): Promise<string> {
+  const client = anthropic();
+  if (!client) return current;
+  const res = await client.messages.create({
+    model: HAIKU,
+    max_tokens: 400,
+    system: STYLE_RULES,
+    messages: [{
+      role: 'user',
+      content: `Note type: ${NOTE_TYPE_MAP[noteType]?.label ?? 'General'}
+
+CURRENT GUIDE:
+${current.trim() || 'NONE'}
+
+NOTE BEFORE THE EDIT:
+"""
+${maskSensitive(before.slice(0, 4000))}
+"""
+
+NOTE AFTER THE EDIT:
+"""
+${maskSensitive(after.slice(0, 4000))}
+"""`,
+    }],
+  });
+  const out: string = (res.content.find((c: { type: string }) => c.type === 'text')?.text ?? '').trim();
+  if (!out || /^none\.?$/i.test(out)) return current;
+  // Keep only bullet lines; anything else (preamble, quoted note text) is dropped.
+  const bullets = out.split('\n').map(l => l.trim()).filter(l => /^[-•*]\s+\S/.test(l)).slice(0, 8);
+  return bullets.length ? maskSensitive(bullets.join('\n')).slice(0, 1200) : current;
 }
 
 /** One-time profile for a field the user typed themselves ("Other"). */

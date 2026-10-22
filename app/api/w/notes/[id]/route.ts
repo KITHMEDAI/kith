@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
-import { requireApiUser, indexNote, processNote, MAX_ATTEMPTS } from '@/lib/workspace/server';
-import { noteToText, sanitizeContent, type NoteContent } from '@/lib/workspace/generate';
+import { requireApiUser, indexNote, processNote, updateStyleNotes, MAX_ATTEMPTS } from '@/lib/workspace/server';
+import { noteToText, sanitizeContent } from '@/lib/workspace/generate';
+import { sealNote, openNote, openContent } from '@/lib/workspace/note-fields';
 import { deleteAudio } from '@/lib/workspace/polish';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { limited, LIMITS } from '@/lib/workspace/rate';
@@ -30,13 +31,13 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     data.status = 'failed';
   }
   return NextResponse.json(
-    { ...data, can_retry: (data.attempts ?? 1) < MAX_ATTEMPTS },
+    { ...openNote(data), can_retry: (data.attempts ?? 1) < MAX_ATTEMPTS },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }
 
-// Save the user's edits. The before/after pair becomes a style example for
-// future notes of the same type.
+// Save the user's edits. The change also teaches the AI the user's style
+// (generic style notes only: the before/after text is not kept).
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const auth = await requireApiUser();
   if ('error' in auth) return auth.error;
@@ -52,26 +53,20 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (!note) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   if (note.status !== 'completed') return NextResponse.json({ error: 'The note is still being written' }, { status: 409 });
 
-  const before = note.content ? noteToText(note.content as NoteContent) : '';
+  const old = openContent(note.content);
+  const before = old ? noteToText(old) : '';
   const after = noteToText(content);
-  const service = createServiceRoleClient();
-  const { error } = await service.from('ws_notes').update({
-    content, title: content.title, summary: content.summary,
-    search_text: after, updated_at: new Date().toISOString(),
+  const { error } = await createServiceRoleClient().from('ws_notes').update({
+    ...sealNote(content), updated_at: new Date().toISOString(),
   }).eq('id', params.id).eq('user_id', user.id);
   if (error) return NextResponse.json({ error: 'Could not save. Try again.' }, { status: 500 });
 
-  if (before && before !== after) {
-    await service.from('ws_note_edits').insert({
-      note_id: params.id, user_id: user.id, note_type: note.note_type,
-      before_text: before.slice(0, 4000), after_text: after.slice(0, 4000),
-    });
-  }
+  if (before && before !== after) waitUntil(updateStyleNotes(user.id, note.note_type, before, after));
   waitUntil(indexNote(params.id, after));
   return NextResponse.json({ ok: true });
 }
 
-// Delete a note, its edits (cascade), its embedding (same row) and any
+// Delete a note, its embedding (same row) and any
 // recording still waiting for the polish pass.
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
   const auth = await requireApiUser();

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { IS_WORKSPACE } from '@/lib/workspace/server';
 import { rateHit, LIMITS } from '@/lib/workspace/rate';
+import { setPasswordOnThisSession } from '@/lib/workspace/auth';
 
 // Sign-up step 2: check the emailed code, set the password chosen by the
 // person who holds it, and sign them in on this browser (session cookie).
@@ -25,11 +26,5 @@ export async function POST(req: Request) {
   if (error || !data.user) {
     return NextResponse.json({ error: 'That code is wrong or has expired. If you already have an account, sign in instead.' }, { status: 400 });
   }
-
-  const { error: pwError } = await createServiceRoleClient().auth.admin.updateUserById(data.user.id, { password });
-  if (pwError) {
-    await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
-    return NextResponse.json({ error: 'Could not set the password. Try again.' }, { status: 500 });
-  }
-  return NextResponse.json({ ok: true });
+  return setPasswordOnThisSession(supabase, password);
 }

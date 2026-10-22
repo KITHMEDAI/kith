@@ -1,21 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
+import Turnstile from './Turnstile';
 
 const inputCls = 'h-11 w-full rounded-xl border border-slate-300 px-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100';
 
 // Shown once Google is configured in the Sydney Supabase project.
 const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_WS_GOOGLE === 'true';
 
-export default function LoginForm({ linkError }: { linkError: boolean }) {
+type Mode = 'signin' | 'signup' | 'reset';
+
+export default function LoginForm({ linkError, notice }: { linkError: boolean; notice?: string }) {
   const router = useRouter();
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
-  // Sign-up step 2: the 8-digit code emailed to prove the address is theirs.
+  const [mode, setMode] = useState<Mode>('signin');
+  // Sign-up / reset step 2: the code emailed to prove the address is theirs.
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState('');
   const [email, setEmail] = useState('');
@@ -23,9 +26,15 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(linkError ? 'Google sign-in didn’t finish. Try again.' : '');
+  const [info, setInfo] = useState(notice ?? '');
+  // CAPTCHA (only when configured): a fresh single-use token per submit.
+  const [captcha, setCaptcha] = useState('');
+  const resetCaptcha = useRef<() => void>(() => {});
 
-  const switchMode = (m: 'signin' | 'signup') => { setMode(m); setError(''); setCodeSent(false); setCode(''); };
+  const switchMode = (m: Mode) => { setMode(m); setError(''); setInfo(''); setCodeSent(false); setCode(''); };
   const [googleBusy, setGoogleBusy] = useState(false);
+  // Steps that set a password come after the emailed code; steps that send a code need the CAPTCHA.
+  const needsCode = mode !== 'signin' && codeSent;
 
   // Same button signs in or creates the account (new users land on onboarding).
   const google = async () => {
@@ -37,47 +46,50 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
     if (error) { setGoogleBusy(false); setError(error.message); }
   };
 
+  const post = async (path: string, body: object) => {
+    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    return { res, j: await res.json().catch(() => ({})) };
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const em = email.trim();
     if (!/^\S+@\S+\.\S+$/.test(em)) { setError('Enter a valid email'); return; }
-    if (password.length < (mode === 'signup' ? 8 : 1)) {
-      setError(mode === 'signup' ? 'Use a password of at least 8 characters' : 'Enter your password');
+    const choosing = mode === 'signup' || needsCode;
+    if (!(mode === 'reset' && !codeSent) && password.length < (choosing ? 8 : 1)) {
+      setError(choosing ? 'Use a password of at least 8 characters' : 'Enter your password');
       return;
     }
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setInfo('');
 
-    if (mode === 'signup' && !codeSent) {
-      const res = await fetch('/api/w/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: em }),
-      });
-      const j = await res.json().catch(() => ({}));
+    // Step 1 of sign-up or reset: email a code.
+    if (mode !== 'signin' && !codeSent) {
+      const { res, j } = await post(mode === 'signup' ? '/api/w/auth/signup' : '/api/w/auth/reset', { email: em, captcha });
       setBusy(false);
-      if (!res.ok) { setError(j.error || 'Could not create the account'); return; }
+      resetCaptcha.current();
+      if (!res.ok) { setError(j.error || (mode === 'signup' ? 'Could not create the account' : 'Could not send the code')); return; }
       setCodeSent(true);
       return;
     }
 
-    if (mode === 'signup') {
-      const res = await fetch('/api/w/auth/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: em, code, password }),
-      });
-      const j = await res.json().catch(() => ({}));
+    // Step 2: check the code and set the password (signs in on this browser).
+    if (mode !== 'signin') {
+      const { res, j } = await post(mode === 'signup' ? '/api/w/auth/verify' : '/api/w/auth/reset', { email: em, code, password });
       if (!res.ok) { setBusy(false); setError(j.error || 'That code didn’t work'); return; }
       router.replace('/');
       router.refresh();
       return;
     }
 
-    const { error } = await createClient().auth.signInWithPassword({ email: em, password });
+    const { error } = await createClient().auth.signInWithPassword({
+      email: em, password, options: captcha ? { captchaToken: captcha } : undefined,
+    });
+    resetCaptcha.current();
     if (error) {
       setBusy(false);
       setError(/invalid/i.test(error.message) ? 'Wrong email or password.'
         : /not confirmed/i.test(error.message) ? 'This account isn’t verified yet. Choose “Create account” to get a new code.'
+        : /captcha/i.test(error.message) ? 'Please complete the security check and try again.'
         : error.message);
       return;
     }
@@ -95,20 +107,27 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-sm font-medium">
-            {(['signin', 'signup'] as const).map(m => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => switchMode(m)}
-                className={cn('rounded-lg py-2 transition', mode === m ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-800')}
-              >
-                {m === 'signin' ? 'Sign in' : 'Create account'}
-              </button>
-            ))}
-          </div>
+          {mode === 'reset' ? (
+            <div className="mb-5">
+              <h1 className="font-semibold">Reset your password</h1>
+              <p className="mt-1 text-sm text-slate-500">{codeSent ? 'Enter the code we emailed and choose a new password.' : 'We’ll email you a code to set a new password.'}</p>
+            </div>
+          ) : (
+            <div className="mb-5 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-sm font-medium">
+              {(['signin', 'signup'] as const).map(m => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => switchMode(m)}
+                  className={cn('rounded-lg py-2 transition', mode === m ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-800')}
+                >
+                  {m === 'signin' ? 'Sign in' : 'Create account'}
+                </button>
+              ))}
+            </div>
+          )}
 
-          {GOOGLE_ENABLED && (
+          {GOOGLE_ENABLED && mode !== 'reset' && (
             <>
               <button
                 type="button"
@@ -140,28 +159,32 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
               className={inputCls}
               autoFocus
             />
-            <div className="relative">
-              <input
-                type={show ? 'text' : 'password'}
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                placeholder={mode === 'signup' ? 'Choose a password (8+ characters)' : 'Password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className={`${inputCls} pr-10`}
-              />
-              <button
-                type="button"
-                onClick={() => setShow(s => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:text-slate-700"
-                aria-label={show ? 'Hide password' : 'Show password'}
-              >
-                {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            {mode === 'signup' && codeSent && (
+            {!(mode === 'reset' && !codeSent) && (
+              <div className="relative">
+                <input
+                  type={show ? 'text' : 'password'}
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                  placeholder={mode === 'signup' ? 'Choose a password (8+ characters)' : mode === 'reset' ? 'New password (8+ characters)' : 'Password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className={`${inputCls} pr-10`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow(s => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-400 hover:text-slate-700"
+                  aria-label={show ? 'Hide password' : 'Show password'}
+                >
+                  {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            )}
+            {needsCode && (
               <div>
                 <p className="mb-2 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-800">
-                  We emailed a code to <b>{email.trim()}</b>. Enter it to finish. (Already have an account? The email says so: sign in instead.)
+                  {mode === 'signup'
+                    ? <>We emailed a code to <b>{email.trim()}</b>. Enter it to finish. (Already have an account? The email says so: sign in instead.)</>
+                    : <>If <b>{email.trim()}</b> has an account, we emailed it a code. Enter it below.</>}
                 </p>
                 <input
                   inputMode="numeric"
@@ -184,8 +207,11 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
               className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.99] disabled:opacity-60"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              {mode === 'signin' ? 'Sign in' : codeSent ? 'Verify and create account' : 'Create account'}
+              {mode === 'signin' ? 'Sign in'
+                : mode === 'reset' ? (codeSent ? 'Set new password' : 'Email me a code')
+                : codeSent ? 'Verify and create account' : 'Create account'}
             </button>
+            {!needsCode && <Turnstile key={mode} onToken={setCaptcha} onReady={r => { resetCaptcha.current = r; }} />}
           </form>
           {mode === 'signup' && (
             <p className="mt-3 text-center text-xs text-slate-500">
@@ -193,10 +219,17 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
             </p>
           )}
 
+          {info && !error && <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{info}</p>}
           {error && <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
           {mode === 'signin' && (
             <p className="mt-4 text-center text-xs text-slate-500">
-              New here? <button type="button" onClick={() => switchMode('signup')} className="font-medium text-violet-700 hover:underline">Create an account</button>
+              <button type="button" onClick={() => switchMode('reset')} className="font-medium text-violet-700 hover:underline">Forgot password?</button>
+              {' · '}New here? <button type="button" onClick={() => switchMode('signup')} className="font-medium text-violet-700 hover:underline">Create an account</button>
+            </p>
+          )}
+          {mode === 'reset' && (
+            <p className="mt-4 text-center text-xs text-slate-500">
+              <button type="button" onClick={() => switchMode('signin')} className="font-medium text-violet-700 hover:underline">Back to sign in</button>
             </p>
           )}
         </div>

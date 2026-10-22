@@ -31,6 +31,18 @@ export async function sweepUserAudio(service: Service, userId: string): Promise<
   return (await deleteAudio(service, old)) ? old.length : 0;
 }
 
+/** Deletes EVERY recording in a user's folder (account deletion). False if any delete failed. */
+export async function deleteAllUserAudio(service: Service, userId: string): Promise<boolean> {
+  for (let i = 0; i < 50; i++) {
+    const { data: files, error } = await service.storage.from(BUCKET).list(userId, { limit: 1000 });
+    if (error) return false;
+    const paths = (files ?? []).filter(f => f.id).map(f => `${userId}/${f.name}`);
+    if (!paths.length) return true;
+    if (!(await deleteAudio(service, paths))) return false;
+  }
+  return false;
+}
+
 export async function runWorkspaceCleanup(): Promise<{ audioDeleted: number; stuckFailed: number }> {
   const service = createServiceRoleClient();
 

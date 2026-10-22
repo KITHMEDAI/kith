@@ -155,5 +155,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Always run on API routes, even ones ending in an image extension:
+    // otherwise /api/patients/x.png skips the workspace edition's "only
+    // /api/w/*" gate and reaches a therapist API (audit 2026-10-22, #20).
+    '/api/:path*',
   ],
 };
