@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { requireApiUser, getProfile, sealInput, processNote } from '@/lib/workspace/server';
+import { isOwnAudioPath, deleteAudio } from '@/lib/workspace/polish';
 import { NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { realWordCount } from '@/lib/workspace/words';
+import { createServiceRoleClient } from '@/lib/supabase/server';
+import { limited, LIMITS } from '@/lib/workspace/rate';
 
 export const maxDuration = 300; // long meetings: generation runs after the response via waitUntil
 
@@ -13,39 +16,46 @@ const MAX_INPUT_CHARS = 150_000; // ~2.5 hours of speech
 export async function POST(req: Request) {
   const auth = await requireApiUser();
   if ('error' in auth) return auth.error;
-  const { user, supabase } = auth;
+  const { user } = auth;
 
   const body = await req.json().catch(() => ({})) as Record<string, unknown>;
   const input = String(body.input ?? '').trim();
   const inputMode = body.input_mode === 'recorded' ? 'recorded' : 'typed';
-  const noteType = typeof body.note_type === 'string' && NOTE_TYPE_MAP[body.note_type] ? body.note_type : 'general';
+  const noteType = typeof body.note_type === 'string' && Object.hasOwn(NOTE_TYPE_MAP, body.note_type) ? body.note_type : 'general';
   const customInstruction = noteType === 'custom' ? String(body.custom_instruction ?? '').slice(0, 600) : undefined;
-  const duration = Number.isFinite(Number(body.duration_seconds)) ? Math.round(Number(body.duration_seconds)) : null;
-
-  // Real words only: speaker labels and emoji/punctuation don't count.
-  const words = input.replace(/^\s*[^:\n]{1,40}:\s/gm, ' ').match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) ?? [];
-  if (words.length < 3) {
-    return NextResponse.json({ error: 'Not enough content yet: say or type a little more.' }, { status: 422 });
-  }
-  if (input.length > MAX_INPUT_CHARS) {
-    return NextResponse.json({ error: 'That is too long for one note (about 2.5 hours of speech). Split it into parts.' }, { status: 413 });
-  }
-  if (!checkRateLimit(`ws-notes:${user.id}`, 40, 60 * 60 * 1000).allowed) {
-    return NextResponse.json({ error: 'You have created a lot of notes in the last hour. Try again shortly.' }, { status: 429 });
-  }
+  const rawDuration = Number(body.duration_seconds);
+  const duration = Number.isFinite(rawDuration) ? Math.min(Math.max(Math.round(rawDuration), 0), 6 * 3600) : null;
 
   // Audio uploaded for the polish pass: only files in this user's own folder.
   const audio = (Array.isArray(body.audio) ? body.audio : [])
     .filter((a: { track?: string; path?: string }) =>
       a && ['room', 'tab', 'mic'].includes(String(a.track)) && typeof a.path === 'string'
-      && a.path.startsWith(`${user.id}/`) && !a.path.includes('..'))
+      && isOwnAudioPath(a.path, user.id))
     .slice(0, 2)
     .map((a: { track: string; path: string }) => `${a.track}:${a.path}`);
 
-  const profile = await getProfile(user.id);
-  if (!profile) return NextResponse.json({ error: 'Finish onboarding first' }, { status: 409 });
+  // Any rejection below must not leave the uploaded recording behind.
+  const service = createServiceRoleClient();
+  const reject = async (error: string, status: number) => {
+    await deleteAudio(service, audio);
+    return NextResponse.json({ error }, { status });
+  };
 
-  const { data, error } = await supabase.from('ws_notes').insert({
+  // Real words only: speaker labels and emoji/punctuation don't count.
+  if (realWordCount(input) < 3) {
+    return reject('Not enough content yet: say or type a little more.', 422);
+  }
+  if (input.length > MAX_INPUT_CHARS) {
+    return reject('That is too long for one note (about 2.5 hours of speech). Split it into parts.', 413);
+  }
+  const tooMany = await limited(`ws-notes:${user.id}`, LIMITS.note, 'You have created a lot of notes recently. Try again a bit later.');
+  if (tooMany) { await deleteAudio(service, audio); return tooMany; }
+
+  const profile = await getProfile(user.id);
+  if (!profile) return reject('Finish onboarding first', 409);
+
+  // Writes use the service role (clients can only read/delete, migration 003).
+  const { data, error } = await service.from('ws_notes').insert({
     user_id: user.id,
     note_type: noteType,
     custom_instruction: customInstruction ?? null,
@@ -57,10 +67,11 @@ export async function POST(req: Request) {
     transcript_source: inputMode === 'recorded' ? 'live' : null,
     status: 'processing',
   }).select('id').single();
-  if (error || !data) return NextResponse.json({ error: error?.message || 'Could not save' }, { status: 500 });
+  if (error || !data) return reject('Could not save the note. Try again.', 500);
+  if (inputMode !== 'recorded') await deleteAudio(service, audio);
 
   // Remember the last-used type so it's pre-selected next time.
-  await supabase.from('ws_profiles').update({ default_note_type: noteType }).eq('user_id', user.id);
+  await service.from('ws_profiles').update({ default_note_type: noteType }).eq('user_id', user.id);
 
   waitUntil(processNote(data.id));
   return NextResponse.json({ id: data.id });

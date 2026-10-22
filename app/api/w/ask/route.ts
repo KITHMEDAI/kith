@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireApiUser } from '@/lib/workspace/server';
+import { limited, LIMITS } from '@/lib/workspace/rate';
 import { retrieveForAsk, buildAskMessages, streamAnswer, NOT_IN_NOTES } from '@/lib/workspace/ask';
 
 export const maxDuration = 60;
@@ -15,6 +16,8 @@ export async function POST(req: Request) {
   const { question } = await req.json().catch(() => ({})) as { question?: string };
   const q = String(question ?? '').trim().slice(0, 500);
   if (!q) return NextResponse.json({ error: 'Ask a question' }, { status: 422 });
+  const tooMany = await limited(`ws-ask:${user.id}`, LIMITS.ask, 'You have asked a lot of questions recently. Try again a bit later.');
+  if (tooMany) return tooMany;
 
   const { sources, recentRows } = await retrieveForAsk(supabase, user.id, q);
   if (!sources.length) {
@@ -36,7 +39,8 @@ export async function POST(req: Request) {
           if (ev.type === 'content_block_delta' && ev.delta.type === 'text_delta') controller.enqueue(enc.encode(ev.delta.text));
         }
       } catch (err) {
-        controller.enqueue(enc.encode(`\n\n(Sorry, something went wrong: ${(err as Error).message})`));
+        console.warn('[workspace] ask stream failed:', (err as Error).message.slice(0, 200));
+        controller.enqueue(enc.encode('\n\n(Sorry, something went wrong. Try asking again.)'));
       } finally {
         controller.close();
       }

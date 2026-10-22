@@ -39,6 +39,7 @@ function wsUrl(diarize = false, keyterms: string[] = KEYTERMS): string {
     (diarize ? '&diarize=true' : '') +
     '&utterance_end_ms=1200&endpointing=400&vad_events=true&filler_words=false' +
     '&encoding=linear16&sample_rate=16000&channels=1' +
+    '&mip_opt_out=true' + // never used by Deepgram for model training
     keyterms.map(t => `&keyterm=${encodeURIComponent(t)}`).join('');
 }
 

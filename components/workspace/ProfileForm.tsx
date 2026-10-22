@@ -104,6 +104,11 @@ export default function ProfileForm({ mode, initial }: { mode: 'onboarding' | 'a
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
         {mode === 'onboarding' ? (busy && v.field === 'other' ? 'Learning your field…' : 'Start taking notes') : saved ? 'Saved' : 'Save changes'}
       </button>
+      {mode === 'onboarding' && (
+        <p className="text-center text-xs text-slate-500">
+          By continuing you agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+        </p>
+      )}
     </form>
   );
 }

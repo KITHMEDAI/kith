@@ -104,11 +104,14 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
     router.refresh();
   };
 
+  const [retryError, setRetryError] = useState('');
   const retry = async () => {
-    setBusy(true);
+    setBusy(true); setRetryError('');
     const res = await fetch(`/api/w/notes/${note.id}`, { method: 'POST' });
+    const j = await res.json().catch(() => ({}));
     setBusy(false);
     if (res.ok) { setStage(0); setNote(n => ({ ...n, status: 'processing', error: null })); }
+    else setRetryError(j.error || 'Could not retry. Try again shortly.');
   };
 
   const revise = async (text?: string) => {
@@ -195,6 +198,7 @@ export default function NoteView({ initial, typeLabel }: { initial: WsNote; type
             <button onClick={retry} disabled={busy} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />} Retry
             </button>
+            {retryError && <p className="mx-auto mt-3 max-w-sm text-sm text-rose-700">{retryError}</p>}
           </div>
         )}
 

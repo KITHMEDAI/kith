@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireApiUser } from '@/lib/workspace/server';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { limited, LIMITS } from '@/lib/workspace/rate';
 
 // Live-transcription credential for the recorder (signed-in users only).
 // Returns a SHORT-LIVED Deepgram access token (Deepgram /v1/auth/grant),
@@ -12,9 +12,8 @@ const TTL_SECONDS = 120;
 export async function GET() {
   const auth = await requireApiUser();
   if ('error' in auth) return auth.error;
-  if (!checkRateLimit(`ws-token:${auth.user.id}`, 120, 60 * 60 * 1000).allowed) {
-    return NextResponse.json({ error: 'Too many recording starts. Try again shortly.' }, { status: 429 });
-  }
+  const tooMany = await limited(`ws-token:${auth.user.id}`, LIMITS.token, 'Too many recording starts. Try again shortly.');
+  if (tooMany) return tooMany;
 
   const key = process.env.DEEPGRAM_API_KEY;
   if (!key) return NextResponse.json({ error: 'Transcription is not configured' }, { status: 500 });

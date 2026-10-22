@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { waitUntil } from '@vercel/functions';
 import { requireApiUser, indexNote, openInput } from '@/lib/workspace/server';
 import { reviseNote, noteToText, type NoteContent } from '@/lib/workspace/generate';
-import { checkRateLimit } from '@/lib/rate-limit';
+import { createServiceRoleClient } from '@/lib/supabase/server';
+import { limited, LIMITS } from '@/lib/workspace/rate';
 
 export const maxDuration = 120;
 
@@ -17,9 +18,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const text = String(request ?? '').trim();
   if (!text) return NextResponse.json({ error: 'Type what to add or change' }, { status: 422 });
   if (text.length > 4000) return NextResponse.json({ error: 'Keep it under 4,000 characters' }, { status: 422 });
-  if (!checkRateLimit(`ws-revise:${user.id}`, 40, 60 * 60 * 1000).allowed) {
-    return NextResponse.json({ error: 'Too many updates in a short time. Try again shortly.' }, { status: 429 });
-  }
+  const tooMany = await limited(`ws-revise:${user.id}`, LIMITS.revise, 'Too many updates in a short time. Try again shortly.');
+  if (tooMany) return tooMany;
 
   const { data: note } = await supabase.from('ws_notes')
     .select('id, note_type, field, content, input_enc, status, created_at').eq('id', params.id).maybeSingle();
@@ -48,14 +48,15 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   const before = noteToText(note.content as NoteContent);
   const after = noteToText(updated);
-  const { error } = await supabase.from('ws_notes').update({
+  const service = createServiceRoleClient();
+  const { error } = await service.from('ws_notes').update({
     content: updated, title: updated.title, summary: updated.summary,
     search_text: after, updated_at: new Date().toISOString(),
-  }).eq('id', params.id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  }).eq('id', params.id).eq('user_id', user.id);
+  if (error) return NextResponse.json({ error: 'Could not save the update. Try again.' }, { status: 500 });
 
   if (before !== after) {
-    await supabase.from('ws_note_edits').insert({
+    await service.from('ws_note_edits').insert({
       note_id: params.id, user_id: user.id, note_type: note.note_type,
       before_text: before.slice(0, 4000), after_text: after.slice(0, 4000),
     });

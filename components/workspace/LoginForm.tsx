@@ -15,13 +15,16 @@ const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_WS_GOOGLE === 'true';
 export default function LoginForm({ linkError }: { linkError: boolean }) {
   const router = useRouter();
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  // Sign-up step 2: the 8-digit code emailed to prove the address is theirs.
+  const [codeSent, setCodeSent] = useState(false);
+  const [code, setCode] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(linkError ? 'That link has expired. Sign in with your email and password.' : '');
+  const [error, setError] = useState(linkError ? 'Google sign-in didn’t finish. Try again.' : '');
 
-  const switchMode = (m: 'signin' | 'signup') => { setMode(m); setError(''); };
+  const switchMode = (m: 'signin' | 'signup') => { setMode(m); setError(''); setCodeSent(false); setCode(''); };
   const [googleBusy, setGoogleBusy] = useState(false);
 
   // Same button signs in or creates the account (new users land on onboarding).
@@ -44,25 +47,38 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
     }
     setBusy(true); setError('');
 
-    if (mode === 'signup') {
+    if (mode === 'signup' && !codeSent) {
       const res = await fetch('/api/w/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: em, password }),
+        body: JSON.stringify({ email: em }),
       });
       const j = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setBusy(false);
-        setError(j.error || 'Could not create the account');
-        if (res.status === 409) setMode('signin');
-        return;
-      }
+      setBusy(false);
+      if (!res.ok) { setError(j.error || 'Could not create the account'); return; }
+      setCodeSent(true);
+      return;
+    }
+
+    if (mode === 'signup') {
+      const res = await fetch('/api/w/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em, code, password }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) { setBusy(false); setError(j.error || 'That code didn’t work'); return; }
+      router.replace('/');
+      router.refresh();
+      return;
     }
 
     const { error } = await createClient().auth.signInWithPassword({ email: em, password });
     if (error) {
       setBusy(false);
-      setError(/invalid/i.test(error.message) ? 'Wrong email or password.' : error.message);
+      setError(/invalid/i.test(error.message) ? 'Wrong email or password.'
+        : /not confirmed/i.test(error.message) ? 'This account isn’t verified yet. Choose “Create account” to get a new code.'
+        : error.message);
       return;
     }
     // New users land on onboarding; returning users on New note.
@@ -105,6 +121,9 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
                 )}
                 Continue with Google
               </button>
+              <p className="mt-2 text-center text-[11px] text-slate-400">
+                By continuing you agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+              </p>
               <div className="my-4 flex items-center gap-3 text-xs text-slate-400">
                 <div className="h-px flex-1 bg-slate-200" /> or use email <div className="h-px flex-1 bg-slate-200" />
               </div>
@@ -139,15 +158,40 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
                 {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            {mode === 'signup' && codeSent && (
+              <div>
+                <p className="mb-2 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-800">
+                  We emailed a code to <b>{email.trim()}</b>. Enter it to finish. (Already have an account? The email says so: sign in instead.)
+                </p>
+                <input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="Code from the email"
+                  value={code}
+                  onChange={e => setCode(e.target.value.replace(/[^\d]/g, '').slice(0, 10))}
+                  className={`${inputCls} tracking-[0.3em]`}
+                  aria-label="Code from the email"
+                  autoFocus
+                />
+                <button type="button" onClick={() => { setCodeSent(false); setCode(''); }} className="mt-1 text-xs text-violet-700 hover:underline">
+                  Send a new code
+                </button>
+              </div>
+            )}
             <button
               type="submit"
               disabled={busy}
               className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-semibold text-white transition hover:bg-violet-700 active:scale-[0.99] disabled:opacity-60"
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
-              {mode === 'signin' ? 'Sign in' : 'Create account'}
+              {mode === 'signin' ? 'Sign in' : codeSent ? 'Verify and create account' : 'Create account'}
             </button>
           </form>
+          {mode === 'signup' && (
+            <p className="mt-3 text-center text-xs text-slate-500">
+              By creating an account you agree to the <a href="/terms" className="underline">Terms</a> and <a href="/privacy" className="underline">Privacy Policy</a>.
+            </p>
+          )}
 
           {error && <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
           {mode === 'signin' && (
@@ -158,7 +202,7 @@ export default function LoginForm({ linkError }: { linkError: boolean }) {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          Your notes are stored in Australia (Sydney). <a href="/privacy" className="underline">Privacy</a> · <a href="/help" className="underline">Help</a>
+          Your notes are stored in Australia (Sydney). <a href="/privacy" className="underline">Privacy</a> · <a href="/terms" className="underline">Terms</a> · <a href="/help" className="underline">Help</a>
         </p>
       </div>
     </div>

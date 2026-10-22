@@ -19,7 +19,7 @@ export default function HelpPage() {
         <h2 className="font-semibold text-slate-900">Quick answers</h2>
         <p><b className="text-slate-800">Recording a meeting:</b> use Chrome or Edge on a computer, choose <i>Online meeting</i>, pick the meeting tab and tick &ldquo;Also share tab audio&rdquo;. Headphones give the cleanest result.</p>
         <p><b className="text-slate-800">Fixing a note:</b> type what to add or change in &ldquo;Add details or ask for changes&rdquo; under the note, or use Edit.</p>
-        <p><b className="text-slate-800">Your data:</b> notes are stored in Australia (Sydney); recordings are deleted right after transcription. See <a href="/privacy" className="text-violet-700 underline">Privacy</a>.</p>
+        <p><b className="text-slate-800">Your data:</b> notes are stored in Australia (Sydney); recordings are deleted right after transcription (anything left over is removed by a daily clean-up). See <a href="/privacy" className="text-violet-700 underline">Privacy</a> and <a href="/terms" className="text-violet-700 underline">Terms</a>.</p>
       </div>
     </div>
   );

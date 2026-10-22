@@ -13,7 +13,8 @@ import { withTimeout, embedQueryFast } from './embed';
 
 export { embedQueryFast };
 import { generateNote, noteToText, type NoteContent } from './generate';
-import { polishTranscript, parseAudioPaths } from './polish';
+import { polishTranscript, parseAudioPaths, deleteAudio } from './polish';
+import { rateHit, AUDIO_MINUTES_PER_DAY } from './rate';
 
 export const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
 
@@ -72,21 +73,32 @@ export async function getProfile(userId: string): Promise<WsProfile | null> {
   return (data as WsProfile | null) ?? null;
 }
 
-// Encryption is optional in dev (no ENCRYPTION_SECRET) — store plain text then.
+// Encryption is optional in local dev only. In production a missing key or a
+// failed encryption is an error: never silently store plain text.
 export function sealInput(text: string): string {
-  try { return process.env.ENCRYPTION_SECRET ? `enc:${encrypt(text)}` : text; } catch { return text; }
+  if (!process.env.ENCRYPTION_SECRET) {
+    if (process.env.NODE_ENV === 'production') throw new Error('ENCRYPTION_SECRET is not set');
+    return text;
+  }
+  return `enc:${encrypt(text)}`;
 }
 export function openInput(stored: string | null): string {
   if (!stored) return '';
   if (!stored.startsWith('enc:')) return stored;
-  try { return decrypt(stored.slice(4)); } catch { return ''; }
+  try { return decrypt(stored.slice(4)); } catch {
+    console.error('[workspace] could not decrypt a note input (key changed?)');
+    return '';
+  }
 }
+
+/** Max generation attempts per note (first try + retries). */
+export const MAX_ATTEMPTS = 3;
 
 /** Generate the note for a row in "processing" state, then index it. Safe to call twice. */
 export async function processNote(noteId: string): Promise<void> {
   const service = createServiceRoleClient();
   const { data: note } = await service.from('ws_notes')
-    .select('id, user_id, note_type, custom_instruction, field, input_mode, input_enc, audio_paths, status, created_at')
+    .select('id, user_id, note_type, custom_instruction, field, input_mode, input_enc, audio_paths, duration_seconds, status, created_at')
     .eq('id', noteId).single();
   if (!note || note.status !== 'processing') return;
 
@@ -100,23 +112,37 @@ export async function processNote(noteId: string): Promise<void> {
 
   // Polish pass: re-transcribe the uploaded recording as a whole file (more
   // accurate, better speakers). Falls back to the live transcript on failure.
+  // The DB reference is cleared BEFORE calling Deepgram, so a function that
+  // times out can never re-bill the same file on retry (the cleanup job
+  // removes any file left behind).
   let input = openInput(note.input_enc);
-  const audio = parseAudioPaths(note.audio_paths);
+  const rawAudio: string[] = note.audio_paths ?? [];
+  const audio = parseAudioPaths(rawAudio, note.user_id); // only the owner's own folder
+  if (rawAudio.length) await service.from('ws_notes').update({ audio_paths: [] }).eq('id', noteId);
   if (audio.length) {
-    try {
-      const polished = await polishTranscript(service, audio, p?.field || note.field, (p?.name || 'Me').split(' ')[0]);
-      const liveWords = input.split(/\s+/).length;
-      if (polished && polished.split(/\s+/).length >= Math.min(20, liveWords * 0.5)) {
-        input = polished;
-        await service.from('ws_notes').update({ input_enc: sealInput(polished), transcript_source: 'polished', audio_paths: [] }).eq('id', noteId);
-      } else {
-        await service.from('ws_notes').update({ audio_paths: [] }).eq('id', noteId);
+    // Daily budget of re-transcribed minutes per user (Deepgram bills per minute).
+    const claimedMin = Math.max(1, Math.ceil((note.duration_seconds ?? 60) / 60)) * audio.length;
+    const overBudget = await rateHit(`ws-audio-min:${note.user_id}`, [[AUDIO_MINUTES_PER_DAY, 86400]], claimedMin);
+    if (overBudget) {
+      await deleteAudio(service, audio);
+    } else {
+      try {
+        const { transcript: polished, seconds } = await polishTranscript(service, audio, p?.field || note.field, (p?.name || 'Me').split(' ')[0]);
+        // Charge the real length if the file was longer than the note claimed.
+        const extra = Math.ceil(seconds / 60) - claimedMin;
+        if (extra > 0) await rateHit(`ws-audio-min:${note.user_id}`, [[AUDIO_MINUTES_PER_DAY, 86400]], extra);
+        const liveWords = input.split(/\s+/).length;
+        if (polished && polished.split(/\s+/).length >= Math.min(20, liveWords * 0.5)) {
+          input = polished;
+          await service.from('ws_notes').update({ input_enc: sealInput(polished), transcript_source: 'polished' }).eq('id', noteId);
+        }
+      } catch (err) {
+        console.warn('[workspace] polish pass failed, using live transcript:', (err as Error).message);
       }
-    } catch (err) {
-      console.warn('[workspace] polish pass failed, using live transcript:', (err as Error).message);
-      await service.from('ws_notes').update({ audio_paths: [] }).eq('id', noteId);
     }
   }
+  // Anything that wasn't a valid own-folder path is never touched (no signing,
+  // no deleting other users' files).
 
   try {
     const content = await generateNote({
@@ -140,8 +166,9 @@ export async function processNote(noteId: string): Promise<void> {
     }).eq('id', noteId);
     await indexNote(noteId, text);
   } catch (err) {
+    console.warn('[workspace] note generation failed:', (err as Error).message.slice(0, 200));
     await service.from('ws_notes').update({
-      status: 'failed', error: (err as Error).message.slice(0, 500), updated_at: new Date().toISOString(),
+      status: 'failed', error: 'Generation failed', updated_at: new Date().toISOString(),
     }).eq('id', noteId).eq('status', 'processing');
   }
 }

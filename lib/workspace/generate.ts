@@ -401,3 +401,38 @@ export function noteToText(c: NoteContent): string {
   if (c.missing_info.length) { lines.push('Missing information'); c.missing_info.forEach(m => lines.push(`- ${m}`)); }
   return lines.join('\n').trim();
 }
+
+/**
+ * Validates a user-edited note (PATCH): right shape, bounded sizes. Returns a
+ * clean copy, or null if the payload isn't a note.
+ */
+export function sanitizeContent(raw: unknown): NoteContent | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const r = raw as Record<string, unknown>;
+  const str = (v: unknown, max: number) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const strs = (v: unknown, n: number, max: number) =>
+    Array.isArray(v) ? v.filter(x => typeof x === 'string').slice(0, n).map(x => (x as string).slice(0, max)) : [];
+  const objs = (v: unknown, n: number) =>
+    Array.isArray(v) ? v.filter(x => x && typeof x === 'object' && !Array.isArray(x)).slice(0, n) as Record<string, unknown>[] : [];
+  const levels = ['info', 'attention', 'urgent'] as const;
+  const c: NoteContent = {
+    title: str(r.title, 200),
+    summary: str(r.summary, 4000),
+    sections: objs(r.sections, 40).map(s => ({ heading: str(s.heading, 200), points: strs(s.points, 100, 2000) })),
+    action_items: objs(r.action_items, 100).map(a => ({
+      task: str(a.task, 1000),
+      owner: typeof a.owner === 'string' && a.owner ? a.owner.slice(0, 200) : null,
+      due: typeof a.due === 'string' && a.due ? a.due.slice(0, 100) : null,
+    })),
+    decisions: strs(r.decisions, 100, 1000),
+    follow_ups: strs(r.follow_ups, 100, 1000),
+    flags: objs(r.flags, 10).map(f => ({
+      level: levels.includes(f.level as typeof levels[number]) ? f.level as typeof levels[number] : 'info',
+      text: str(f.text, 1000),
+    })),
+    missing_info: strs(r.missing_info, 20, 500),
+    tags: strs(r.tags, 20, 60),
+  };
+  if (!c.title && !c.summary && !c.sections.length) return null;
+  return c;
+}

@@ -20,31 +20,66 @@ type Utt = { start: number; end: number; speaker: number; text: string; track: A
 
 const BUCKET = 'ws-audio';
 
-export function parseAudioPaths(raw: string[] | null | undefined): AudioRef[] {
+// Exactly what /api/w/audio/upload-url issues: "<userId>/<uuid>.<ext>".
+const PATH_RE = /^([0-9a-f-]{36})\/[0-9a-f-]{36}\.(webm|ogg|mp4|m4a)$/;
+
+/** True when `path` is a recording in this user's own folder. */
+export function isOwnAudioPath(path: string, userId: string): boolean {
+  const m = PATH_RE.exec(path);
+  return !!m && m[1] === userId;
+}
+
+/** Parses "<track>:<path>" entries. With `userId`, drops anything not in that user's folder. */
+export function parseAudioPaths(raw: string[] | null | undefined, userId?: string): AudioRef[] {
   return (raw ?? []).map(s => {
     const i = s.indexOf(':');
     return { track: s.slice(0, i) as AudioTrack, path: s.slice(i + 1) };
-  }).filter(a => ['room', 'tab', 'mic'].includes(a.track) && a.path);
+  }).filter(a => ['room', 'tab', 'mic'].includes(a.track) && a.path && (!userId || isOwnAudioPath(a.path, userId)));
 }
 
-async function transcribeFile(url: string, track: AudioTrack, keyterms: string[]): Promise<Utt[]> {
+/**
+ * Deletes recordings ("<track>:<path>" entries or refs). Returns false if the
+ * storage API reported an error (supabase-js returns errors, it doesn't throw),
+ * so callers can keep the reference for the cleanup job to retry.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function deleteAudio(service: any, audio: Array<string | AudioRef>): Promise<boolean> {
+  const paths = audio.map(a => (typeof a === 'string' ? a.slice(a.indexOf(':') + 1) : a.path)).filter(Boolean);
+  if (!paths.length) return true;
+  try {
+    const { error } = await service.storage.from(BUCKET).remove(paths);
+    if (error) { console.warn('[workspace] audio delete failed:', error.message); return false; }
+    return true;
+  } catch (err) {
+    console.warn('[workspace] audio delete failed:', (err as Error).message);
+    return false;
+  }
+}
+
+// A stuck transcription must finish (or fail) well inside the function's 300 s.
+const DEEPGRAM_TIMEOUT_MS = 150_000;
+
+async function transcribeFile(url: string, track: AudioTrack, keyterms: string[]): Promise<{ utts: Utt[]; seconds: number }> {
   const key = process.env.DEEPGRAM_API_KEY;
   if (!key) throw new Error('DEEPGRAM_API_KEY missing');
   const qs = new URLSearchParams({
     model: 'nova-3', language: 'en', smart_format: 'true', punctuate: 'true',
     utterances: 'true', utt_split: '0.8', diarize: track === 'mic' ? 'false' : 'true',
+    mip_opt_out: 'true', // never used by Deepgram for model training
   });
   keyterms.slice(0, 40).forEach(k => qs.append('keyterm', k));
   const res = await fetch(`https://api.deepgram.com/v1/listen?${qs}`, {
     method: 'POST',
     headers: { Authorization: `Token ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
+    signal: AbortSignal.timeout(DEEPGRAM_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Deepgram ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const j = await res.json() as { results?: { utterances?: Array<{ start: number; end: number; speaker?: number; transcript: string }> } };
-  return (j.results?.utterances ?? [])
+  const j = await res.json() as { metadata?: { duration?: number }; results?: { utterances?: Array<{ start: number; end: number; speaker?: number; transcript: string }> } };
+  const utts = (j.results?.utterances ?? [])
     .filter(u => u.transcript?.trim())
     .map(u => ({ start: u.start, end: u.end, speaker: u.speaker ?? 0, text: u.transcript.trim(), track }));
+  return { utts, seconds: Number(j.metadata?.duration) || 0 };
 }
 
 function words(s: string): Set<string> {
@@ -72,19 +107,23 @@ function label(u: Utt, youName: string): string {
 }
 
 /**
- * Returns the polished transcript ("Label: text" lines in time order), or null
- * if nothing usable came back. Always deletes the audio files afterwards.
+ * Returns the polished transcript ("Label: text" lines in time order) and the
+ * audio seconds Deepgram processed, or a null transcript if nothing usable
+ * came back. Always deletes the audio files afterwards.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function polishTranscript(service: any, audio: AudioRef[], field: string, youName: string): Promise<string | null> {
+export async function polishTranscript(service: any, audio: AudioRef[], field: string, youName: string): Promise<{ transcript: string | null; seconds: number }> {
+  let seconds = 0;
+  let transcript: string | null = null;
   try {
     const keyterms = keytermsForField(field);
     const perTrack = await Promise.all(audio.map(async a => {
-      const { data, error } = await service.storage.from(BUCKET).createSignedUrl(a.path, 900);
+      const { data, error } = await service.storage.from(BUCKET).createSignedUrl(a.path, 300);
       if (error || !data?.signedUrl) throw new Error(`signed url: ${error?.message}`);
       return transcribeFile(data.signedUrl, a.track, keyterms);
     }));
-    let all = perTrack.flat();
+    seconds = perTrack.reduce((n, t) => n + t.seconds, 0);
+    let all = perTrack.flatMap(t => t.utts);
     const tab = all.filter(u => u.track === 'tab');
     if (tab.length) all = [...all.filter(u => u.track !== 'mic'), ...dropEcho(all.filter(u => u.track === 'mic'), tab)];
     all.sort((x, y) => x.start - y.start);
@@ -97,10 +136,12 @@ export async function polishTranscript(service: any, audio: AudioRef[], field: s
       if (last && last.who === who) last.text += ` ${u.text}`;
       else lines.push({ who, text: u.text });
     }
-    const transcript = lines.map(l => `${l.who}: ${l.text}`).join('\n');
-    return transcript.trim() ? transcript : null;
+    const text = lines.map(l => `${l.who}: ${l.text}`).join('\n');
+    transcript = text.trim() ? text : null;
   } finally {
-    // Never keep recordings.
-    await service.storage.from(BUCKET).remove(audio.map(a => a.path)).catch(() => {});
+    // Never keep recordings. (If this fails, the daily cleanup job removes
+    // any leftover recording, see cleanup.ts.)
+    await deleteAudio(service, audio);
   }
+  return { transcript, seconds };
 }

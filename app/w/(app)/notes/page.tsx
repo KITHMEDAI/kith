@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Mic, Keyboard, Loader2, AlertTriangle, Search, Plus } from 'lucide-react';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { embedQueryFast, requirePageProfile } from '@/lib/workspace/server';
+import { rateHit, LIMITS } from '@/lib/workspace/rate';
 import { NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
 
 export const metadata = { title: 'Notes' };
@@ -21,11 +22,12 @@ function fmt(d: string) {
 export default async function NotesPage({ searchParams }: { searchParams: { q?: string } }) {
   const { userId } = await requirePageProfile();
   const supabase = createServerSupabaseClient();
-  const q = (searchParams.q ?? '').trim();
+  const q = (searchParams.q ?? '').trim().slice(0, 200);
   let rows: Row[] = [];
 
   if (q) {
-    const vector = await embedQueryFast(q);
+    // Semantic search costs an embedding call: over the limit, keyword only.
+    const vector = (await rateHit(`ws-search:${userId}`, LIMITS.search)) ? null : await embedQueryFast(q);
     const { data: ranked } = vector
       ? await supabase.rpc('ws_search_notes', { p_user_id: userId, p_query_embedding: JSON.stringify(vector), p_query_text: q, p_limit: 30 })
       : await supabase.rpc('ws_keyword_notes', { p_user_id: userId, p_query_text: q, p_limit: 30 });

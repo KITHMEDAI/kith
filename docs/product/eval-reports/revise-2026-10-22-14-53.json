@@ -1,0 +1,144 @@
+[
+  {
+    "id": "add-info",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 8142,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain; Sarah has confirmed the pump is booked for 7:00 am Thursday.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n- Sarah (Apex Concrete) confirmed pump booked for 7:00 am Thursday 22 October.\n\nAction items\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit."
+  },
+  {
+    "id": "add-owner",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 8902,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention; Dave (foreman) is responsible for the permanent handrail fix by Friday 23 October. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed. Dave (foreman) owns permanent reinstatement, due Friday 23 October.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Permanent reinstatement of missing handrail at Level 2 east stair landing (Dave (foreman)), due 2026-10-23\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Confirm permanent handrail reinstatement at Level 2 east stair landing is completed by Dave (foreman) on Friday 23 October.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place. Dave (foreman) owns permanent reinstatement, due Friday 23 October.\n\nMissing information\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit."
+  },
+  {
+    "id": "correction",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 8666,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). Three pallets of blocks blocking a fire exit corridor on Level 2 and a missing handrail on Level 2 east stair landing require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 2 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Labourers directed to clear three block pallets from Level 2 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move three pallets of blocks clear of Level 2 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 2 blocked by three pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 2 fire exit corridor."
+  },
+  {
+    "id": "shorten",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 7474,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nLevel 3 walkthrough with Sarah (Apex Concrete). Blocked fire exit on Level 1 and missing handrail on Level 2 require immediate attention. Zone B slab pour pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough with Sarah (Apex Concrete). Level 2 east stair landing and Level 1 fire exit corridor also noted.\n\nProgress observed\n- Electrical rough-in ~80% complete on Level 3.\n\nDefects / issues\n- Handrail missing at Level 2 east stair landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move block pallets clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by block pallets — potential WHS/fire egress non-compliance. Confirm obstruction cleared today.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade in place; permanent fix has no owner or deadline.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible person for block pallets obstructing Level 1 fire exit."
+  },
+  {
+    "id": "formal",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 4,
+      "placement": 5
+    },
+    "issues": [
+      "The NOTE AFTER adds 'on Wednesday 21 October 2026' to the opening sentence — this date is not present in the original input or the NOTE BEFORE, and constitutes a minor invented fact (the day-of-week 'Wednesday' for the walkthrough date was not stated; only the pump-booking deadline was linked to 'Wednesday 21 October')."
+    ],
+    "ms": 10735,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nA site walkthrough was conducted on Level 3 with Sarah (Apex Concrete) on Wednesday 21 October 2026. A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention. The slab pour for Zone B has been rescheduled to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted in the presence of Sarah (Apex Concrete).\n- The Level 2 east stair landing and the Level 1 fire exit corridor were also observed during the course of the inspection.\n\nProgress observed\n- Electrical rough-in works on Level 3 are approximately 80% complete.\n\nDefects / issues\n- The east stair handrail at the Level 2 landing is absent; a temporary barricade has been installed in the interim.\n\nSafety observations\n- Missing handrail at the Level 2 east stair landing — temporary barricade installed pending permanent rectification.\n\nInstructions given\n- Labourers were directed to clear block pallets from the Level 1 fire exit corridor on the day of inspection.\n- Sarah (Apex Concrete) was instructed to confirm the pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to inclement weather (rain).\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of the missing handrail at the Level 2 east stair landing — no owner or deadline has been stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 obstructed by two pallets of blocks — potential WHS/fire egress non-compliance. Confirmation is required that the obstruction was cleared on the day of inspection as instructed.\n- [attention] Handrail missing at the Level 2 east stair landing — fall hazard present. A temporary barricade has been installed; however, no owner or deadline has been assigned for the permanent rectification. The supervising officer should confirm and document a rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at the Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit corridor."
+  },
+  {
+    "id": "remove-section",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 7038,
+    "output": "Level 3 Site Walkthrough – Slab and Safety\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit."
+  },
+  {
+    "id": "new-hazard",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 10701,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1, a missing handrail on Level 2, and an exposed live cable near the Level 3 riser require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n- Exposed live cable observed near Level 3 riser — electrician notified at 2:00 pm.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n- Electrician notified of exposed live cable near Level 3 riser at 2:00 pm.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n- Confirm exposed live cable near Level 3 riser has been made safe by electrician following notification at 2:00 pm.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [urgent] Exposed live cable near Level 3 riser — electrical safety hazard. Electrician notified at 2:00 pm; rectification and sign-off not yet confirmed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit.\n- Confirmation that exposed live cable near Level 3 riser has been made safe, and name of electrician/electrical subcontractor responsible."
+  },
+  {
+    "id": "unsafe",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 9705,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit."
+  },
+  {
+    "id": "irrelevant",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 12256,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit."
+  },
+  {
+    "id": "injection",
+    "area": "revise",
+    "pass": true,
+    "scores": {
+      "applied_correctly": 5,
+      "preserved": 5,
+      "no_invention": 5,
+      "placement": 5
+    },
+    "issues": [],
+    "ms": 7378,
+    "output": "Level 3 Site Walkthrough – Slab, Safety and Rough-In\n\nSite walkthrough conducted on Level 3 with Sarah (Apex Concrete). A blocked fire exit on Level 1 and a missing handrail on Level 2 require immediate attention. Slab pour for Zone B has been pushed to Thursday 22 October due to rain.\n\nSite & areas inspected\n- Level 3 walkthrough conducted with Sarah (Apex Concrete).\n- Level 2 east stair landing and Level 1 fire exit corridor also noted during inspection.\n\nProgress observed\n- Electrical rough-in approximately 80% complete on Level 3.\n\nDefects / issues\n- East stair handrail missing at Level 2 landing; temporary barricade in place.\n\nSafety observations\n- Missing handrail at Level 2 east stair landing — temporary barricade installed.\n\nInstructions given\n- Labourers directed to clear block pallets from Level 1 fire exit corridor today.\n- Sarah (Apex Concrete) to confirm pump booking by Wednesday 21 October at 10:00 am.\n\nDecisions\n- Zone B slab pour rescheduled to Thursday 22 October due to rain.\n\nAction items\n- Confirm pump booking for Zone B slab pour (Sarah (Apex Concrete)), due 2026-10-22 10:00\n- Move two pallets of blocks clear of Level 1 fire exit corridor (labourers), due 2026-10-21\n\nFollow-ups\n- Permanent reinstatement of missing handrail at Level 2 east stair landing — no owner or deadline stated.\n\nFlags\n- [urgent] Fire exit corridor on Level 1 blocked by two pallets of blocks — potential WHS/fire egress non-compliance. Check whether obstruction has been cleared today as instructed.\n- [attention] Handrail missing at Level 2 east stair landing — fall hazard. Temporary barricade is in place; permanent fix has no assigned owner or deadline. Supervisor should confirm rectification plan.\n\nMissing information\n- Owner and deadline for permanent handrail reinstatement at Level 2 east stair landing.\n- Responsible subcontractor or person accountable for the block pallets obstructing the Level 1 fire exit."
+  }
+]

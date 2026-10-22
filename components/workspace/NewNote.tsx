@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Mic, Square, Keyboard, Loader2, Sparkles, ShieldCheck, MonitorSpeaker } from 'lucide-react';
 import MeetingRecorder from './MeetingRecorder';
+import { realWordCount } from '@/lib/workspace/words';
 import { startCapture, uploadTrack, type Capture } from '@/lib/workspace/audio-capture';
 import { startDeepgramStream, type StreamStatus } from '@/lib/copilot/deepgram-stream';
 import { cn } from '@/lib/utils';
@@ -83,7 +84,13 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
     router.push(`/notes/${j.id}`);
   };
 
+  const customMissing = () => {
+    if (noteType === 'custom' && !custom.trim()) { setError('Describe the note you want (Custom) before recording'); return true; }
+    return false;
+  };
+
   const startRecording = async () => {
+    if (customMissing()) return;
     if (!consent) { setAskConsent(true); return; }
     setStarting(true); setError('');
     try {
@@ -127,7 +134,9 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
     setStopping(false);
     setRecording(false);
     const transcript = segRef.current.map(s => `${s.speaker}: ${s.text}`).join('\n');
-    if (transcript.split(/\s+/).length < 4) { setError('We didn\'t catch enough speech. Try again a little closer to the mic.'); return; }
+    // Same check as the server, BEFORE uploading: a rejected note must never
+    // leave a recording behind.
+    if (realWordCount(transcript) < 3) { setError('We didn\'t catch enough speech. Try again a little closer to the mic.'); return; }
     setUploading(true);
     const ref = await uploadTrack(blob, 'room');
     setUploading(false);
@@ -141,6 +150,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, cons
   };
 
   const ensureConsent = () => {
+    if (customMissing()) return false;
     if (consent) return true;
     setAskConsent(true);
     return false;

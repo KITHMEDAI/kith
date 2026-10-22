@@ -70,7 +70,8 @@ export default function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
         {children}
-        <Analytics />
+        {/* No analytics in the Workspace edition (privacy: notes app). */}
+        {process.env.NEXT_PUBLIC_EDITION !== 'workspace' && <Analytics />}
       </body>
     </html>
   );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MonitorSpeaker, Square, Loader2, Info } from 'lucide-react';
 import { startDeepgramStream, type StreamStatus } from '@/lib/copilot/deepgram-stream';
 import { startCapture, uploadTrack, type Capture } from '@/lib/workspace/audio-capture';
+import { realWordCount } from '@/lib/workspace/words';
 
 // Records an online meeting (Google Meet / Teams / Zoom in the browser) with
 // no bot: the meeting tab's audio = everyone else, the microphone = you. Two
@@ -128,7 +129,7 @@ export default function MeetingRecorder({ youName, disabled, ensureConsent, onDo
     setRunning(false); setStopping(false); stoppingRef.current = false;
     setPartial({ them: '', you: '' });
     const transcript = segRef.current.map(s => `${s.who}: ${s.text}`).join('\n');
-    if (transcript.split(/\s+/).length < 6) {
+    if (realWordCount(transcript) < 3) { // same check as the server, before uploading
       setError("We didn't catch enough of the meeting. Check you shared the meeting tab with audio, then try again.");
       return;
     }
