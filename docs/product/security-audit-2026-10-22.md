@@ -48,6 +48,8 @@ Quality evals after the fixes (2026-10-22), same suites as 2026-10-21:
 | Edge | 25/29 | 23/29 | |
 | Recording | 3/10 | 4/10 | strict judge on synthetic audio; one case either way is normal |
 
+Evals after round 2 (field encryption, style notes, input masking), 2026-10-22: smoke pass, notes 50/70, Ask 60/62 (clock pinned to 21 Oct, zero leaks), revise 10/10, edge 25/29 — no regressions.
+
 Regression tests:
 - `scripts/workspace-test/security-check.ts` (38 checks)
 - `scripts/workspace-test/signup-check.ts` (9 checks)
