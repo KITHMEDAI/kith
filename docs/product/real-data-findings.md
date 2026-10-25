@@ -108,3 +108,21 @@ The errors are mostly one unusual word ("cloak" → "coat"/"coke"), not the acce
 6. **Dates.** "Thursday (22 Oct)" is helpful, but a strict reviewer calls the derived date invented. Keep the spoken day and label the date as calculated, or leave dates as spoken in NDIS notes.
 7. **Formatting glitch:** an action item rendered as "…as requested by his mum., due Monday (26 Oct)".
 8. **Reliability bug:** in one run, generation failed with invalid JSON on a typed note containing quotes, and the retry failed too. The user would see "We couldn't write this note". Fix: use the model's structured (tool / JSON-schema) output so the JSON is always valid.
+
+## 7. Fixes for sections 5 and 6 (2026-10-25, not yet deployed)
+
+| Finding | Fix | Result |
+|---|---|---|
+| 6.1 No shift-details block | `ndis_progress_note` now always starts with **Shift details** (Date, Shift time, Participant, Support worker, Location, Support type), filled from the input or "Not stated". This is enforced in code (`enforceFixedBlocks`), so the model can't leave it out | NDIS-format eval: 1/7 → **5/7 and 7/7** (two runs; the judge varies by about ±2) |
+| 6.2 No incidents line | **Incidents** is always present. It says "None (worker said 'no incidents')" only when the worker said so, otherwise "None reported by the worker: confirm before signing" | |
+| 6.3 Invented goal links | **Goal link** shows only a goal the worker names. An unsure goal is written "Possible goal (worker unsure)", otherwise "Not stated" | |
+| 6.4 Advice not in the input | Prompt rules, plus code that cuts advice clauses ("supervisor may wish…", "confirm whether…", "as required by policy") and speculative gaps ("whether BP monitoring is required…") from flags, follow-ups and missing info | |
+| 6.5 Reportable-incident calls | The incident template now has the NDIS Commission categories, the 24 h vs 5-business-day rule (5 days only when no one was harmed), PRN given for behaviour = chemical restraint, "internal incident only" for no-harm events, and the SIRS P1/P2 rules for aged care. Also fixed blocks for Incident details, witnesses, contributing factors and prevention | Fall, late medication and restraint: 5/5 on the reportable call |
+| 6.6 Dates | **Decision:** NDIS and aged-care notes keep dates exactly as spoken. A calculated date (even labelled "calculated") was still counted as invented. The record's Date line adds the note date itself: "Tuesday (note written 21 October 2026)", "21 October 2026 (worker said 'this arvo')", or "Not stated (note written …): confirm". Other fields keep "Monday (26 Oct)" | |
+| 6.7 "…mum., due Monday" | Trailing punctuation is removed from action-item tasks | |
+| 6.8 Invalid JSON | Note writing and revising now use **structured output** (`output_config.format` with a JSON schema), so the reply is always valid JSON. A forced *strict tool* was tried first, but it cut text off at a quotation mark ("JM said: ") in 2 of 3 runs, and a non-strict tool sometimes returned `sections` as a string. Quotes are now written with single quotation marks, and a note with a cut-off string is retried once | 0 generation failures in all runs; the participant's quote kept 4/4 |
+| 5 Local names/brands | Field vocabulary for ndis and aged_care now includes ~33 AU medicine brands, Centrelink/Medicare/My Aged Care/Opal/myki/TAFE/Woolies/Coles/Aldi/Bunnings/Chemist Warehouse/servo/Weet-Bix… New per-user **Names & terms** on the profile page (up to 40, encrypted). It is merged first into the Deepgram keyterms for both the live and polish passes (cap 100) and given to the note writer as a spelling reference | aus-noise (transcription only): WER 5.1% → **4.7%** with the field list, **4.3%** with user terms. Hard words kept 70 → 71/102 with the field list, **79/102** with user terms. Most remaining misses are spelling variants (WeetBix, nonslip) |
+
+General notes eval: **52/70** (baseline 50–51). The care-field subset (8 cases) went 7/8 → 5/8, mostly judge noise on templates that didn't change. `ndis-progress-shopping` now fails because the judge doesn't accept a late dose flagged as info. Security check 69/69, tsc clean.
+
+**Deploy order:** run `supabase/workspace/005_custom_terms.sql` (adds `ws_profiles.custom_terms`) **before** deploying. Until it runs, saving the profile page fails and the data export leaves out the profile block.

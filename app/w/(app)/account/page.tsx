@@ -1,4 +1,4 @@
-import { requirePageProfile } from '@/lib/workspace/server';
+import { requirePageProfile, userTerms } from '@/lib/workspace/server';
 import { getAuthUser } from '@/lib/supabase/server';
 import ProfileForm from '@/components/workspace/ProfileForm';
 import AccountData from '@/components/workspace/AccountData';
@@ -18,6 +18,7 @@ export default async function AccountPage() {
           initial={{
             name: p.name, email: p.email, phone: p.phone ?? '', field: p.field,
             field_custom: p.field_custom ?? '', note_preferences: p.note_preferences ?? '',
+            custom_terms: userTerms(p).join(', '),
           }}
         />
       </div>

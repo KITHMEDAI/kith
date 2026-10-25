@@ -13,6 +13,8 @@ export interface ProfileValues {
   field: string;
   field_custom: string;
   note_preferences: string;
+  /** "Names & terms" (account page only; onboarding leaves it out). */
+  custom_terms?: string;
 }
 
 const inputCls = 'h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100';
@@ -92,6 +94,20 @@ export default function ProfileForm({ mode, initial }: { mode: 'onboarding' | 'a
         <button type="button" onClick={() => setShowPrefs(true)} className="text-sm text-violet-700 hover:underline">
           + Tell Kith how you like your notes (optional)
         </button>
+      )}
+
+      {mode === 'account' && v.custom_terms !== undefined && (
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium">Names &amp; terms <span className="font-normal text-slate-400">(optional)</span></span>
+          <textarea
+            className="min-h-[80px] w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+            value={v.custom_terms}
+            onChange={set('custom_terms')}
+            maxLength={2000}
+            placeholder="e.g. Darren Kowalski, Woolloongabba, Dr Mehta, Coversyl"
+          />
+          <span className="mt-1 block text-xs text-slate-500">Names of clients, places, colleagues and products you often mention, separated by commas (up to 40). Kith listens for them so they&apos;re spelled right. Stored encrypted.</span>
+        </label>
       )}
 
       {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}

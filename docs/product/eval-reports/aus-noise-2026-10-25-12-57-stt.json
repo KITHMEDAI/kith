@@ -1,0 +1,325 @@
+[
+ {
+  "id": "shift_summary",
+  "level": "clean",
+  "wer": 6.3,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "7/10",
+  "missed": [
+   "arvo",
+   "toastie",
+   "545"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "+right",
+   "righto→toe",
+   "+toe",
+   "+as",
+   "toastie→tie",
+   "+point",
+   "+five",
+   "dollars→zero",
+   "fifty→dollars",
+   "receipt's→receipts",
+   "mum→mom",
+   "+we",
+   "we're→are"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "shift_summary",
+  "level": "busy",
+  "wer": 4.9,
+  "speakers": 2,
+  "spkAcc": 98.1,
+  "hardFound": "7/10",
+  "missed": [
+   "arvo",
+   "toastie",
+   "545"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "+tourist",
+   "toastie→tie",
+   "+point",
+   "+five",
+   "dollars→zero",
+   "fifty→dollars",
+   "receipt's→receipts",
+   "mum→mom",
+   "+we",
+   "we're→are"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "shift_summary",
+  "level": "loud",
+  "wer": 5.4,
+  "speakers": 2,
+  "spkAcc": 99.1,
+  "hardFound": "8/10",
+  "missed": [
+   "toastie",
+   "545"
+  ],
+  "sttErrors": [
+   "+how",
+   "toastie→tie",
+   "+point",
+   "+five",
+   "dollars→zero",
+   "fifty→dollars",
+   "receipt's→receipts",
+   "mum→mom",
+   "+we",
+   "we're→are",
+   "-knee",
+   "gel→nijel"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "home_visit",
+  "level": "clean",
+  "wer": 2.8,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "6/9",
+  "missed": [
+   "weet-bix",
+   "broncos",
+   "kowalski"
+  ],
+  "sttErrors": [
+   "broncos→bronchos",
+   "-ha",
+   "-weet",
+   "bix→weetbix",
+   "hallway's→hallways"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "home_visit",
+  "level": "busy",
+  "wer": 2.2,
+  "speakers": 2,
+  "spkAcc": 98.3,
+  "hardFound": "7/9",
+  "missed": [
+   "weet-bix",
+   "kowalski"
+  ],
+  "sttErrors": [
+   "-ha",
+   "-weet",
+   "bix→weetbix",
+   "hallway's→hallways"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "home_visit",
+  "level": "loud",
+  "wer": 3.9,
+  "speakers": 2,
+  "spkAcc": 97.1,
+  "hardFound": "6/9",
+  "missed": [
+   "weet-bix",
+   "broncos",
+   "kowalski"
+  ],
+  "sttErrors": [
+   "broncos→bronchos",
+   "-ha",
+   "+seal",
+   "-weet",
+   "bix→weekdays",
+   "hallway's→hallways",
+   "-coordinator"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "incident_report",
+  "level": "clean",
+  "wer": 5.1,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "4/7",
+  "missed": [
+   "woolloongabba",
+   "mehta",
+   "non-slip"
+  ],
+  "sttErrors": [
+   "+wooloon",
+   "woolloongabba→gabba",
+   "centimetres→centimeters",
+   "graze→grays",
+   "-o'clock",
+   "dr→doctor",
+   "mehta's→metta's",
+   "-non",
+   "slip→nonslip",
+   "too→two"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "incident_report",
+  "level": "busy",
+  "wer": 5.1,
+  "speakers": 2,
+  "spkAcc": 96.8,
+  "hardFound": "4/7",
+  "missed": [
+   "woolloongabba",
+   "mehta",
+   "non-slip"
+  ],
+  "sttErrors": [
+   "woolloongabba→woolongabba",
+   "centimetres→centimeters",
+   "graze→greys",
+   "helped→help",
+   "-o'clock",
+   "dr→doctor",
+   "mehta's→metta's",
+   "-non",
+   "slip→nonslip",
+   "too→two"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "incident_report",
+  "level": "loud",
+  "wer": 4.5,
+  "speakers": 2,
+  "spkAcc": 98.4,
+  "hardFound": "4/7",
+  "missed": [
+   "woolloongabba",
+   "mehta",
+   "non-slip"
+  ],
+  "sttErrors": [
+   "woolloongabba→woolongabba",
+   "centimetres→centimeters",
+   "-he",
+   "-o'clock",
+   "dr→doctor",
+   "mehta's→metta's",
+   "-non",
+   "slip→nonslip",
+   "too→two"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "team_meeting",
+  "level": "clean",
+  "wer": 4.9,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "7/8",
+  "missed": [
+   "arvo"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "arvo→avo",
+   "supports→support's",
+   "dollars→point",
+   "fifty→five",
+   "cents→dollars",
+   "-first",
+   "of→july",
+   "july→one"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "team_meeting",
+  "level": "busy",
+  "wer": 6,
+  "speakers": 2,
+  "spkAcc": 96.5,
+  "hardFound": "5/8",
+  "missed": [
+   "gatton",
+   "arvo",
+   "jacinta"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "gatton→gatin",
+   "arvo→avo",
+   "supports→support's",
+   "dollars→point",
+   "fifty→five",
+   "cents→dollars",
+   "-first",
+   "of→july",
+   "july→one",
+   "jacinta→jacinto"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ },
+ {
+  "id": "team_meeting",
+  "level": "loud",
+  "wer": 5.5,
+  "speakers": 2,
+  "spkAcc": 98.3,
+  "hardFound": "6/8",
+  "missed": [
+   "arvo",
+   "jacinta"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "arvo→avo",
+   "-supports",
+   "dollars→point",
+   "fifty→five",
+   "cents→dollars",
+   "-first",
+   "of→july",
+   "july→one",
+   "jacinta→jacinto"
+  ],
+  "judge": {},
+  "pass": false,
+  "issues": []
+ }
+]

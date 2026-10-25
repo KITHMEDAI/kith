@@ -16,6 +16,7 @@ export { embedQueryFast };
 import { generateNote, learnStyle, noteToText, type NoteContent } from './generate';
 import { polishTranscript, parseAudioPaths, deleteAudio } from './polish';
 import { rateHit, AUDIO_MINUTES_PER_DAY } from './rate';
+import { parseUserTerms } from './keyterms';
 
 export const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
 
@@ -31,6 +32,7 @@ export interface WsProfile {
   default_note_type: string | null;
   recording_consent_ack_at: string | null;
   style_notes: string | null;   // encrypted; read with open()
+  custom_terms?: string | null; // encrypted "names & terms", comma separated; read with userTerms()
 }
 
 export interface WsNote {
@@ -75,6 +77,11 @@ export async function getProfile(userId: string): Promise<WsProfile | null> {
   return (data as WsProfile | null) ?? null;
 }
 
+/** The user's own "names & terms" (decrypted), for transcription and the note writer. */
+export function userTerms(p: Pick<WsProfile, 'custom_terms'> | null | undefined): string[] {
+  return parseUserTerms(open(p?.custom_terms ?? null));
+}
+
 // Note input (typed text or transcript), encrypted at the field level (crypto.ts).
 export const sealInput = (text: string): string => seal(text);
 export const openInput = (stored: string | null): string => open(stored);
@@ -112,7 +119,7 @@ export async function processNote(noteId: string): Promise<void> {
       await deleteAudio(service, audio);
     } else {
       try {
-        const { transcript: polished, seconds } = await polishTranscript(service, audio, p?.field || note.field, (p?.name || 'Me').split(' ')[0]);
+        const { transcript: polished, seconds } = await polishTranscript(service, audio, p?.field || note.field, (p?.name || 'Me').split(' ')[0], userTerms(p));
         // Charge the real length if the file was longer than the note claimed.
         const extra = Math.ceil(seconds / 60) - claimedMin;
         if (extra > 0) await rateHit(`ws-audio-min:${note.user_id}`, [[AUDIO_MINUTES_PER_DAY, 86400]], extra);
@@ -140,6 +147,7 @@ export async function processNote(noteId: string): Promise<void> {
       fieldProfile: p?.field_profile,
       preferences: p?.note_preferences,
       styleNotes: open(p?.style_notes) || null,
+      userTerms: userTerms(p),
       userName: p?.name,
       date: new Date(note.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
       dateISO: note.created_at,

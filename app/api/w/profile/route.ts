@@ -5,6 +5,8 @@ import { NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
 import { generateFieldProfile } from '@/lib/workspace/generate';
 import { createServiceRoleClient } from '@/lib/supabase/server';
 import { limited, LIMITS } from '@/lib/workspace/rate';
+import { seal } from '@/lib/workspace/crypto';
+import { parseUserTerms } from '@/lib/workspace/keyterms';
 
 // Create/update the user's profile (onboarding + later tweaks).
 export async function POST(req: Request) {
@@ -18,6 +20,8 @@ export async function POST(req: Request) {
   const field = typeof body.field === 'string' && Object.hasOwn(FIELD_MAP, body.field) ? body.field : 'general';
   const fieldCustom = field === 'other' ? String(body.field_custom ?? '').trim().slice(0, 120) : null;
   const preferences = String(body.note_preferences ?? '').trim().slice(0, 500) || null;
+  // Names & terms (account page only): encrypted; left unchanged when not sent (onboarding).
+  const terms = 'custom_terms' in body ? parseUserTerms(body.custom_terms) : null;
   if (!name) return NextResponse.json({ error: 'Please add your name' }, { status: 422 });
   if (field === 'other' && !fieldCustom) return NextResponse.json({ error: 'Tell us your field' }, { status: 422 });
   const tooMany = await limited(`ws-profile:${user.id}`, LIMITS.profile, 'Too many changes in a short time. Try again shortly.');
@@ -42,6 +46,7 @@ export async function POST(req: Request) {
     field_custom: fieldCustom,
     field_profile: fieldProfile,
     note_preferences: preferences,
+    ...(terms ? { custom_terms: terms.length ? seal(terms.join(', ')) : null } : {}),
     default_note_type: NOTE_TYPE_MAP[FIELD_MAP[field].defaultNoteType] ? FIELD_MAP[field].defaultNoteType : 'general',
     // Creating the profile (onboarding) is where the Terms are accepted.
     terms_accepted_at: existing?.terms_accepted_at ?? new Date().toISOString(),

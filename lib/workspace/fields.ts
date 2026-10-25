@@ -41,7 +41,7 @@ export const FIELDS: FieldDef[] = [
   },
   {
     key: 'ndis', label: 'NDIS & disability support', defaultNoteType: 'ndis_progress_note',
-    profile: 'Australian NDIS disability-support context. Say "participant", not "patient". Write objective, person-centred notes that link supports delivered to the participant\'s NDIS plan goals where the input mentions them. Flag possible reportable incidents (injury, abuse/neglect, unauthorised restrictive practice such as PRN for behaviour, unlawful contact, death) for a supervisor; reportable incidents are generally due to the NDIS Commission within 24 hours. Never invent goal links or details.',
+    profile: 'Australian NDIS disability-support context. Say "participant", not "patient". Write objective, person-centred notes that link supports delivered to the participant\'s NDIS plan goals where the input mentions them. Flag possible reportable incidents (serious injury, abuse/neglect, unauthorised restrictive practice such as PRN for behaviour, unlawful contact, death) for a supervisor; reportable incidents are due to the NDIS Commission within 24 hours (5 business days for unauthorised restrictive practice with no harm). A minor injury treated with first aid, or a late dose with no harm, is an internal incident, not a reportable one. Never invent goal links or details.',
   },
   {
     key: 'aged_care', label: 'Aged care', defaultNoteType: 'aged_care_note',

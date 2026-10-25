@@ -11,7 +11,7 @@
  *   - "tab":  online meeting tab audio (everyone else, diarized → Participant N)
  *   - "mic":  your own mic during an online meeting (→ "<name> (me)")
  */
-import { keytermsForField } from './keyterms';
+import { keytermsForField, MAX_KEYTERMS } from './keyterms';
 
 export type AudioTrack = 'room' | 'tab' | 'mic';
 export interface AudioRef { track: AudioTrack; path: string }
@@ -67,7 +67,7 @@ async function transcribeFile(url: string, track: AudioTrack, keyterms: string[]
     utterances: 'true', utt_split: '0.8', diarize: track === 'mic' ? 'false' : 'true',
     mip_opt_out: 'true', // never used by Deepgram for model training
   });
-  keyterms.slice(0, 40).forEach(k => qs.append('keyterm', k));
+  keyterms.slice(0, MAX_KEYTERMS).forEach(k => qs.append('keyterm', k));
   const res = await fetch(`https://api.deepgram.com/v1/listen?${qs}`, {
     method: 'POST',
     headers: { Authorization: `Token ${key}`, 'Content-Type': 'application/json' },
@@ -112,11 +112,11 @@ function label(u: Utt, youName: string): string {
  * came back. Always deletes the audio files afterwards.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function polishTranscript(service: any, audio: AudioRef[], field: string, youName: string): Promise<{ transcript: string | null; seconds: number }> {
+export async function polishTranscript(service: any, audio: AudioRef[], field: string, youName: string, userTerms: string[] = []): Promise<{ transcript: string | null; seconds: number }> {
   let seconds = 0;
   let transcript: string | null = null;
   try {
-    const keyterms = keytermsForField(field);
+    const keyterms = keytermsForField(field, userTerms);
     const perTrack = await Promise.all(audio.map(async a => {
       const { data, error } = await service.storage.from(BUCKET).createSignedUrl(a.path, 300);
       if (error || !data?.signedUrl) throw new Error(`signed url: ${error?.message}`);

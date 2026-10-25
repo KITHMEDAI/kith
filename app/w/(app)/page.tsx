@@ -1,4 +1,4 @@
-import { requirePageProfile } from '@/lib/workspace/server';
+import { requirePageProfile, userTerms } from '@/lib/workspace/server';
 import { noteTypesForField, NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
 import { FIELD_MAP, fieldLabel } from '@/lib/workspace/fields';
 import NewNote from '@/components/workspace/NewNote';
@@ -19,7 +19,7 @@ export default async function NewNotePage() {
       fieldName={fieldLabel(p.field, p.field_custom)}
       types={types}
       defaultType={preferred}
-      keyterms={keytermsForField(p.field)}
+      keyterms={keytermsForField(p.field, userTerms(p))}
     />
   );
 }

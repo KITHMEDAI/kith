@@ -19,7 +19,7 @@ export async function GET() {
   if (tooMany) return tooMany;
 
   const { data: profile } = await supabase.from('ws_profiles')
-    .select('name, email, phone, field, field_custom, field_profile, note_preferences, default_note_type, style_notes, terms_accepted_at, created_at, updated_at')
+    .select('name, email, phone, field, field_custom, field_profile, note_preferences, default_note_type, style_notes, custom_terms, terms_accepted_at, created_at, updated_at')
     .eq('user_id', user.id).maybeSingle();
 
   const notes: Record<string, unknown>[] = [];
@@ -38,7 +38,7 @@ export async function GET() {
     exported_at: new Date().toISOString(),
     service: 'Kith Workspace (work.kith.space)',
     account: { id: user.id, email: user.email, created_at: user.created_at, sign_in_methods: user.app_metadata?.providers ?? [] },
-    profile: profile ? { ...profile, style_notes: open(profile.style_notes) || null } : null,
+    profile: profile ? { ...profile, style_notes: open(profile.style_notes) || null, custom_terms: open(profile.custom_terms) || null } : null,
     notes,
     not_included: 'Recordings are deleted right after transcription, so there are none to export.',
   };
