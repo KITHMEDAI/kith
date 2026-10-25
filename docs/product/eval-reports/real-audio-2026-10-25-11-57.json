@@ -1,0 +1,58 @@
+[
+ {
+  "case": "LONG: 4 meetings stitched",
+  "minutes": 162.3,
+  "opusMB": 35.1,
+  "withinBucket50MB": true,
+  "cachedTranscript": true,
+  "transcribeS": 41,
+  "deepgramMin": 162.3,
+  "transcriptChars": 134488,
+  "speakers": 13,
+  "withinInputCap": true,
+  "writeS": 120,
+  "totalS": 161,
+  "withinFunctionLimit": true,
+  "costAUD": 3.83,
+  "costPerHourAUD": 1.41,
+  "judge": {
+   "faithfulness": 2,
+   "coverage": 5,
+   "usefulness": 4
+  },
+  "pass": false,
+  "issues": [
+   "Invented date bracket: 'Friday (23 Oct)' — 23 Oct 2026 is a Friday, but no spoken weekday 'Friday' was ever resolved to a specific date bracket in the minutes without a spoken day behind it qualifying as a date resolution. More critically: 'Monday (26 Oct)' is correct, but 'Friday (23 Oct)' is the day after the note date (22 Oct) not 'next Friday' — 23 Oct 2026 is indeed a Friday so the bracketed date is arithmetically correct, however this is a borderline case.",
+   "Invented date: Progress report deadline rendered as 'June 23 February' and then glossed in the follow-ups as 'exact date needs confirmation' — the transcript says 'June 23 February' which is clearly a speech-to-text error for '23rd of February'; the minutes then separately state 'by the end of February' without a year, adding a year-free invented date framing, but also in the Flags section the minutes say 'No year was stated; the relevant year should be confirmed' about the September market deadline — this is speculative editorialising not supported by the transcript.",
+   "Invented proper noun expansion: The minutes state the folder is 'nlssd' and subfolder 'mbrowser' — the transcript says 'n l s s d' and 'm browser', which the writer has silently merged into specific formatted names without confirmation. This is reasonable inference but presented as fact."
+  ]
+ },
+ {
+  "case": "LONGEST: 6 meetings stitched",
+  "minutes": 193.8,
+  "opusMB": 41.9,
+  "withinBucket50MB": true,
+  "cachedTranscript": true,
+  "transcribeS": 46,
+  "deepgramMin": 193.8,
+  "transcriptChars": 157023,
+  "speakers": 17,
+  "withinInputCap": true,
+  "writeS": 139,
+  "totalS": 186,
+  "withinFunctionLimit": true,
+  "costAUD": 4.55,
+  "costPerHourAUD": 1.41,
+  "judge": {
+   "faithfulness": 2,
+   "coverage": 4,
+   "usefulness": 4
+  },
+  "pass": false,
+  "issues": [
+   "The minutes state the Friday meeting is 'Friday (23 Oct)' — the note date is Thursday 22 October 2026, so the very next day (Friday) would be 23 October 2026. That bracketed date is arithmetically correct. However, the minutes also state 'Monday (26 Oct)' for the code walkthrough, which is also correct (Monday after Thursday 22 Oct is 26 Oct). These are fine.",
+   "The minutes state the progress report date as 'June 23 February' and add 'Speaker C asked if that was roughly two weeks away' — the transcript says 'The progress report is June 23 February' which is garbled speech-to-text. The minutes reproduce this as a date 'June 23 February', which is internally contradictory and not a real date, but crucially the minutes then add the bracketed parenthetical interpretation without flagging it as unintelligible, risking treating 'February' as a confirmed month. More critically, Speaker E says 'By the end of February?' and the minutes present this as fact rather than a question, slightly misrepresenting the transcript.",
+   "The minutes state in the Decisions section: 'Next browser project meeting provisionally set for Friday (23 Oct) at 3:00 pm.' The note date is Thursday 22 October 2026, making Friday 23 October 2026 correct. However, the meeting was discussed as potentially happening 'this Friday' relative to the meeting day (Thursday), which makes it the very next day. The transcript does not confirm whether 'Friday' refers to the coming Friday or a later one — the minutes assume correctly but this is a minor inference."
+  ]
+ }
+]

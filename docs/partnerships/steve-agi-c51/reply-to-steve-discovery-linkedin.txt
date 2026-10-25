@@ -1,0 +1,23 @@
+Hi Steve,
+
+Thanks, that's great to hear, and good that your colleagues validated it. I agree: a paid discovery around one NDIS documentation workflow is the right next step before anyone builds further.
+
+I've attached a short work breakdown (PDF). In summary:
+
+• Scope: one provider, one workflow (shift / progress notes, with incident flagging and a mandatory review step).
+
+• 4 weeks:
+   – Week 1: discover and map the workflow, templates and requirements
+   – Week 2: configure Kith for it
+   – Weeks 3–4: 3–5 workers use it on real shifts, then a go / no-go report with time saved, note quality and a security and compliance pack
+
+• Not a build from zero: the platform is already working and hosted in Sydney, with encryption and a security test suite in place, so the money goes into fitting and proving the workflow.
+
+• Cost: A$4,500 (ex GST), fixed, funded by the pilot provider. Kith invoices 50% at kick-off and 50% on the report, with C51's share as we agree between us. Hosting and AI costs are included.
+
+• Split of work: I'd handle all the technical delivery, security and support. You'd handle the provider introduction, the market and commercial assessment, and pricing validation.
+
+Happy to adjust the scope once you've looked at the market side. Do you have a provider in mind for this? If it helps, I can set you up with an account on the current version so you can see where we're starting from.
+
+Best,
+Anurag

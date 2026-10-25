@@ -1,0 +1,21 @@
+[
+ {
+  "case": "LONG: 4 meetings stitched",
+  "minutes": 162.3,
+  "opusMB": 35.1,
+  "withinBucket50MB": true,
+  "transcribeS": 41,
+  "deepgramMin": 162.3,
+  "transcriptChars": 134488,
+  "speakers": 13,
+  "withinInputCap": true,
+  "error": "timeout must be an integer"
+ },
+ {
+  "case": "LONGEST: 6 meetings stitched",
+  "minutes": 193.8,
+  "opusMB": 41.9,
+  "withinBucket50MB": true,
+  "error": "upload: fetch failed"
+ }
+]

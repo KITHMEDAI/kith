@@ -1,0 +1,470 @@
+[
+ {
+  "id": "shift_summary",
+  "level": "clean",
+  "wer": 6.3,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "7/10",
+  "missed": [
+   "toastie",
+   "voltaren",
+   "545"
+  ],
+  "sttErrors": [
+   "+right",
+   "righto→toe",
+   "+toe",
+   "+as",
+   "toastie→tie",
+   "+point",
+   "+five",
+   "dollars→zero",
+   "fifty→dollars",
+   "receipt's→receipts",
+   "mum→mom",
+   "+we",
+   "we're→are",
+   "voltaren→voltran"
+  ],
+  "judge": {
+   "faithfulness": 3,
+   "coverage": 4,
+   "speaker_attribution": 3,
+   "stt_robustness": 3
+  },
+  "pass": false,
+  "issues": [
+   "[MODEL] 'Jess provided a handover to Darren's incoming support worker' — Liam is the Team Leader, not an incoming support worker. The note misattributes his role.",
+   "[MODEL] 'Missing information: Name and role of the incoming support worker (Speaker B, 'Darren')' — Speaker B is Liam, who was identified by name in the transcript ('No worries Jess'). Calling him 'Darren' is a factual error; Darren is the participant, not a speaker.",
+   "[STT] 'ham and cheese toe as tie' is a clear STT error for 'ham and cheese toastie'. The note flags it as 'unclear in recording' and says 'confirm what was purchased', which is overly cautious given the STT corruption is obvious and the correct item (ham and cheese toastie) was audible enough to partially transcribe. The note should have corrected this.",
+   "[STT] 'Voltran' in the transcript (STT error for 'Voltaren') — the note correctly uses 'Voltaren', which is good STT correction."
+  ],
+  "control": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 4
+  }
+ },
+ {
+  "id": "shift_summary",
+  "level": "busy",
+  "wer": 4.9,
+  "speakers": 1,
+  "spkAcc": 87.5,
+  "hardFound": "7/10",
+  "missed": [
+   "toastie",
+   "voltaren",
+   "545"
+  ],
+  "sttErrors": [
+   "+tourist",
+   "toastie→tie",
+   "+point",
+   "+five",
+   "dollars→zero",
+   "fifty→dollars",
+   "receipt's→receipts",
+   "mum→mom",
+   "+we",
+   "we're→are",
+   "voltaren→voltran"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 3,
+   "stt_robustness": 4
+  },
+  "pass": false,
+  "issues": [
+   "[MODEL] 'ham and cheese tourist tie' (STT garble) was silently corrected to 'ham and cheese toastie' — correct handling, not an error.",
+   "[STT] 'Voltran' in transcript was silently corrected to 'Voltaren' in the note — correct handling.",
+   "[MODEL] Speaker attribution is partially incorrect: the note flags Jess's name/role as 'not fully confirmed in transcript', yet the transcript's diarization collapsed all speakers into 'Speaker A', meaning Liam's lines (e.g., 'Good on him', 'Righto', 'Okay worth noting', 'Anything for next shift') are also attributed to Speaker A. The note does not acknowledge that a second speaker (team leader / Liam) is present and was party to the handover — it presents the content as a single-person account without flagging the diarization failure for speaker separation.",
+   "[MODEL] Receipt amount: script says '$11.50' ('eleven dollars fifty'); transcript says '$11.50' — note correctly states '$11.50'. No error here."
+  ]
+ },
+ {
+  "id": "shift_summary",
+  "level": "loud",
+  "wer": 5.8,
+  "speakers": 2,
+  "spkAcc": 99.1,
+  "hardFound": "6/10",
+  "missed": [
+   "servo",
+   "toastie",
+   "voltaren",
+   "545"
+  ],
+  "sttErrors": [
+   "+how",
+   "did→dare",
+   "toastie→tie",
+   "servo→server",
+   "+point",
+   "+five",
+   "dollars→zero",
+   "fifty→dollars",
+   "receipt's→receipts",
+   "mum→mom",
+   "+we",
+   "we're→are",
+   "voltaren→voltran"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 4,
+   "speaker_attribution": 4,
+   "stt_robustness": 4
+  },
+  "pass": true,
+  "issues": [
+   "[MODEL] 'Jess provided a handover to Liam covering Darren's morning shift (1–5 pm noted as 'this arvo')' — the script clearly states 'this arvo, from one till five' referring to Darren's AFTERNOON shift being handed over TO the next worker, not a morning shift. Labelling it 'morning shift' is a factual error.",
+   "[STT] The transcript garbled 'ham and cheese toastie' as 'ham and cheese tie' and 'servo' as 'server'; the note correctly recovers 'ham and cheese toastie' but writes 'café' instead of 'servo' (service station/petrol station). The original script says 'servo', not café — this is a minor but real factual substitution.",
+   "[STT] The transcript renders 'Voltaren' as 'Voltran'; the note correctly writes 'Voltaren' — good recovery.",
+   "[MODEL] The note states 'Monday (26 Oct)' for the Centrelink appointment. 21 October 2026 is a Wednesday; the following Monday is 26 October 2026. This date resolution is correct, so this is NOT an error — included here only to confirm it was verified."
+  ]
+ },
+ {
+  "id": "home_visit",
+  "level": "clean",
+  "wer": 5.6,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "4/9",
+  "missed": [
+   "weet-bix",
+   "coversyl",
+   "broncos",
+   "woolies",
+   "kowalski"
+  ],
+  "sttErrors": [
+   "-weet",
+   "bix→weepbix",
+   "broncos→bronchos",
+   "-ha",
+   "+cover",
+   "coversyl→seal",
+   "weet→week",
+   "bix→picks",
+   "hallway's→hallways",
+   "woolies→willy's"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 5,
+   "stt_robustness": 5
+  },
+  "pass": true,
+  "issues": [
+   "[MODEL] 'notify coordinator of elevated blood pressure reading so nurse can recheck on Wednesday (28 Oct)' — the nurse recheck was scheduled for 'Wednesday' spoken during a visit dated Wednesday 21 Oct, so the next Wednesday is 28 Oct; however the script simply says 'Wednesday' with no qualifier implying the following week. The visit itself is on Wednesday 21 Oct, so 'Wednesday' most naturally refers to a future Wednesday (28 Oct) but this is a mild interpretive risk rather than a clear error.",
+   "[MODEL] Shopping listed as 'from Willy's, as requested' — Bill said 'Woolies' (Woolworths); the STT transcript garbled this to 'Willy's' and the note repeats 'Willy's' rather than flagging the garbled store name or correcting it, treating it as fact (minor faithfulness issue).",
+   "[STT] Medication 'Coversyl' transcribed as 'cover seal' — note correctly flags this as unclear and does not assert the wrong name as fact.",
+   "[STT] 'Weetbix' transcribed as 'Weepbix' — note correctly renders 'Weetbix'."
+  ],
+  "control": {
+   "faithfulness": 3,
+   "coverage": 5,
+   "speaker_attribution": 5
+  }
+ },
+ {
+  "id": "home_visit",
+  "level": "busy",
+  "wer": 4.4,
+  "speakers": 2,
+  "spkAcc": 98.3,
+  "hardFound": "6/9",
+  "missed": [
+   "weet-bix",
+   "coversyl",
+   "kowalski"
+  ],
+  "sttErrors": [
+   "-weet",
+   "bix→weepbix",
+   "-ha",
+   "+cover",
+   "coversyl→still",
+   "weet→week",
+   "bix→picks",
+   "hallway's→hallways"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 5,
+   "stt_robustness": 4
+  },
+  "pass": true,
+  "issues": [
+   "[MODEL] The note resolves 'Wednesday' (the nurse recheck) to '28 Oct 2026', but the visit itself is on Wednesday 21 Oct 2026, making the next Wednesday 28 Oct — this is actually correct and not an error.",
+   "[STT] The STT rendered 'Coversyl' as 'cover still' and 'Weet-Bix' (second mention) as 'week picks'. The note correctly flags the medication name as unclear ('cover still') rather than asserting it as fact, which is appropriate handling.",
+   "[STT] The STT rendered 'Weet-Bix' (breakfast confirmation) as 'Weepbix' — the note correctly silently corrects this to 'Weet-Bix' using context.",
+   "[MODEL] The note states 'Mood appeared good; engaged in conversation and was cheerful' — this is an inference/observation not stated in the script; the script only records what was said, not a formal mood assessment. Minor faithfulness concern."
+  ]
+ },
+ {
+  "id": "home_visit",
+  "level": "loud",
+  "wer": 6.1,
+  "speakers": 2,
+  "spkAcc": 97.6,
+  "hardFound": "4/9",
+  "missed": [
+   "weet-bix",
+   "coversyl",
+   "broncos",
+   "woolies",
+   "kowalski"
+  ],
+  "sttErrors": [
+   "-weet",
+   "bix→weepbix",
+   "broncos→bronchos",
+   "-ha",
+   "+cover",
+   "coversyl→seal",
+   "-weet",
+   "bix→weekdays",
+   "hallway's→hallways",
+   "-coordinator",
+   "-woolies"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 5,
+   "stt_robustness": 5
+  },
+  "pass": true,
+  "issues": [
+   "[MODEL] 'Friday (16 Oct)' in the Follow-ups section: 21 Oct 2026 is a Wednesday, so the previous Friday was 16 Oct 2026 — this is actually correct. No issue here.",
+   "[MODEL] 'Saturday (17 Oct)' for Bill's illness: 21 Oct 2026 is Wednesday, so the prior Saturday was 17 Oct 2026 — correct.",
+   "[MODEL] 'Wednesday (28 Oct)' for nurse follow-up: the script says 'on Wednesday' which, spoken on 21 Oct (a Wednesday), most naturally means the NEXT Wednesday, i.e. 28 Oct 2026. This interpretation is reasonable but slightly ambiguous — it could mean the same day (21 Oct). The note treats it as a future appointment, which is plausible but not certain.",
+   "[MODEL] The note states 'Bill appeared in good spirits during the visit' — this is an inference not explicitly stated in the script. Minor editorial addition."
+  ]
+ },
+ {
+  "id": "incident_report",
+  "level": "clean",
+  "wer": 5.1,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "4/7",
+  "missed": [
+   "woolloongabba",
+   "mehta",
+   "non-slip"
+  ],
+  "sttErrors": [
+   "woolloongabba→wollongabba",
+   "centimetres→centimeters",
+   "graze→grays",
+   "helped→help",
+   "-o'clock",
+   "dr→doctor",
+   "mehta's→meta's",
+   "-non",
+   "slip→nonslip",
+   "too→two"
+  ],
+  "judge": {
+   "faithfulness": 3,
+   "coverage": 5,
+   "speaker_attribution": 3,
+   "stt_robustness": 3
+  },
+  "pass": false,
+  "issues": [
+   "[STT] The STT transcript garbled 'Woolloongabba' as 'Wollongabba' and the note propagates this misspelling throughout ('Wollongabba house'), rather than flagging it as uncertain.",
+   "[STT] The STT transcript garbled 'Dr Mehta' as 'doctor Meta' and the note adopts 'Dr Meta's clinic' / 'Dr Meta's GP clinic' as fact, presenting an incorrect name without flagging uncertainty.",
+   "[STT] The STT transcript rendered 'Kylie was on shift too' (meaning also/as well) as 'Kylie was on shift two', and the note adopts the erroneous reading 'Kylie (shift 2)' as a factual label, inventing a shift number not stated in the script.",
+   "[MODEL] The note assigns Priya the role 'person Tom reported to' but does not identify her as the Coordinator, which is stated in the script. This is a minor omission rather than an error, but her role is undercaptured."
+  ],
+  "control": {
+   "faithfulness": 5,
+   "coverage": 5,
+   "speaker_attribution": 5
+  }
+ },
+ {
+  "id": "incident_report",
+  "level": "busy",
+  "wer": 4.5,
+  "speakers": 2,
+  "spkAcc": 97.4,
+  "hardFound": "5/7",
+  "missed": [
+   "mehta",
+   "non-slip"
+  ],
+  "sttErrors": [
+   "centimetres→centimeters",
+   "graze→greys",
+   "helped→help",
+   "-o'clock",
+   "dr→doctor",
+   "mehta's→meta's",
+   "-non",
+   "slip→nonslip",
+   "too→two"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 4,
+   "stt_robustness": 4
+  },
+  "pass": true,
+  "issues": [
+   "[STT] The transcript rendered 'Dr Mehta' as 'doctor Meta'; the note carries this forward as 'Dr Meta's GP clinic' throughout — a misspelled name treated as fact rather than flagged as uncertain.",
+   "[STT] The transcript rendered 'Kylie was on shift too' (i.e., also on shift) as 'Kylie was on shift two', and the note repeats 'shift 2' as if Kylie was assigned to a numbered shift, which is not supported by the original script.",
+   "[MODEL] The note resolves Tuesday 20 Oct from the anchor date of Wednesday 21 Oct correctly; no error here, but the explicit date label for when the mat was removed is an inference not stated in the script (acceptable minor inference, not a hallmark error)."
+  ]
+ },
+ {
+  "id": "incident_report",
+  "level": "loud",
+  "wer": 4,
+  "speakers": 2,
+  "spkAcc": 98.4,
+  "hardFound": "5/7",
+  "missed": [
+   "mehta",
+   "non-slip"
+  ],
+  "sttErrors": [
+   "centimetres→centimeters",
+   "-he",
+   "-o'clock",
+   "dr→doctor",
+   "mehta's→medha's",
+   "-non",
+   "slip→nonslip",
+   "too→two"
+  ],
+  "judge": {
+   "faithfulness": 3,
+   "coverage": 5,
+   "speaker_attribution": 4,
+   "stt_robustness": 3
+  },
+  "pass": false,
+  "issues": [
+   "[STT] The STT transcript renders 'Dr Mehta's practice' as 'doctor Medha's practice'; the note faithfully reproduces the STT error as 'Dr Medha's GP clinic' rather than correcting it to 'Dr Mehta's'.",
+   "[STT] The STT transcript renders 'she came in straight after she heard him fall' with 'shift two' instead of 'too'; the note states 'Kylie — support worker, shift two' — this interprets the STT garble as a factual assertion about a shift designation ('shift two') that has no support in the original script, introducing an invented detail.",
+   "[MODEL] The note labels Priya only as 'person Tom reported the incident to' rather than her role of Coordinator, though her name 'Priya' was spoken in the transcript and her coordinator role is in the script.",
+   "[MODEL] The note correctly resolves Tuesday 20 Oct as the day prior to Wednesday 21 Oct — this is a correct calendar inference and not an error, noted for completeness."
+  ]
+ },
+ {
+  "id": "team_meeting",
+  "level": "clean",
+  "wer": 4.4,
+  "speakers": 2,
+  "spkAcc": 100,
+  "hardFound": "8/8",
+  "missed": [],
+  "sttErrors": [
+   "arvo→avo",
+   "supports→support's",
+   "dollars→point",
+   "fifty→five",
+   "cents→dollars",
+   "-first",
+   "of→july",
+   "july→one"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 4,
+   "speaker_attribution": 3,
+   "stt_robustness": 5
+  },
+  "pass": false,
+  "issues": [
+   "[MODEL] Speaker A's role (Operations Manager / Sarah) was not spoken in the transcript but is legitimately unknown to the note model — however, the note labels her 'chair' without basis; 'chair' is an invention not supported by anything in the transcript or script.",
+   "[MODEL] Matt is named in the transcript (Speaker A addresses him by name) but his role as 'Rostering Lead' is correctly omitted; however, the note says 'Matt (Speaker B, role not stated)' which is accurate — no issue here.",
+   "[MODEL] Speaker attribution for 'Keep Ahmed on training until his screening check clearance is received' is left unattributed in the action items, when in the script/transcript it was clearly Speaker A's instruction — minor gap.",
+   "[MODEL] The follow-up meeting 'on the twelfth' is flagged as month-unknown, which is reasonable given the transcript does not specify the month; however, given the context date of 21 October 2026, the obvious upcoming 12th is 12 November 2026 — the note could have resolved this but instead flags it as missing, which is conservative but not an error per se."
+  ],
+  "control": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 4
+  }
+ },
+ {
+  "id": "team_meeting",
+  "level": "busy",
+  "wer": 4.9,
+  "speakers": 2,
+  "spkAcc": 96.6,
+  "hardFound": "7/8",
+  "missed": [
+   "gatton"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "gatton→gatin",
+   "supports→support's",
+   "dollars→point",
+   "fifty→five",
+   "cents→dollars",
+   "-first",
+   "of→july",
+   "july→one"
+  ],
+  "judge": {
+   "faithfulness": 4,
+   "coverage": 5,
+   "speaker_attribution": 3,
+   "stt_robustness": 4
+  },
+  "pass": false,
+  "issues": [
+   "[MODEL] Speaker attribution is incomplete/incorrect: Sarah is the Operations Manager and Matt is the Rostering Lead — their roles were available in context but the note labels them 'Speaker A (role not stated)' and 'Matt / Speaker B (role not stated)', which is technically fair given the STT used Speaker A/B, but the note then inconsistently names Matt by name while not naming Sarah, creating an asymmetry.",
+   "[MODEL] 'Next meeting to be held on the twelfth (date unclear)' — with the context date of 21 October 2026 (Wednesday), 'the twelfth' most naturally resolves to 12 November 2026; the note flags it as unclear rather than attempting the obvious resolution, which is overly cautious but not a factual error.",
+   "[STT] 'Gatton' is transcribed as 'Gatin' in the STT; the note correctly uses 'Gatton', showing appropriate STT correction.",
+   "[MODEL] The note says 'Matt' raised the weekend no-shows and screening issue — correct — but also attributes 'Chase it up with the screening unit tomorrow and keep him on training until then' to 'Speaker A' without identifying Speaker A as Sarah; this is not wrong but reduces attributional clarity."
+  ]
+ },
+ {
+  "id": "team_meeting",
+  "level": "loud",
+  "wer": 4.9,
+  "speakers": 2,
+  "spkAcc": 98.3,
+  "hardFound": "7/8",
+  "missed": [
+   "arvo"
+  ],
+  "sttErrors": [
+   "arvo→avo",
+   "-arvo",
+   "-supports",
+   "dollars→point",
+   "fifty→five",
+   "cents→dollars",
+   "-first",
+   "of→july",
+   "july→one"
+  ],
+  "judge": {
+   "faithfulness": 5,
+   "coverage": 5,
+   "speaker_attribution": 4,
+   "stt_robustness": 5
+  },
+  "pass": true,
+  "issues": [
+   "[MODEL] The note does not identify Speaker A as the Operations Manager (Sarah) or Speaker B as the Rostering Lead (Matt), even though their names were spoken in the script ('Righto Matt' / 'Sure'). Matt is partially identified but Sarah is never named. This is a minor attribution gap rather than a fabrication, but it reduces speaker attribution quality.",
+   "[MODEL] The note states 'Matt / Speaker B (role not stated)' yet the transcript preserves the name 'Matt'; the role (Rostering Lead) and Speaker A's name (Sarah) were in the original script but not the transcript, so omitting them is defensible — however Matt being named in the transcript means calling him 'role not stated' is slightly imprecise. Not a faithfulness error but a minor coverage/attribution gap."
+  ]
+ }
+]

@@ -1,0 +1,48 @@
+[
+ {
+  "case": "LONG: 4 meetings stitched",
+  "minutes": 162.3,
+  "opusMB": 35.1,
+  "withinBucket50MB": true,
+  "cachedTranscript": true,
+  "transcribeS": 41,
+  "deepgramMin": 162.3,
+  "transcriptChars": 134488,
+  "speakers": 13,
+  "withinInputCap": true,
+  "writeS": 122,
+  "totalS": 163,
+  "withinFunctionLimit": true,
+  "costAUD": 3.82,
+  "costPerHourAUD": 1.41,
+  "error": "Expected ',' or '}' after property value in JSON at position 81 (line 6 column 4)"
+ },
+ {
+  "case": "LONGEST: 6 meetings stitched",
+  "minutes": 193.8,
+  "opusMB": 41.9,
+  "withinBucket50MB": true,
+  "cachedTranscript": true,
+  "transcribeS": 46,
+  "deepgramMin": 193.8,
+  "transcriptChars": 157023,
+  "speakers": 17,
+  "withinInputCap": true,
+  "writeS": 153,
+  "totalS": 199,
+  "withinFunctionLimit": true,
+  "costAUD": 4.57,
+  "costPerHourAUD": 1.42,
+  "judge": {
+   "faithfulness": 2,
+   "coverage": 4,
+   "usefulness": 3
+  },
+  "pass": false,
+  "issues": [
+   "Invented date: Action item 'Begin working seriously on search/indexing' states 'due weekend (24–25 Oct)' — no year is spoken; appending an implied year to a spoken weekday/weekend reference without a spoken date crosses into invention. The note date is 22 Oct 2026, so the weekend would be 24–25 Oct 2026, but the year is never spoken and the writer added it as a bracketed date without a spoken day anchor, violating the stated rule.",
+   "Invented date: 'Make two-line code change … then notify the group' and other action items — the note states 'due Friday (23 Oct)'; Friday after 22 Oct 2026 is 23 Oct 2026, so the bracketed date is arithmetically correct, but 'Friday' in the transcript was used in passing conversation ('I'm not doing any background readings … that's in, like, Friday') — not as a meeting deadline. Attributing 'Friday (23 Oct)' as a due date to action items invents a commitment not in the transcript.",
+   "Invented year context: The 'progress report is June 23 February' is flagged as 'unclear in recording' but the minutes also state 'interim prototype should be done by the progress report deadline' — the writer has constructed a decision around a date fragment that was garbled and unconfirmed, inserting it as if it were an agreed deadline."
+  ]
+ }
+]

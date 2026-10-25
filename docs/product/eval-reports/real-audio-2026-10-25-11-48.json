@@ -1,0 +1,58 @@
+[
+ {
+  "case": "LONG: 4 meetings stitched",
+  "minutes": 162.3,
+  "opusMB": 35.1,
+  "withinBucket50MB": true,
+  "cachedTranscript": true,
+  "transcribeS": 41,
+  "deepgramMin": 162.3,
+  "transcriptChars": 134488,
+  "speakers": 13,
+  "withinInputCap": true,
+  "writeS": 127,
+  "totalS": 168,
+  "withinFunctionLimit": true,
+  "costAUD": 3.84,
+  "costPerHourAUD": 1.42,
+  "judge": {
+   "faithfulness": 2,
+   "coverage": 5,
+   "usefulness": 5
+  },
+  "pass": false,
+  "issues": [
+   "Invented date: The minutes state the Friday meeting for Speaker E's exercise due is 'Friday (23 Oct)' — the note date is Thursday 22 Oct 2026, so Friday would be 23 Oct 2026, which is correct. However, the minutes also state 'Hold follow-up meeting on Friday (23 Oct) at 3:00 PM' — this bracketed date is correct and allowed.",
+   "Invented date: The action item and decisions section states the code walkthrough is 'Monday (26 Oct)' — Monday after Thursday 22 Oct 2026 is indeed 26 Oct 2026, so this bracketed date is correct and allowed.",
+   "Invented date/fact: The progress report deadline is described in the transcript as 'June 23 February' (garbled speech-to-text). The minutes correctly flag this as unclear and do not invent a clean date. However, the minutes state in the decisions section 'aim to have the prototype done by that date (described as roughly two weeks away)' — 'roughly two weeks away' is an interpretation/invention not clearly stated in the transcript; Speaker C only said 'so what's that? Two weeks, basically?' as a question, not a confirmed characterisation."
+  ]
+ },
+ {
+  "case": "LONGEST: 6 meetings stitched",
+  "minutes": 193.8,
+  "opusMB": 41.9,
+  "withinBucket50MB": true,
+  "cachedTranscript": true,
+  "transcribeS": 46,
+  "deepgramMin": 193.8,
+  "transcriptChars": 157023,
+  "speakers": 17,
+  "withinInputCap": true,
+  "writeS": 144,
+  "totalS": 190,
+  "withinFunctionLimit": true,
+  "costAUD": 4.55,
+  "costPerHourAUD": 1.41,
+  "judge": {
+   "faithfulness": 2,
+   "coverage": 4,
+   "usefulness": 3
+  },
+  "pass": false,
+  "issues": [
+   "Progress report date invented: the minutes state 'June 23 February' and then interpret it as 'roughly two weeks away' from 22 Oct 2026 — the transcript says only 'June 23 February' (garbled speech), and the writer adds 'approximately two weeks' as an interpretation not supported by the transcript.",
+   "Date invented without spoken weekday: the minutes state 'Friday (23 Oct)' for the follow-up meeting. The transcript says only 'Friday' with no spoken date, so the writer has added '(23 Oct)' — but 23 Oct 2026 is actually a Friday, so the bracketed date is correct. However, 'due Friday (23 Oct) at 3:00 PM' is used as a formal deadline label where the transcript only casually mentions Friday; minor but the date bracket is technically correct.",
+   "Speaker C's directory number invented/misattributed: the minutes attribute the directory path '04 0455560' to 'Speaker C', but in the transcript it is Speaker E who shares the directory path and folder details ('nlssd', 'mbrowser'), while Speaker C is a different participant."
+  ]
+ }
+]

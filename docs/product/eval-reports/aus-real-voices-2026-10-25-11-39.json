@@ -1,0 +1,274 @@
+[
+ {
+  "reader": "Australian (Annise)",
+  "id": "03arb",
+  "level": "clean",
+  "wer": 3.5,
+  "errors": [
+   "cloak\u2192coke",
+   "cloak\u2192coke",
+   "cloak\u2192croak",
+   "around\u2192about"
+  ]
+ },
+ {
+  "reader": "Australian (Annise)",
+  "id": "03arb",
+  "level": "busy",
+  "wer": 3.5,
+  "errors": [
+   "cloak\u2192coat",
+   "cloak\u2192coke",
+   "cloak\u2192coke",
+   "around\u2192about"
+  ]
+ },
+ {
+  "reader": "Australian (Annise)",
+  "id": "03arb",
+  "level": "loud",
+  "wer": 5.3,
+  "errors": [
+   "cloak\u2192coat",
+   "cloak\u2192coat",
+   "cloak\u2192croak",
+   "around\u2192about",
+   "-north",
+   "wind\u2192northwind"
+  ]
+ },
+ {
+  "reader": "BASELINE English RP (Ruth Golding)",
+  "id": "04rg",
+  "level": "clean",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "BASELINE English RP (Ruth Golding)",
+  "id": "04rg",
+  "level": "busy",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "BASELINE English RP (Ruth Golding)",
+  "id": "04rg",
+  "level": "loud",
+  "wer": 11.5,
+  "errors": [
+   "-as",
+   "-he",
+   "-could",
+   "-confess",
+   "-that",
+   "-the",
+   "-sun",
+   "-was",
+   "-the",
+   "-stronger",
+   "-of",
+   "-the"
+  ]
+ },
+ {
+  "reader": "BASELINE New Zealand",
+  "id": "13mch",
+  "level": "clean",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "BASELINE New Zealand",
+  "id": "13mch",
+  "level": "busy",
+  "wer": 0.9,
+  "errors": [
+   "could\u2192put"
+  ]
+ },
+ {
+  "reader": "BASELINE New Zealand",
+  "id": "13mch",
+  "level": "loud",
+  "wer": 94.7,
+  "errors": [
+   "-the",
+   "-north",
+   "-wind",
+   "-and",
+   "-the",
+   "-sun",
+   "-were",
+   "-disputing",
+   "-which",
+   "-was",
+   "-the",
+   "-stronger"
+  ]
+ },
+ {
+  "reader": "Australian (Graeme Dunlop)",
+  "id": "15gwd",
+  "level": "clean",
+  "wer": 24.8,
+  "errors": [
+   "+dialect",
+   "+and",
+   "+accent",
+   "+collection",
+   "+volume",
+   "+one",
+   "+and",
+   "+the",
+   "+sun",
+   "+attributed",
+   "+to",
+   "+esop"
+  ]
+ },
+ {
+  "reader": "Australian (Graeme Dunlop)",
+  "id": "15gwd",
+  "level": "busy",
+  "wer": 2.7,
+  "errors": [
+   "-north",
+   "wind\u2192northwind",
+   "-did"
+  ]
+ },
+ {
+  "reader": "Australian (Graeme Dunlop)",
+  "id": "15gwd",
+  "level": "loud",
+  "wer": 6.2,
+  "errors": [
+   "a\u2192the",
+   "-but",
+   "closely\u2192close",
+   "did\u2192now",
+   "fold\u2192pulled",
+   "-the",
+   "-that"
+  ]
+ },
+ {
+  "reader": "Australian, cultivated (Timothy Ferguson)",
+  "id": "24tf",
+  "level": "clean",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "Australian, cultivated (Timothy Ferguson)",
+  "id": "24tf",
+  "level": "busy",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "Australian, cultivated (Timothy Ferguson)",
+  "id": "24tf",
+  "level": "loud",
+  "wer": 3.5,
+  "errors": [
+   "-the",
+   "fold\u2192hold",
+   "-the",
+   "attempt\u2192intent"
+  ]
+ },
+ {
+  "reader": "Australian (Magdalena)",
+  "id": "25mvc",
+  "level": "clean",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "Australian (Magdalena)",
+  "id": "25mvc",
+  "level": "busy",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "Australian (Magdalena)",
+  "id": "25mvc",
+  "level": "loud",
+  "wer": 0.9,
+  "errors": [
+   "-then"
+  ]
+ },
+ {
+  "reader": "Australian, metropolitan",
+  "id": "33ml",
+  "level": "clean",
+  "wer": 3.5,
+  "errors": [
+   "+off",
+   "-off",
+   "out\u2192warmly",
+   "warmly\u2192out"
+  ]
+ },
+ {
+  "reader": "Australian, metropolitan",
+  "id": "33ml",
+  "level": "busy",
+  "wer": 3.5,
+  "errors": [
+   "+off",
+   "-off",
+   "out\u2192warmly",
+   "warmly\u2192out"
+  ]
+ },
+ {
+  "reader": "Australian, metropolitan",
+  "id": "33ml",
+  "level": "loud",
+  "wer": 7.1,
+  "errors": [
+   "+off",
+   "-off",
+   "-north",
+   "-north",
+   "+along",
+   "out\u2192the",
+   "warmly\u2192app",
+   "cloak\u2192clothes"
+  ]
+ },
+ {
+  "reader": "Australian",
+  "id": "35lb",
+  "level": "clean",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "Australian",
+  "id": "35lb",
+  "level": "busy",
+  "wer": 0.0,
+  "errors": []
+ },
+ {
+  "reader": "Australian",
+  "id": "35lb",
+  "level": "loud",
+  "wer": 6.2,
+  "errors": [
+   "-the",
+   "cloak\u2192coat",
+   "could\u2192did",
+   "but\u2192and",
+   "fold\u2192hold",
+   "-obliged",
+   "of\u2192than"
+  ]
+ }
+]

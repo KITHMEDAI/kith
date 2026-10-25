@@ -1,0 +1,79 @@
+[
+  {
+    "id": "shift_summary",
+    "field": "ndis",
+    "noteType": "ndis_progress_note",
+    "speakers": { "A": "Support worker (Jess)", "B": "Team leader (Liam)" },
+    "turns": [
+      ["A", "G'day Liam, just doing my handover for Darren's shift this arvo, from one till five."],
+      ["B", "No worries Jess, go for it."],
+      ["A", "So we went down to the Parramatta pool for his hydrotherapy goal. He did about twenty minutes in the water and walked the full length of the shallow end twice with the noodle, which is more than last week."],
+      ["B", "Good on him. Any issues with his knee?"],
+      ["A", "He said it was a bit sore after, about a four out of ten. I gave him his Panadol at three fifteen, two tablets, five hundred milligrams each, and wrote it in the medication chart."],
+      ["B", "Righto. Did he eat?"],
+      ["A", "He had a ham and cheese toastie and a flat white at the servo on the way back. Paid with his own card, eleven dollars fifty, receipt's in the folder."],
+      ["B", "And mood wise?"],
+      ["A", "Pretty chuffed, honestly. He reckons he wants to try the deep end next Thursday. Only thing is he got a bit frustrated at the bus stop when the 545 was twenty minutes late, but he calmed down with his breathing exercises after a couple of minutes."],
+      ["B", "Okay, worth noting. Anything for next shift?"],
+      ["A", "Yeah, his mum asked us to remind him about the Centrelink appointment on Monday at ten, and we're nearly out of the knee gel, so someone needs to grab Voltaren from the chemist."]
+    ]
+  },
+  {
+    "id": "home_visit",
+    "field": "aged_care",
+    "noteType": "aged_care_note",
+    "speakers": { "A": "Care worker (Natalie)", "B": "Client (Mr Bill Kowalski)" },
+    "turns": [
+      ["A", "Morning Bill, it's Natalie from Sunshine Care. How'd you pull up after the weekend?"],
+      ["B", "Not too bad love. Bit crook on Saturday, had a dodgy tummy, but right as rain now."],
+      ["A", "Glad to hear it. Did you manage your brekkie today?"],
+      ["B", "Weet-Bix and a cuppa. Couldn't face the eggs."],
+      ["A", "That's alright. I'll do your blood pressure now. Okay, it's one forty two over eighty eight, a little higher than Friday's one thirty over eighty."],
+      ["B", "That'll be the footy. The Broncos got flogged."],
+      ["A", "Ha, fair enough. Have you taken your Coversyl this morning?"],
+      ["B", "Yep, with the Weet-Bix, at about half seven."],
+      ["A", "Good. I noticed the rug in the hallway's curling up at the edge. That's a trip hazard, Bill. I'll put in a request to get it taped down or removed."],
+      ["B", "My daughter Karen keeps nagging me about that rug."],
+      ["A", "She's right. I'll also let the coordinator know about your blood pressure so the nurse can check it again on Wednesday. Anything else you need from the shops?"],
+      ["B", "Some milk, bread, and a tin of Milo if you're going past Woolies."]
+    ]
+  },
+  {
+    "id": "incident_report",
+    "field": "ndis",
+    "noteType": "ndis_incident",
+    "speakers": { "A": "Support worker (Tom)", "B": "Coordinator (Priya)" },
+    "turns": [
+      ["A", "Priya, I need to report something from the Woolloongabba house this morning."],
+      ["B", "Okay Tom, take your time. What happened?"],
+      ["A", "At about seven forty, Sam was getting out of the shower and slipped on the wet tiles. He landed on his left hip and hit his elbow on the vanity."],
+      ["B", "Was he hurt?"],
+      ["A", "He had a graze on his left elbow, about three centimetres, and he said his hip was sore, maybe six out of ten. I cleaned the graze, put a dressing on, and helped him sit down. He didn't hit his head and he was talking normally the whole time."],
+      ["B", "Did you call anyone?"],
+      ["A", "I called his GP clinic at eight o'clock, Dr Mehta's practice, and they said to watch for swelling and bring him in if the pain gets worse. I also rang his sister Leanne at eight fifteen and let her know."],
+      ["B", "Was the non-slip mat in the shower?"],
+      ["A", "No, it had been taken out to be washed yesterday and nobody put it back. That's on us. I've put it back now and put a sign on the bathroom door."],
+      ["B", "Alright, we'll log it today. Did anyone else see it?"],
+      ["A", "Kylie was on shift too, she came in straight after she heard him fall."]
+    ]
+  },
+  {
+    "id": "team_meeting",
+    "field": "ndis",
+    "noteType": "meeting_minutes",
+    "speakers": { "A": "Operations manager (Sarah)", "B": "Rostering lead (Matt)" },
+    "turns": [
+      ["A", "Righto Matt, let's go through the roster issues before the end of the month."],
+      ["B", "Sure. Biggest one is weekends. We've had three no-shows in the last fortnight, all Saturday arvo shifts in Toowoomba."],
+      ["A", "That's not good. What's the cause?"],
+      ["B", "Mostly travel. Two of the casuals live out at Gatton and it's a forty minute drive. I reckon we offer a travel allowance or pair them with closer clients."],
+      ["A", "Let's cost the travel allowance. Can you have numbers by Friday?"],
+      ["B", "Yep, I'll have it by Friday arvo."],
+      ["A", "Second thing, the NDIS price guide changes. Our core supports rate goes up to sixty seven dollars and fifty six cents an hour from the first of July. We need to update the service agreements."],
+      ["B", "How many participants is that?"],
+      ["A", "Forty two. I'll draft the letter, and Jacinta from admin can send them out next week."],
+      ["B", "Last one, the new starter, Ahmed, still hasn't got his NDIS worker screening check back. He can't go on shift till it's cleared."],
+      ["A", "Chase it up with the screening unit tomorrow, and keep him on training until then. Let's meet again on the twelfth."]
+    ]
+  }
+]
