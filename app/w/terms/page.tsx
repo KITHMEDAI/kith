@@ -11,7 +11,7 @@ export default function WorkspaceTerms() {
     <div className="mx-auto max-w-2xl px-4 py-12 text-sm leading-relaxed text-slate-700">
       <Link href="/" className="text-violet-700 hover:underline">← Back</Link>
       <h1 className="mt-4 text-2xl font-semibold text-slate-900">Terms of use</h1>
-      <p className="mt-2 text-slate-500">Kith Workspace pilot · last updated 22 October 2026</p>
+      <p className="mt-2 text-slate-500">Kith Workspace pilot · last updated 25 October 2026</p>
 
       <p className="mt-4">These terms apply to your use of Kith Workspace, operated by KITH, Brookfield, Bengaluru, Karnataka 560037, India (&quot;Kith&quot;, &quot;we&quot;). By creating an account or using the service you agree to them and to our <Link href="/privacy" className="text-violet-700 underline">Privacy Policy</Link>.</p>
 
@@ -32,7 +32,7 @@ export default function WorkspaceTerms() {
       <p className="mt-1">You own what you put into Kith and the notes it writes for you. You give us permission to store and process that content only to provide the service to you (as described in the Privacy Policy). You can delete it at any time.</p>
 
       <H>Availability and liability</H>
-      <p className="mt-1">During the pilot the service is provided &quot;as is&quot;. We work to keep it available and your data safe, but we can&apos;t promise it will be uninterrupted or error-free. Keep your own copy of anything critical. To the extent the law allows, we are not liable for indirect or consequential loss. Nothing in these terms excludes rights you have under the Australian Consumer Law that can&apos;t be excluded.</p>
+      <p className="mt-1">During the pilot the service is provided &quot;as is&quot;. We work to keep it available and your data safe, but we can&apos;t promise it will be uninterrupted or error-free. We don&apos;t keep separate backups during the pilot, so keep your own copy of anything critical (Profile → Your data &amp; security → Download my data). To the extent the law allows, we are not liable for indirect or consequential loss. Nothing in these terms excludes rights you have under the Australian Consumer Law that can&apos;t be excluded.</p>
 
       <H>Ending your use</H>
       <p className="mt-1">You can stop using Kith and delete your account yourself (Profile → Your data &amp; security), or ask us to, at any time. If we end the pilot, we will give you reasonable notice and a chance to copy your notes.</p>

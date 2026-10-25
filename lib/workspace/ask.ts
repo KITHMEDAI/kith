@@ -119,7 +119,7 @@ export function buildAskMessages(q: string, sources: NoteRow[], recentRows: Note
     ? `\n\n<index_of_recent_note_titles>\n${recentRows.map(r => `- ${fmt(r.created_at)}: ${r.title || 'Untitled'}`).join('\n')}\n</index_of_recent_note_titles>`
     : '';
   const meta: AskSource[] = sources.map((s, i) => ({ n: i + 1, id: s.id, title: s.title || 'Untitled', date: s.created_at }));
-  const user = `<notes oldest_first="true">\n${context}\n</notes>${index}\n\nQuestion: ${q}`;
+  const user = `<notes oldest_first="true">\n${context}\n</notes>${index}\n\nQuestion: ${maskSensitive(q)}`;
   return { meta, user };
 }
 

@@ -42,7 +42,7 @@ export default function AccountData({ email }: { email: string }) {
 
       <div>
         <h2 className="font-medium text-rose-700">Delete account</h2>
-        <p className="mt-1 text-sm text-slate-500">Permanently deletes your account, every note and anything still waiting to be transcribed. This can&apos;t be undone. Copies in our providers&apos; backups are overwritten within about 7 days.</p>
+        <p className="mt-1 text-sm text-slate-500">Permanently deletes your account, every note and anything still waiting to be transcribed. This can&apos;t be undone.</p>
         {!confirming ? (
           <button onClick={() => setConfirming(true)} className={`${btn} mt-3 border-rose-300 text-rose-700 hover:bg-rose-50`}>
             <Trash2 className="h-4 w-4" /> Delete my account

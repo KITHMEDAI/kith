@@ -180,7 +180,7 @@ export default function NewNote({ firstName, fieldName, types, defaultType, keyt
   const consentBox = askConsent && (
     <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm">
       <p className="flex items-center gap-2 font-medium text-amber-900"><ShieldCheck className="h-4 w-4" /> Before you record</p>
-      <p className="mt-1 text-amber-900/80">In Australia you generally need everyone&apos;s agreement to record a conversation. Confirm everyone in this recording has agreed. Kith asks before every recording and keeps your confirmation with the note.</p>
+      <p className="mt-1 text-amber-900/80">Recording laws differ between Australian states, and in several you need everyone&apos;s agreement to record a private conversation. Always ask first. Confirm everyone in this recording has agreed. Kith asks before every recording and keeps your confirmation with the note.</p>
       <div className="mt-3 flex gap-2">
         <button onClick={acceptConsent} className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-700">Everyone has agreed</button>
         <button onClick={() => setAskConsent(false)} className="rounded-lg px-3 py-1.5 text-sm text-amber-900 hover:bg-amber-100">Cancel</button>

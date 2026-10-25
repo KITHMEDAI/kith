@@ -146,3 +146,31 @@ Regression tests (run against the local dev server on the Sydney DB):
 - `Cache-Control: no-store` on data APIs
 - No localStorage or service worker
 - Prompt injection only affects the user's own output
+
+## Policy and claims review (2026-10-25)
+
+Every user-facing security and privacy statement was checked against the code and the live setup: Privacy Policy, Terms, Help, login footer, recording-consent box, Profile → Your data & security, account emails, and the discovery proposal sent to Steve.
+
+**Verified true:**
+- Data in Sydney: Supabase, plus Vercel functions served from `syd1` (checked live via `x-vercel-id`).
+- Field encryption covers transcript, title, summary, body, custom description and style notes; 0 plaintext notes in the database. Search index holds no readable words.
+- Per-user isolation (security-check 69/69 on production).
+- Audio bucket empty; no stuck notes; old abuse counters cleared (daily clean-up runs).
+- Deepgram training opt-out on live and polish requests. Voyage training opt-out switched on. No analytics or Sentry in the workspace edition.
+- Self-serve export, sign-out-everywhere and delete account work as described (deletion removes storage, then the auth user, which cascades).
+- Per-recording consent stored on the note; Terms acceptance stored at onboarding.
+- Proposal PDF claims (Sydney hosting, encryption, isolation, 69 automated checks, templates) are accurate.
+
+**Corrected:**
+1. Ask questions and search queries were sent unmasked. They are now masked (card / TFN / Medicare) before going to Anthropic and Voyage (`ask.ts`, `embed.ts`).
+2. Voyage receives search queries and Ask questions as well as notes. Now disclosed.
+3. "Style notes never contain names" was only a prompt instruction. Reworded to "designed to hold…", with numbers always masked.
+4. **"Backups overwritten within ~7 days" was false.** The Supabase free plan has no backups. The Privacy page, Terms and the delete-account text now say there are no separate backups during the pilot and that users should download their data.
+5. Technical data (IP and email in abuse counters for ~2 days; provider request logs) and essential-only cookies are now disclosed.
+6. The consent box said "In Australia you generally need everyone's agreement". Reworded: recording laws differ by state, and several need everyone's agreement (VIC, QLD and NT allow a party to record).
+7. Help reply time is aligned ("aim to reply within one business day").
+
+**Open:**
+- No database backups (real data-loss risk). Move to Supabase Pro (daily backups, 7 days) before real client data.
+- The upcoming "names & terms" field sends names to Deepgram. The Privacy page must say so when it ships (asked of the NDIS session).
+- Not verified from code: Supabase email-code expiry (default 1 h, as the emails say) and Anthropic's retention period (stated as "about 30 days", per Anthropic's commercial terms).

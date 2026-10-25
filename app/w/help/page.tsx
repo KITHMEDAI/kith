@@ -12,7 +12,7 @@ export default function HelpPage() {
       <h1 className="mt-4 text-2xl font-semibold tracking-tight">Help &amp; support</h1>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">
         Questions, feedback, a bug, or a note that didn&apos;t come out right? Email us and include what you were doing.
-        We usually reply within a day.
+        We aim to reply within one business day.
       </p>
       <HelpContact email="kithmedai@gmail.com" />
       <div className="mt-8 space-y-3 text-sm text-slate-600">
