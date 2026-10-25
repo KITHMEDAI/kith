@@ -41,6 +41,7 @@ export interface GenerateInput {
   userName?: string;
   date: string;                  // human date of the note, e.g. "21 October 2026"
   dateISO?: string;              // exact timestamp, used to build a weekday calendar
+  deadline?: number;             // epoch ms the note must be written by (long sessions stay inside the function limit)
 }
 
 const BASE_RULES = `You are Kith, an AI note-taker used by professionals in many fields. You turn a recording transcript or rough typed notes into a clear, accurate, well-structured note.
@@ -95,7 +96,7 @@ export function dateContext(dateISO?: string, fallback?: string): string {
   }
   return `Note date: ${fmt(d, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.
 Calendar for resolving relative dates: ${days.join(', ')}.
-Date rules: resolve a relative date only when it is unambiguous ("tmrw", "Fri", "this Thu" = the next such day; "yesterday"); for "next <weekday>" use the one in the following week. Keep ambiguous ones as written ("last Tuesday", a bare "Mon" that could be past or future, "next week", "in a few weeks"). Never compute a date by adding durations unless the input gives the start date and duration exactly. If the input pairs a weekday with a date that doesn't match the calendar, keep both as written and add a follow-up to confirm.`;
+Date rules: resolve a relative date only when it is unambiguous ("tmrw", "Fri", "this Thu" = the next such day; "yesterday"); for "next <weekday>" use the one in the following week. Keep ambiguous ones as written ("last Tuesday", a bare "Mon" that could be past or future, "next week", "in a few weeks"). When you resolve a spoken day, keep the words the speaker used and put the derived date in brackets: "Monday (26 Oct)", "tomorrow (22 Oct)". Never add a year the input doesn't state. Never compute a date by adding durations unless the input gives the start date and duration exactly. If the input pairs a weekday with a date that doesn't match the calendar, keep both as written and add a follow-up to confirm.`;
 }
 
 function noteYearOf(dateISO?: string, fallback?: string): number {
@@ -126,31 +127,41 @@ export function maskSensitive(text: string): string {
 }
 
 const WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
  * Deterministic weekday/date check. Evals showed the model sometimes writes
  * "Friday 24 October" when 24 Oct is a Saturday, even with a calendar in the
  * prompt. The weekday is what the speaker said, so we keep it and move the
  * day-of-month to the nearest date (±3 days) that really is that weekday.
+ *
+ * The result is always written "Friday (23 Oct)": the spoken day first, the
+ * derived date in brackets, so a reader (and the evals) can tell what was
+ * said from what was worked out. The year is dropped when it is the note's
+ * own year (the model tended to add one nobody said).
  */
 export function fixWeekdayDates(text: string, noteYear: number): string {
-  // Matches "Friday 24 October", "Friday, 24 October", "Friday (24 October 2026)".
-  const re = /\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day[,]?\s*\(?\s*(\d{1,2})(st|nd|rd|th)?\s+(January|February|March|April|May|June|July|August|September|October|November|December)(\s+\d{4})?\b/gi;
-  return text.replace(re, (whole, wdStem: string, dayStr: string, suffix: string | undefined, monthName: string, yearPart: string | undefined) => {
+  // Matches "Friday 24 October", "Friday, 24 Oct", "Friday (24 October 2026)".
+  const re = /\b(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day,?\s*(\(\s*)?(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b,?(\s+\d{4})?(\s*\))?/gi;
+  return text.replace(re, (whole, wdStem: string, open: string | undefined, dayStr: string, monthName: string, yearPart: string | undefined, close: string | undefined) => {
     const want = WEEKDAYS.findIndex(w => w.startsWith(wdStem.toLowerCase()));
-    const month = MONTHS.indexOf(monthName.toLowerCase());
+    const month = MONTH_ABBR.findIndex(m => m.toLowerCase() === monthName.slice(0, 3).toLowerCase());
+    if (want < 0 || month < 0) return whole;
     const year = yearPart ? Number(yearPart.trim()) : noteYear;
     const day = Number(dayStr);
-    const d = new Date(Date.UTC(year, month, day));
-    if (want < 0 || month < 0 || d.getUTCDay() === want) return whole;
-    for (const off of [1, -1, 2, -2, 3, -3]) {
-      const c = new Date(Date.UTC(year, month, day + off));
-      if (c.getUTCDay() === want && c.getUTCMonth() === month) {
-        return whole.replace(new RegExp(`\\b${dayStr}${suffix ?? ''}\\b`), `${c.getUTCDate()}${suffix ?? ''}`);
+    let fixed = new Date(Date.UTC(year, month, day));
+    if (fixed.getUTCDay() !== want) {
+      for (const off of [1, -1, 2, -2, 3, -3]) {
+        const c = new Date(Date.UTC(year, month, day + off));
+        if (c.getUTCDay() === want && c.getUTCMonth() === month) { fixed = c; break; }
       }
     }
-    return whole;
+    if (fixed.getUTCDay() !== want) return whole;
+    const weekday = WEEKDAYS[want][0].toUpperCase() + WEEKDAYS[want].slice(1);
+    const yearOut = yearPart && year !== noteYear ? ` ${year}` : '';
+    // A ")" that closed an outer bracket (no "(" before the date) is kept.
+    const tail = close && !open ? close : '';
+    return `${weekday} (${fixed.getUTCDate()} ${MONTH_ABBR[month]}${yearOut})${tail}`;
   });
 }
 
@@ -172,12 +183,18 @@ function postProcess(c: NoteContent, noteYear: number): NoteContent {
  * with a larger budget and a request to be more concise.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function callForNote(client: any, system: string, user: string, noteYear: number): Promise<NoteContent> {
-  const res = await client.messages.create({ model: SONNET, max_tokens: 8192, system, messages: [{ role: 'user', content: user }] });
+async function callForNote(client: any, system: string, user: string, noteYear: number, opts: { maxTokens?: number; retry?: boolean; timeoutMs?: number; label?: string } = {}): Promise<NoteContent> {
+  const t0 = Date.now();
+  const res = await client.messages.create(
+    { model: SONNET, max_tokens: opts.maxTokens ?? 8192, system, messages: [{ role: 'user', content: user }] },
+    opts.timeoutMs ? { timeout: Math.round(Math.max(5_000, opts.timeoutMs)), maxRetries: 0 } : undefined,
+  );
   const raw = res.content.find((c: { type: string }) => c.type === 'text')?.text ?? '';
+  if (process.env.WS_GEN_DEBUG) console.info(`[gen] ${opts.label ?? 'note'}: ${((Date.now() - t0) / 1000).toFixed(0)} s, ${res.usage?.output_tokens} out tokens, ${res.stop_reason}`);
   if (res.stop_reason !== 'max_tokens') {
     try { return postProcess(parseJson(raw), noteYear); } catch { /* retry below */ }
   }
+  if (opts.retry === false) throw new Error(`${opts.label ?? 'note'}: output ${res.stop_reason === 'max_tokens' ? 'cut off' : 'not valid JSON'}`);
   const retry = await client.messages.create({
     model: SONNET, max_tokens: 16000, system,
     messages: [{ role: 'user', content: `${user}\n\nThe input is long: keep every point concise and merge closely related points so the complete JSON fits.` }],
@@ -301,17 +318,154 @@ export function dedupe(input: NoteContent): NoteContent {
   return { ...c, sections, follow_ups: uniq(follow_ups), decisions: uniq(c.decisions), missing_info: uniq(c.missing_info) };
 }
 
+/** Hard cap on input sent to the writer; matches MAX_INPUT_CHARS in app/api/w/notes/route.ts. */
+export const MAX_NOTE_INPUT_CHARS = 200_000;
+
+/**
+ * Above this size (~60 min of speech at ~830 chars/min) the note is written in
+ * sections. One call over a 2.7 h transcript invented a decision and a name;
+ * meetings up to 50 min (49k chars) scored 4-5/5 with a single call.
+ */
+export const SECTIONED_ABOVE_CHARS = 50_000;
+/**
+ * Target part size, ~30 min of speech. Smaller parts run in parallel and each
+ * writes less: with ~45 min parts a 2.7 h note took ~470 s (parts hit the
+ * output limit and were retried), over the 300 s function limit.
+ */
+const PART_CHARS = 25_000;
+/** Default writing budget when the caller gives no deadline. */
+const DEFAULT_WRITE_BUDGET_MS = 200_000;
+
 export async function generateNote(input: GenerateInput): Promise<NoteContent> {
   const client = anthropic();
   if (!client) throw new Error('AI is not configured (ANTHROPIC_API_KEY missing)');
 
-  const system = [BASE_RULES, fieldBlock(input), noteTypeBlock(input), personalBlock(input), OUTPUT_SCHEMA]
-    .filter(Boolean).join('\n\n');
-
-  const source = input.inputMode === 'recorded' ? 'RECORDING TRANSCRIPT' : 'TYPED NOTES';
   // Card, TFN and Medicare numbers are masked before the AI sees the input.
-  const user = `${dateContext(input.dateISO, input.date)}${input.userName ? `\nNote author: ${input.userName}` : ''}\n\n${source}:\n"""\n${maskSensitive(input.input.slice(0, 150_000))}\n"""`;
-  return callForNote(client, system, user, noteYearOf(input.dateISO, input.date));
+  const text = maskSensitive(input.input.slice(0, MAX_NOTE_INPUT_CHARS));
+  const header = `${dateContext(input.dateISO, input.date)}${input.userName ? `\nNote author: ${input.userName}` : ''}`;
+  const source = input.inputMode === 'recorded' ? 'RECORDING TRANSCRIPT' : 'TYPED NOTES';
+  const noteYear = noteYearOf(input.dateISO, input.date);
+  const blocks = [BASE_RULES, fieldBlock(input), noteTypeBlock(input), personalBlock(input)];
+
+  if (text.length > SECTIONED_ABOVE_CHARS) return generateSectioned(client, input, text, header, source, blocks, noteYear);
+
+  const system = [...blocks, OUTPUT_SCHEMA].filter(Boolean).join('\n\n');
+  const user = `${header}\n\n${source}:\n"""\n${text}\n"""`;
+  return callForNote(client, system, user, noteYear);
+}
+
+// ── Long sessions: write in sections, then combine ─────────────────────────
+
+/**
+ * Splits a transcript into ~equal parts of about PART_CHARS, only at line
+ * breaks (each line is one speaker turn), so no turn is cut in half. A single
+ * line longer than a part (typed notes without line breaks) is split at
+ * sentence ends.
+ */
+export function splitTranscript(text: string, partChars = PART_CHARS): string[] {
+  const n = Math.max(1, Math.ceil(text.length / partChars));
+  if (n === 1) return [text];
+  const target = text.length / n;
+  const units = text.split('\n').flatMap(line =>
+    line.length <= target ? [line] : (line.match(/[^.!?]+(?:[.!?]+\s*|$)/g) ?? [line]));
+  const parts: string[] = [];
+  let cur: string[] = [], size = 0;
+  for (const u of units) {
+    if (size > 0 && size + u.length > target && parts.length < n - 1) {
+      parts.push(cur.join('\n')); cur = []; size = 0;
+    }
+    cur.push(u); size += u.length + 1;
+  }
+  if (cur.length) parts.push(cur.join('\n'));
+  return parts.filter(p => p.trim());
+}
+
+const PART_RULES = (i: number, n: number) => `LONG SESSION, PART ${i} OF ${n}. The recording was split into ${n} consecutive parts; you see only part ${i}. Another step later combines the ${n} part notes into one note and cannot see the transcript, so:
+- Document ONLY what is said in this part. Capture every topic, decision, action item, open question and risk in it; don't drop things to save space.
+- Write every point so it stands alone: say what or whom it concerns (no "as above", "this", "the same").
+- A decision is only something explicitly agreed in THIS part. Something proposed, discussed or "probably" is a point, not a decision.
+- Use a person's name only when it is said in this part; otherwise keep the speaker label exactly as written (e.g. "Speaker C").
+- A date, number or name that sounds garbled or contradicts itself (e.g. "June twenty third February") carries "(unclear in recording)" and is never presented as a firm deadline.
+- A question stays a question: a figure, date or plan someone only asks about ("two weeks, basically?") is not recorded as stated or agreed.
+- Attribute something to a speaker label only when that speaker's own line says it. When a detail comes out over several speakers' turns, or the transcript doesn't make clear who said it, leave it unattributed.
+- Be brief: points under 20 words, no repetition. Main topics belong in sections; skip small talk and technical asides that lead nowhere.
+- Owners and due dates only as stated in this part (rule 7); otherwise null.
+- "title": a few words for this part's main topic. "summary": 1-2 sentences about this part only.`;
+
+const COMBINE_RULES = `COMBINING A LONG SESSION. You are given, in order, the parts of the notes written from each consecutive part of ONE long recording: each part's title and summary, and its decisions, action items, follow-ups, flags and missing info. The body sections are merged separately, so return "sections" as an empty array.
+- The part notes are your ONLY source. Never add a fact, name, number, date, decision, owner or due date that is not in a part note. Never infer one from another part (e.g. don't give a speaker label a name unless a part note does).
+- Merge items that say the same thing; state each once. Keep distinct items distinct; don't blend two parts' details into a new claim.
+- If a later part changes or reverses something from an earlier part, keep the later outcome and say what it was before. If parts cover separate meetings or topics with different answers to the same question, keep each with its context instead of presenting one as the overall answer.
+- decisions: only items that a part lists as a decision. Never upgrade a proposal, discussion point or follow-up to a decision.
+- action_items: keep every one, with owner and due exactly as the parts give them (or null). If parts disagree on an owner or date, use null and add a follow-up to confirm.
+- Keep hedges and "(unclear in recording)" markers exactly as in the parts.
+- follow_ups and missing_info: drop an item that a later part answers.
+- "title" and "summary" (3-4 sentences) cover the whole session, using only the part titles and summaries.`;
+
+/**
+ * Long input: a note for each ~30 min part (in parallel), then one short call
+ * that writes the title and summary and merges decisions, actions, follow-ups
+ * and flags. Body sections are merged in code (by heading, in order), because
+ * having the model rewrite the whole note took ~150 s and broke the time limit.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function generateSectioned(client: any, input: GenerateInput, text: string, header: string, source: string, blocks: string[], noteYear: number): Promise<NoteContent> {
+  const deadline = input.deadline ?? Date.now() + DEFAULT_WRITE_BUDGET_MS;
+  const parts = splitTranscript(text);
+  const n = parts.length;
+  // Parts get at most 60% of the remaining time; the combine step gets the rest.
+  const partTimeout = Math.min(150_000, (deadline - Date.now()) * 0.6);
+  const partNotes = await Promise.all(parts.map((part, i) => {
+    const system = [...blocks, PART_RULES(i + 1, n), OUTPUT_SCHEMA].filter(Boolean).join('\n\n');
+    const user = `${header}\n\n${source}, PART ${i + 1} OF ${n}:\n"""\n${part}\n"""`;
+    return callForNote(client, system, user, noteYear, { retry: false, timeoutMs: partTimeout, label: `part ${i + 1}/${n}` });
+  }));
+  const joined = joinPartNotes(partNotes, NOTE_TYPE_MAP[input.noteType]?.sections);
+
+  const system = [...blocks, COMBINE_RULES, OUTPUT_SCHEMA].filter(Boolean).join('\n\n');
+  const lists = partNotes.map((p, i) => `PART ${i + 1} OF ${n}:\n${JSON.stringify({
+    title: p.title, summary: p.summary, decisions: p.decisions, action_items: p.action_items,
+    follow_ups: p.follow_ups, flags: p.flags, missing_info: p.missing_info, tags: p.tags,
+  })}`).join('\n\n');
+  const user = `${header}\n\n${lists}\n\nReturn the combined title, summary and lists for the whole session as JSON.`;
+  try {
+    // Whatever time is left; past the deadline the joined part notes are used as they are.
+    const c = await callForNote(client, system, user, noteYear, { maxTokens: 6000, retry: false, timeoutMs: deadline - Date.now(), label: 'combine' });
+    return dedupe({ ...c, sections: joined.sections });
+  } catch (err) {
+    // The part notes are already faithful; joining them beats failing the note.
+    console.warn('[workspace] combine step failed, joining part notes:', (err as Error).message.slice(0, 200));
+    return joined;
+  }
+}
+
+/**
+ * Concatenates part notes: sections merged by heading (template order when
+ * given, else first seen; points stay in time order, repeats dropped), lists
+ * joined, then dedupe(). Used for the body of every long note and as the
+ * fallback for the whole note.
+ */
+export function joinPartNotes(parts: NoteContent[], headingOrder: string[] = []): NoteContent {
+  const sections: NoteContent['sections'] = [];
+  for (const p of parts) for (const s of p.sections) {
+    const same = sections.find(x => x.heading.toLowerCase() === s.heading.toLowerCase());
+    const fresh = s.points.filter(pt => !(same?.points ?? []).some(q => jaccard(tokens(pt), tokens(q)) >= 0.85));
+    if (same) same.points.push(...fresh); else sections.push({ heading: s.heading, points: [...s.points] });
+  }
+  const rank = (h: string) => { const k = headingOrder.findIndex(x => x.toLowerCase() === h.toLowerCase()); return k < 0 ? headingOrder.length : k; };
+  sections.sort((a, b) => rank(a.heading) - rank(b.heading)); // stable: unknown headings keep first-seen order
+  const all = <K extends 'action_items' | 'decisions' | 'follow_ups' | 'flags' | 'missing_info' | 'tags'>(k: K) => parts.flatMap(p => p[k] as NoteContent[K][number][]);
+  return dedupe({
+    title: parts[0]?.title ?? 'Untitled note',
+    summary: parts.map(p => p.summary).filter(Boolean).join(' '),
+    sections,
+    action_items: all('action_items'),
+    decisions: all('decisions'),
+    follow_ups: all('follow_ups'),
+    flags: all('flags').slice(0, 10),
+    missing_info: all('missing_info').slice(0, 5),
+    tags: Array.from(new Set(all('tags'))).slice(0, 6),
+  });
 }
 
 const REVISE_RULES = `You update an existing structured note based on the user's request. The request is either NEW INFORMATION to add (e.g. "also, Sarah confirmed the pump for 7am"), a CORRECTION (e.g. "Dave owns the handrail fix, not Sarah"), or an EDITING instruction (e.g. "make the action items shorter", "remove the weather section").

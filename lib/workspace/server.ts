@@ -84,6 +84,8 @@ export const MAX_ATTEMPTS = 3;
 
 /** Generate the note for a row in "processing" state, then index it. Safe to call twice. */
 export async function processNote(noteId: string): Promise<void> {
+  // The function has 300 s (maxDuration); writing must finish with room left to save and index.
+  const deadline = Date.now() + 250_000;
   const service = createServiceRoleClient();
   const { data: note } = await service.from('ws_notes')
     .select('id, user_id, note_type, custom_instruction, field, input_mode, input_enc, audio_paths, duration_seconds, status, created_at')
@@ -141,6 +143,7 @@ export async function processNote(noteId: string): Promise<void> {
       userName: p?.name,
       date: new Date(note.created_at).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
       dateISO: note.created_at,
+      deadline,
     });
     const text = noteToText(content);
     await service.from('ws_notes').update({

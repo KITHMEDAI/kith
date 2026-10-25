@@ -10,7 +10,7 @@ import { limited, LIMITS } from '@/lib/workspace/rate';
 
 export const maxDuration = 300; // long meetings: generation runs after the response via waitUntil
 
-const MAX_INPUT_CHARS = 150_000; // ~2.5 hours of speech
+const MAX_INPUT_CHARS = 200_000; // ~3.5-4 hours of speech; over ~60 min the note is written in sections (generate.ts)
 
 // Create a note from a recording transcript or typed text. Returns the id
 // immediately; generation continues in the background and the note page polls.
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     return reject('Not enough content yet: say or type a little more.', 422);
   }
   if (input.length > MAX_INPUT_CHARS) {
-    return reject('That is too long for one note (about 2.5 hours of speech). Split it into parts.', 413);
+    return reject('That is too long for one note (about 3.5 hours of speech). Split it into parts.', 413);
   }
   const tooMany = await limited(`ws-notes:${user.id}`, LIMITS.note, 'You have created a lot of notes recently. Try again a bit later.');
   if (tooMany) { await deleteAudio(service, audio); return tooMany; }
