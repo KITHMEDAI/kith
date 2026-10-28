@@ -8,7 +8,7 @@ const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
 // Kith Workspace (generic edition, work.kith.space): every page lives under
 // app/w/ and is served at a clean URL via rewrite (/notes → /w/notes). Nothing
 // from the therapist product is reachable in this edition.
-const WS_PUBLIC = ['/login', '/privacy', '/terms', '/help', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
+const WS_PUBLIC = ['/login', '/privacy', '/terms', '/help', '/welcome', '/for', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
 
 async function workspaceMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -41,6 +41,14 @@ async function workspaceMiddleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   const isPublic = WS_PUBLIC.some(p => cleanPath === p || cleanPath.startsWith(`${p}/`));
 
+  // Logged-out visitors to the home page see the public landing page.
+  if (!user && cleanPath === '/') {
+    const landing = request.nextUrl.clone();
+    landing.pathname = '/w/welcome';
+    const page = NextResponse.rewrite(landing);
+    response.cookies.getAll().forEach(c => page.cookies.set(c));
+    return page;
+  }
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';

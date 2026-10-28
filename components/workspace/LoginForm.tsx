@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
@@ -15,9 +15,13 @@ const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_WS_GOOGLE === 'true';
 
 type Mode = 'signin' | 'signup' | 'reset';
 
-export default function LoginForm({ linkError, notice }: { linkError: boolean; notice?: string }) {
+export default function LoginForm({ linkError, notice, initialMode = 'signin', field }: { linkError: boolean; notice?: string; initialMode?: 'signin' | 'signup'; field?: string }) {
   const router = useRouter();
-  const [mode, setMode] = useState<Mode>('signin');
+  const [mode, setMode] = useState<Mode>(initialMode);
+  // Field chosen on a landing page: onboarding pre-selects it (cookie survives the Google redirect).
+  useEffect(() => {
+    if (field) document.cookie = `ws_field=${encodeURIComponent(field)}; path=/; max-age=3600; samesite=lax; secure`;
+  }, [field]);
   // Sign-up / reset step 2: the code emailed to prove the address is theirs.
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState('');

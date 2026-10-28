@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { FIELD_MAP, type FieldKey } from '@/lib/workspace/fields';
 import { getAuthUser } from '@/lib/supabase/server';
 import { getProfile } from '@/lib/workspace/server';
 import ProfileForm from '@/components/workspace/ProfileForm';
@@ -12,6 +14,9 @@ export default async function OnboardingPage() {
   if (await getProfile(user.id)) redirect('/');
 
   const meta = (user.user_metadata ?? {}) as Record<string, string>;
+  // Set by a landing page's "Start free" (see LoginForm); only known fields are accepted.
+  const chosen = cookies().get('ws_field')?.value;
+  const field = chosen && FIELD_MAP[chosen as FieldKey] ? chosen : 'general';
   return (
     <div className="flex min-h-screen items-start justify-center px-4 py-10 sm:items-center">
       <div className="w-full max-w-md">
@@ -27,7 +32,7 @@ export default async function OnboardingPage() {
               name: meta.full_name || meta.name || '',
               email: user.email ?? '',
               phone: '',
-              field: 'general',
+              field,
               field_custom: '',
               note_preferences: '',
             }}
