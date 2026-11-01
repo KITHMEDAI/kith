@@ -1,6 +1,13 @@
 import Link from 'next/link';
+import { socialMeta } from '@/lib/workspace/site';
 
-export const metadata = { title: 'Privacy' };
+export const metadata = {
+  title: 'Privacy',
+  description: 'How Kith Workspace stores and protects your notes: Sydney storage, encryption, recordings deleted after transcription, and the providers we use.',
+  alternates: { canonical: '/privacy' },
+  ...socialMeta('Privacy · Kith Workspace', 'How Kith Workspace stores and protects your notes: Sydney storage, encryption, recordings deleted after transcription, and the providers we use.', '/privacy'),
+  robots: { index: true, follow: true },
+};
 
 // Keep every statement here true to what the code does (security audit
 // 2026-10-22). Change the page whenever data handling changes.

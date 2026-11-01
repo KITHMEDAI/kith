@@ -1,6 +1,7 @@
 import { Mic, FileText, ShieldCheck, ArrowRight, Flag } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
 import { USE_CASES, type UseCase } from '@/lib/workspace/use-cases';
+import { HOME_FAQ, type Faq } from '@/lib/workspace/site';
 
 // Public marketing page for logged-out visitors (/ and /for/<slug>).
 // Claims here must match the Privacy page: storage in Sydney, AI in the US.
@@ -33,7 +34,7 @@ function ExampleCard({ u }: { u: UseCase }) {
       </div>
       <div className="px-5 py-4">
         <p className="text-xs font-medium uppercase tracking-wide text-violet-600">What Kith writes</p>
-        <h3 className="mt-1 font-semibold">{e.title}</h3>
+        <p className="mt-1 font-semibold">{e.title}</p>
         <div className="mt-3 space-y-3">
           {e.sections.map(s => (
             <div key={s.heading}>
@@ -58,6 +59,7 @@ function ExampleCard({ u }: { u: UseCase }) {
 function Trust() {
   return (
     <section className="mx-auto max-w-5xl px-4 py-12">
+      <h2 className="sr-only">Why people use Kith</h2>
       <div className="grid gap-6 sm:grid-cols-3">
         <div>
           <Mic className="h-5 w-5 text-violet-600" aria-hidden />
@@ -79,11 +81,54 @@ function Trust() {
   );
 }
 
+function HowItWorks() {
+  const steps = [
+    ['Speak, record or type', 'A voice note after the shift or visit, a recorded meeting (in the room or online), or rough typed notes.'],
+    ['Kith writes the note', 'In your industry’s format, using only what you said. Anything missing is marked so you can add it.'],
+    ['Check, edit and use it', 'Fix anything in a tap, then copy it or print it to PDF. Search and ask questions across your notes later.'],
+  ];
+  return (
+    <section className="mx-auto max-w-5xl px-4 py-10">
+      <h2 className="text-lg font-semibold">How it works</h2>
+      <ol className="mt-4 grid gap-4 sm:grid-cols-3">
+        {steps.map(([t, d], i) => (
+          <li key={t} className="rounded-xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-violet-700">Step {i + 1}</p>
+            <h3 className="mt-1 font-semibold">{t}</h3>
+            <p className="mt-1 text-sm text-slate-600">{d}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function FaqSection({ faq, title = 'Questions' }: { faq: Faq[]; title?: string }) {
+  return (
+    <section className="mx-auto max-w-5xl px-4 pb-12">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <div className="mt-4 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+        {faq.map(f => (
+          <details key={f.q} className="group px-5 py-4" open>
+            <summary className="cursor-pointer list-none font-medium text-slate-900">
+              <h3 className="inline">{f.q}</h3>
+            </summary>
+            <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
     <footer className="border-t border-slate-200">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-slate-500">
         <span>Kith Workspace · free during early access</span>
+        <nav aria-label="Uses" className="flex flex-wrap gap-x-4 gap-y-1">
+          {USE_CASES.map(u => <a key={u.slug} href={`/for/${u.slug}`} className="hover:text-slate-800">{u.name}</a>)}
+        </nav>
         <span className="flex gap-4">
           <a href="/privacy" className="hover:text-slate-800">Privacy</a>
           <a href="/terms" className="hover:text-slate-800">Terms</a>
@@ -121,7 +166,13 @@ export function UseCaseLanding({ u }: { u: UseCase }) {
         </div>
         <ExampleCard u={u} />
       </section>
+      <section className="mx-auto max-w-5xl px-4 pb-2">
+        <h2 className="text-lg font-semibold">{u.name} with Kith</h2>
+        <p className="mt-2 max-w-3xl text-base leading-relaxed text-slate-600">{u.intro}</p>
+      </section>
+      <HowItWorks />
       <Trust />
+      <FaqSection faq={u.faq} title={`${u.name}: common questions`} />
       <OtherUses current={u.slug} />
       <Footer />
     </div>
@@ -155,7 +206,7 @@ export function HomeLanding() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Talk for two minutes. Get the note.</h1>
           <p className="mt-4 text-base leading-relaxed text-slate-600">
-            Kith turns a quick voice note, a recorded meeting or rough typed notes into a clean, structured note in your industry&rsquo;s format: shift notes, care notes, site reports, handovers and minutes.
+            Kith is an AI note taker for work that happens away from a desk. It turns a quick voice note, a recorded meeting or rough typed notes into a clean, structured note in your industry&rsquo;s format: NDIS shift and progress notes, aged care notes, incident reports, site diaries, shift handovers and meeting minutes.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={signupHref()} className={`${btn} bg-violet-600 text-white hover:bg-violet-700`}>Start free <ArrowRight className="h-4 w-4" aria-hidden /></a>
@@ -165,8 +216,10 @@ export function HomeLanding() {
         </div>
         <ExampleCard u={featured} />
       </section>
+      <HowItWorks />
       <Trust />
       <div id="uses"><OtherUses /></div>
+      <FaqSection faq={HOME_FAQ} />
       <Footer />
     </div>
   );

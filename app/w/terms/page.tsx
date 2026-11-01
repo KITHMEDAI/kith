@@ -1,6 +1,13 @@
 import Link from 'next/link';
+import { socialMeta } from '@/lib/workspace/site';
 
-export const metadata = { title: 'Terms' };
+export const metadata = {
+  title: 'Terms',
+  description: 'The terms of use for Kith Workspace, the AI note taker for shift notes, care notes, site reports and meeting minutes.',
+  alternates: { canonical: '/terms' },
+  ...socialMeta('Terms · Kith Workspace', 'The terms of use for Kith Workspace, the AI note taker for shift notes, care notes, site reports and meeting minutes.', '/terms'),
+  robots: { index: true, follow: true },
+};
 
 function H({ children }: { children: React.ReactNode }) {
   return <h2 className="mt-7 font-semibold text-slate-900">{children}</h2>;

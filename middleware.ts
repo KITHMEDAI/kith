@@ -8,7 +8,7 @@ const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
 // Kith Workspace (generic edition, work.kith.space): every page lives under
 // app/w/ and is served at a clean URL via rewrite (/notes → /w/notes). Nothing
 // from the therapist product is reachable in this edition.
-const WS_PUBLIC = ['/login', '/privacy', '/terms', '/help', '/welcome', '/for', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
+const WS_PUBLIC = ['/login', '/privacy', '/terms', '/help', '/welcome', '/for', '/opengraph-image', '/llms.txt', ...(process.env.NODE_ENV !== 'production' ? ['/preview'] : [])];
 
 async function workspaceMiddleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,6 +17,9 @@ async function workspaceMiddleware(request: NextRequest) {
     if (!pathname.startsWith('/api/w/') && pathname !== '/api/cron/keepalive') return new NextResponse('Not found', { status: 404 });
     return NextResponse.next();
   }
+
+  // Crawler files are generated at the app root (app/robots.ts, app/sitemap.ts), not under /w.
+  if (pathname === '/robots.txt' || pathname === '/sitemap.xml') return NextResponse.next();
 
   const cleanPath = pathname.startsWith('/w/') ? pathname.slice(2) : pathname === '/w' ? '/' : pathname;
   const target = request.nextUrl.clone();

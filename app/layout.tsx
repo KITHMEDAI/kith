@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
+import { WS_URL, WS_NAME, WS_TITLE, WS_DESCRIPTION, socialMeta, organizationLd as wsOrganizationLd, websiteLd as wsWebsiteLd, ldJson } from '@/lib/workspace/site';
 
 const inter = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -15,7 +16,20 @@ const title = 'Kith — AI Clinical Workspace for Therapists';
 const description =
   'Private clinical workspace with AI-assisted SOAP notes and real-time session transcription.';
 
-export const metadata: Metadata = {
+const IS_WORKSPACE = process.env.NEXT_PUBLIC_EDITION === 'workspace';
+
+// Workspace edition (work.kith.space): its own name, base URL and previews.
+// Each public page sets its own canonical; app pages are noindex (app/w/layout.tsx).
+const workspaceMetadata: Metadata = {
+  metadataBase: new URL(WS_URL),
+  title: WS_TITLE,
+  description: WS_DESCRIPTION,
+  applicationName: WS_NAME,
+  ...socialMeta(WS_TITLE, WS_DESCRIPTION, '/'),
+  verification: { google: '8-9pOJnPvbZguHKYVW3we5387WAsHGuml-9-Rzu_TT0' },
+};
+
+const therapistMetadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title,
   description,
@@ -36,6 +50,8 @@ export const metadata: Metadata = {
     google: '8-9pOJnPvbZguHKYVW3we5387WAsHGuml-9-Rzu_TT0',
   },
 };
+
+export const metadata: Metadata = IS_WORKSPACE ? workspaceMetadata : therapistMetadata;
 
 // Site-wide identity signal for Google (knowledge panel / brand search
 // eligibility) — harmless to render on authenticated pages too, since those
@@ -65,10 +81,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={IS_WORKSPACE ? 'en-AU' : 'en'} suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: IS_WORKSPACE ? ldJson(wsOrganizationLd()) : JSON.stringify(organizationJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: IS_WORKSPACE ? ldJson(wsWebsiteLd()) : JSON.stringify(websiteJsonLd) }} />
         {children}
         {/* No analytics in the Workspace edition (privacy: notes app). */}
         {process.env.NEXT_PUBLIC_EDITION !== 'workspace' && <Analytics />}

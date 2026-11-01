@@ -1,6 +1,13 @@
 import HelpContact from '@/components/workspace/HelpContact';
+import { socialMeta } from '@/lib/workspace/site';
 
-export const metadata = { title: 'Help & support' };
+export const metadata = {
+  title: 'Help & support',
+  description: 'Get help with Kith Workspace: contact us, ask about notes, recordings, privacy or your account.',
+  alternates: { canonical: '/help' },
+  ...socialMeta('Help & support · Kith Workspace', 'Get help with Kith Workspace: contact us, ask about notes, recordings, privacy or your account.', '/help'),
+  robots: { index: true, follow: true },
+};
 
 // Public help page. Uses copy + "Open in Gmail" (web compose) instead of a
 // mailto: link, which on many PCs launches an unexpected mail app or a
