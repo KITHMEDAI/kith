@@ -19,7 +19,7 @@ async function workspaceMiddleware(request: NextRequest) {
   }
 
   // Crawler files are generated at the app root (app/robots.ts, app/sitemap.ts), not under /w.
-  if (pathname === '/robots.txt' || pathname === '/sitemap.xml') return NextResponse.next();
+  if (pathname === '/robots.txt' || pathname === '/sitemap.xml' || pathname === '/87b88f049768cbffb19ff3954fdd68a0.txt') return NextResponse.next(); // last one: IndexNow key
 
   const cleanPath = pathname.startsWith('/w/') ? pathname.slice(2) : pathname === '/w' ? '/' : pathname;
   const target = request.nextUrl.clone();
