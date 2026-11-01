@@ -1,4 +1,5 @@
 import { USE_CASES } from '@/lib/workspace/use-cases';
+import { GUIDES } from '@/lib/workspace/guides';
 import { WS_URL, WS_NAME, WS_DESCRIPTION, HOME_FAQ } from '@/lib/workspace/site';
 
 // /llms.txt: a plain-text summary for AI assistants and answer engines
@@ -16,6 +17,10 @@ export function GET() {
     '## Use cases',
     '',
     ...USE_CASES.map(u => `- [${u.name}](${WS_URL}/for/${u.slug}): ${u.seoDescription}`),
+    '',
+    '## Guides',
+    '',
+    ...GUIDES.map(g => `- [${g.title}](${WS_URL}/guides/${g.slug}): ${g.seoDescription}`),
     '',
     '## FAQ',
     '',

@@ -8,6 +8,7 @@
  * Sydney, AI in the US, recordings deleted after transcription).
  */
 import { USE_CASES, type UseCase } from './use-cases';
+import { GUIDES, type Guide } from './guides';
 
 export const WS_URL = (process.env.NEXT_PUBLIC_WORKSPACE_URL || 'https://work.kith.space').replace(/\/+$/, '');
 export const WS_NAME = 'Kith Workspace';
@@ -19,6 +20,7 @@ export const WS_DESCRIPTION =
 export const WS_PAGES_UPDATED = {
   home: '2026-11-01',
   useCases: '2026-11-01',
+  guides: '2026-11-01',          // the /guides index (each guide has its own `updated`)
   help: '2026-10-25',
   privacy: '2026-10-25',
   terms: '2026-10-25',
@@ -33,9 +35,12 @@ const OG_IMAGE = { url: `${WS_URL}/opengraph-image`, width: 1200, height: 630, a
  * merge) a parent's openGraph when a page sets one, so every page passes the
  * site name, locale and image again here.
  */
-export function socialMeta(title: string, description: string, path: string) {
+export function socialMeta(title: string, description: string, path: string, article?: { published: string; updated: string }) {
+  const og = article
+    ? { type: 'article' as const, publishedTime: article.published, modifiedTime: article.updated }
+    : { type: 'website' as const };
   return {
-    openGraph: { title, description, url: absolute(path), siteName: WS_NAME, locale: 'en_AU', type: 'website' as const, images: [OG_IMAGE] },
+    openGraph: { title, description, url: absolute(path), siteName: WS_NAME, locale: 'en_AU', ...og, images: [OG_IMAGE] },
     twitter: { card: 'summary_large_image' as const, title, description, images: [OG_IMAGE.url] },
   };
 }
@@ -156,6 +161,61 @@ export function useCaseLd(u: UseCase) {
       ],
     },
     faqLd(u.faq),
+  ];
+}
+
+export function guideLd(g: Guide) {
+  const url = absolute(`/guides/${g.slug}`);
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      '@id': `${url}#article`,
+      mainEntityOfPage: url,
+      headline: g.title,
+      description: g.seoDescription,
+      image: OG_IMAGE.url,
+      inLanguage: 'en-AU',
+      datePublished: g.published,
+      dateModified: g.updated,
+      author: { '@id': ORG_ID },
+      publisher: { '@id': ORG_ID },
+      isPartOf: { '@id': `${WS_URL}/#website` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: WS_NAME, item: WS_URL },
+        { '@type': 'ListItem', position: 2, name: 'Guides', item: absolute('/guides') },
+        { '@type': 'ListItem', position: 3, name: g.title, item: url },
+      ],
+    },
+    faqLd(g.faq),
+  ];
+}
+
+export function guidesIndexLd() {
+  const url = absolute('/guides');
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      '@id': `${url}#webpage`,
+      url,
+      name: 'Guides',
+      inLanguage: 'en-AU',
+      isPartOf: { '@id': `${WS_URL}/#website` },
+      hasPart: GUIDES.map(g => ({ '@type': 'Article', headline: g.title, url: absolute(`/guides/${g.slug}`) })),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: WS_NAME, item: WS_URL },
+        { '@type': 'ListItem', position: 2, name: 'Guides', item: url },
+      ],
+    },
   ];
 }
 

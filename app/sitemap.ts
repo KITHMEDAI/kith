@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getAllPosts } from '@/lib/blog';
 import { WS_URL, WS_PAGES_UPDATED, PUBLIC_USE_CASE_PATHS } from '@/lib/workspace/site';
+import { GUIDES } from '@/lib/workspace/guides';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kith.space';
 
@@ -12,11 +13,13 @@ const SOAP_FORMATTER_LAST_MODIFIED = '2026-08-06';
 const PRIVACY_LAST_MODIFIED = '2026-08-16';
 const TERMS_LAST_MODIFIED = '2026-08-06';
 
-/** Workspace edition (work.kith.space): the landing page, use-case pages and trust pages. */
+/** Workspace edition (work.kith.space): the landing page, use-case pages, guides and trust pages. */
 function workspaceSitemap(): MetadataRoute.Sitemap {
   return [
     { url: WS_URL, lastModified: WS_PAGES_UPDATED.home, changeFrequency: 'weekly', priority: 1 },
     ...PUBLIC_USE_CASE_PATHS.map(path => ({ url: `${WS_URL}${path}`, lastModified: WS_PAGES_UPDATED.useCases, changeFrequency: 'monthly' as const, priority: 0.9 })),
+    { url: `${WS_URL}/guides`, lastModified: WS_PAGES_UPDATED.guides, changeFrequency: 'weekly', priority: 0.7 },
+    ...GUIDES.map(g => ({ url: `${WS_URL}/guides/${g.slug}`, lastModified: g.updated, changeFrequency: 'monthly' as const, priority: 0.8 })),
     { url: `${WS_URL}/help`, lastModified: WS_PAGES_UPDATED.help, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${WS_URL}/privacy`, lastModified: WS_PAGES_UPDATED.privacy, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${WS_URL}/terms`, lastModified: WS_PAGES_UPDATED.terms, changeFrequency: 'yearly', priority: 0.3 },

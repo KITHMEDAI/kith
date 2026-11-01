@@ -1,4 +1,6 @@
-// Local dev server for Kith Workspace (generic edition) on :8090.
+// Local dev server for Kith Workspace (generic edition) on :8090, or on the
+// port given as the first argument (with its own build folder, so a second
+// session can run one alongside: `node scripts/workspace-dev.mjs 8091`).
 // Loads .env.workspace (Sydney Supabase keys) OVER .env.local, so the
 // workspace never talks to the kith.space database.
 import { readFileSync, existsSync } from 'node:fs';
@@ -24,8 +26,9 @@ if (!existsSync(file)) {
   env.SUPABASE_SERVICE_ROLE_KEY = 'placeholder';
 }
 env.NEXT_PUBLIC_EDITION = 'workspace';
-env.NEXT_DIST_DIR = '.next-workspace';
-env.NEXT_PUBLIC_APP_URL = env.NEXT_PUBLIC_APP_URL || 'http://localhost:8090';
+const port = process.argv[2] || '8090';
+env.NEXT_DIST_DIR = port === '8090' ? '.next-workspace' : `.next-workspace-${port}`;
+env.NEXT_PUBLIC_APP_URL = env.NEXT_PUBLIC_APP_URL || `http://localhost:${port}`;
 
-const child = spawn('npx', ['next', 'dev', '--turbo', '-p', '8090'], { env, stdio: 'inherit', shell: true });
+const child = spawn('npx', ['next', 'dev', '--turbo', '-p', port], { env, stdio: 'inherit', shell: true });
 child.on('exit', code => process.exit(code ?? 0));

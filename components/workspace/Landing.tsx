@@ -1,18 +1,20 @@
 import { Mic, FileText, ShieldCheck, ArrowRight, Flag } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
-import { USE_CASES, type UseCase } from '@/lib/workspace/use-cases';
+import { USE_CASES, type UseCase, type ExampleNote } from '@/lib/workspace/use-cases';
+import { guidesFor } from '@/lib/workspace/guides';
 import { HOME_FAQ, type Faq } from '@/lib/workspace/site';
 
-// Public marketing page for logged-out visitors (/ and /for/<slug>).
+// Public marketing page for logged-out visitors (/ and /for/<slug>); the
+// header, footer and example card are shared with the guides (/guides).
 // Claims here must match the Privacy page: storage in Sydney, AI in the US.
 
-const btn = 'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition';
+export const btn = 'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition';
 
-function signupHref(field?: string) {
+export function signupHref(field?: string) {
   return `/login?mode=signup${field ? `&field=${field}` : ''}`;
 }
 
-function Header() {
+export function Header() {
   return (
     <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-5">
       <a href="/" aria-label="Kith Workspace home"><KithLockup markSize={26} className="text-[19px] text-slate-900" gradientId="ws-land-grad" /></a>
@@ -24,8 +26,7 @@ function Header() {
   );
 }
 
-function ExampleCard({ u }: { u: UseCase }) {
-  const e = u.example;
+export function ExampleCard({ e }: { e: ExampleNote }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-5 py-4">
@@ -103,7 +104,7 @@ function HowItWorks() {
   );
 }
 
-function FaqSection({ faq, title = 'Questions' }: { faq: Faq[]; title?: string }) {
+export function FaqSection({ faq, title = 'Questions' }: { faq: Faq[]; title?: string }) {
   return (
     <section className="mx-auto max-w-5xl px-4 pb-12">
       <h2 className="text-lg font-semibold">{title}</h2>
@@ -121,7 +122,7 @@ function FaqSection({ faq, title = 'Questions' }: { faq: Faq[]; title?: string }
   );
 }
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="border-t border-slate-200">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-slate-500">
@@ -130,6 +131,7 @@ function Footer() {
           {USE_CASES.map(u => <a key={u.slug} href={`/for/${u.slug}`} className="hover:text-slate-800">{u.name}</a>)}
         </nav>
         <span className="flex gap-4">
+          <a href="/guides" className="hover:text-slate-800">Guides</a>
           <a href="/privacy" className="hover:text-slate-800">Privacy</a>
           <a href="/terms" className="hover:text-slate-800">Terms</a>
           <a href="/help" className="hover:text-slate-800">Contact</a>
@@ -164,7 +166,7 @@ export function UseCaseLanding({ u }: { u: UseCase }) {
             </ul>
           </div>
         </div>
-        <ExampleCard u={u} />
+        <ExampleCard e={u.example} />
       </section>
       <section className="mx-auto max-w-5xl px-4 pb-2">
         <h2 className="text-lg font-semibold">{u.name} with Kith</h2>
@@ -173,9 +175,25 @@ export function UseCaseLanding({ u }: { u: UseCase }) {
       <HowItWorks />
       <Trust />
       <FaqSection faq={u.faq} title={`${u.name}: common questions`} />
+      <RelatedGuides useCase={u.slug} />
       <OtherUses current={u.slug} />
       <Footer />
     </div>
+  );
+}
+
+function RelatedGuides({ useCase }: { useCase: string }) {
+  const guides = guidesFor(useCase);
+  if (!guides.length) return null;
+  return (
+    <section className="mx-auto max-w-5xl px-4 pb-12">
+      <h2 className="text-lg font-semibold">Guides</h2>
+      <ul className="mt-3 space-y-2">
+        {guides.map(g => (
+          <li key={g.slug}><a href={`/guides/${g.slug}`} className="text-violet-700 hover:underline">{g.title}</a></li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -214,7 +232,7 @@ export function HomeLanding() {
           </div>
           <p className="mt-3 text-xs text-slate-500">Free during early access. No card needed.</p>
         </div>
-        <ExampleCard u={featured} />
+        <ExampleCard e={featured.example} />
       </section>
       <HowItWorks />
       <Trust />
