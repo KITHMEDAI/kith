@@ -156,7 +156,7 @@
       "keyword": "therapy notes tool no audio upload",
       "intent": "informational",
       "priority": "quick-win",
-      "status": "pending"
+      "status": "drafted"
     },
     {
       "slug": "free-hipaa-compliant-note-app",
