@@ -48,6 +48,16 @@
       ],
       "port": 8090,
       "autoPort": false
+    },
+    {
+      "name": "kith-workspace-alt",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "scripts/workspace-dev.mjs",
+        "8091"
+      ],
+      "port": 8091,
+      "autoPort": false
     }
   ]
 }
