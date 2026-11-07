@@ -152,6 +152,7 @@ export default function HomePage() {
           <div className="flex items-center gap-4 text-xs text-purple-300/40">
             <Link href="/blog" className="hover:text-purple-200 transition-colors">Blog</Link>
             <Link href="/soap-formatter" className="hover:text-purple-200 transition-colors">Free SOAP Formatter</Link>
+            <a href="https://work.kith.space/for/ndis" className="hover:text-purple-200 transition-colors">NDIS &amp; care notes (Kith Workspace)</a>
             <Link href="/privacy" className="hover:text-purple-200 transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-purple-200 transition-colors">Terms</Link>
             <a href="mailto:hello@kith.space" className="hover:text-purple-200 transition-colors">

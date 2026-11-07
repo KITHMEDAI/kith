@@ -56,7 +56,8 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
   const g = GUIDE_MAP[params.slug];
   if (!g) notFound();
   const u = USE_CASE_MAP[g.useCase];
-  const others = GUIDES.filter(o => o.slug !== g.slug);
+  // Same-topic guides first so link equity flows inside each cluster.
+  const others = GUIDES.filter(o => o.slug !== g.slug).sort((a, b) => Number(b.useCase === g.useCase) - Number(a.useCase === g.useCase));
   return (
     <div className="bg-slate-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(guideLd(g)) }} />

@@ -19,6 +19,7 @@ export interface UseCase {
   slug: string;
   field?: FieldKey;             // pre-selected at sign-up (none for cross-field pages)
   name: string;
+  h1: string;                   // keyword-led page heading (headline is shown under it)
   headline: string;
   sub: string;
   seoTitle: string;             // <title>, ~60 characters, leads with the search phrase
@@ -35,6 +36,7 @@ export const USE_CASES: UseCase[] = [
     slug: 'ndis',
     field: 'ndis',
     name: 'NDIS & disability support',
+    h1: 'NDIS progress notes software for support workers',
     headline: 'Shift notes in 2 minutes, not 20',
     sub: 'Talk through the shift on your phone. Kith writes the NDIS progress note: shift details, supports, goal link, incidents and handover, ready for you to check and sign.',
     seoTitle: "NDIS Progress Notes & Shift Notes, Written by AI | Kith",
@@ -69,6 +71,7 @@ export const USE_CASES: UseCase[] = [
     slug: 'aged-care',
     field: 'aged_care',
     name: 'Aged care & Support at Home',
+    h1: 'Aged care progress notes and home care notes, from your voice',
     headline: 'Care notes that write themselves after every visit',
     sub: 'For home care and residential care workers. Speak for a minute after a visit; Kith writes a clear care note and flags falls, skin, intake and medication issues for your coordinator.',
     seoTitle: "Aged Care Progress Notes & Home Care Notes with AI | Kith",
@@ -103,6 +106,7 @@ export const USE_CASES: UseCase[] = [
     slug: 'construction',
     field: 'construction',
     name: 'Construction & trades',
+    h1: 'Site diary and site inspection report app',
     headline: 'Walk the site, talk, and the report is done',
     sub: 'Site inspections, daily diaries, toolbox talks and defect lists from a voice note on site. Hazards and safety defects are flagged automatically.',
     seoTitle: "Site Diary & Site Inspection Report App (Voice to Report) | Kith",
@@ -135,6 +139,7 @@ export const USE_CASES: UseCase[] = [
     slug: 'hospitality',
     field: 'hospitality',
     name: 'Hospitality & food service',
+    h1: 'Shift handover and food safety log app',
     headline: 'Shift handovers and food-safety logs, spoken not typed',
     sub: 'Close the shift with a 1-minute voice note. Kith writes the handover for the next manager and the food-safety record, and flags anything out of range.',
     seoTitle: "Shift Handover & Food Safety Log, Spoken Not Typed | Kith",
@@ -168,6 +173,7 @@ export const USE_CASES: UseCase[] = [
     slug: 'meetings',
     field: 'general',
     name: 'Meetings & client calls',
+    h1: 'AI meeting minutes for Teams, Meet and Zoom',
     headline: 'Record the meeting. Get the minutes.',
     sub: 'In the room or online (Teams, Meet, Zoom in your browser). Kith writes the minutes: decisions, action items with owners, and open questions.',
     seoTitle: "AI Meeting Minutes & Notes for Teams, Meet and Zoom | Kith",
@@ -198,6 +204,7 @@ export const USE_CASES: UseCase[] = [
   {
     slug: 'incident-reports',
     name: 'Incident reports',
+    h1: 'Incident report writing for NDIS, aged care SIRS and WHS',
     headline: 'Incident reports that say what happened, and whether it’s reportable',
     sub: 'Describe the incident in your own words. Kith writes a factual, chronological report and checks it against the NDIS Commission’s reportable incident rules or the aged care SIRS priorities, for a supervisor to decide.',
     seoTitle: 'Incident Report Writing with AI: NDIS, SIRS & WHS | Kith',

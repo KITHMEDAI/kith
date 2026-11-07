@@ -1,7 +1,7 @@
 import { Mic, FileText, ShieldCheck, ArrowRight, Flag } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
 import { USE_CASES, type UseCase, type ExampleNote } from '@/lib/workspace/use-cases';
-import { guidesFor } from '@/lib/workspace/guides';
+import { GUIDES, guidesFor } from '@/lib/workspace/guides';
 import { HOME_FAQ, type Faq } from '@/lib/workspace/site';
 
 // Public marketing page for logged-out visitors (/ and /for/<slug>); the
@@ -148,8 +148,9 @@ export function UseCaseLanding({ u }: { u: UseCase }) {
       <section className="mx-auto grid max-w-5xl gap-10 px-4 pb-10 pt-6 lg:grid-cols-2 lg:items-start lg:pt-12">
         <div>
           <p className="text-sm font-medium text-violet-700">{u.name}</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{u.headline}</h1>
-          <p className="mt-4 text-base leading-relaxed text-slate-600">{u.sub}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{u.h1}</h1>
+          <p className="mt-3 text-xl font-semibold text-slate-800">{u.headline}</p>
+          <p className="mt-3 text-base leading-relaxed text-slate-600">{u.sub}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={signupHref(u.field)} className={`${btn} bg-violet-600 text-white hover:bg-violet-700`}>Start free <ArrowRight className="h-4 w-4" aria-hidden /></a>
             <a href="/help" className={`${btn} border border-slate-300 bg-white text-slate-800 hover:bg-slate-100`}>Ask a question</a>
@@ -215,6 +216,17 @@ function OtherUses({ current }: { current?: string }) {
   );
 }
 
+function HomeGuides() {
+  return (
+    <section className="mx-auto max-w-5xl px-4 pb-14">
+      <h2 className="text-lg font-semibold">Guides: how to write the notes your work depends on</h2>
+      <ul className="mt-4 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+        {GUIDES.map(g => <li key={g.slug}><a href={`/guides/${g.slug}`} className="text-violet-700 hover:underline">{g.title}</a></li>)}
+      </ul>
+    </section>
+  );
+}
+
 export function HomeLanding() {
   const featured = USE_CASES[0];
   return (
@@ -237,6 +249,7 @@ export function HomeLanding() {
       <HowItWorks />
       <Trust />
       <div id="uses"><OtherUses /></div>
+      <HomeGuides />
       <FaqSection faq={HOME_FAQ} />
       <Footer />
     </div>

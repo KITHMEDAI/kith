@@ -18,9 +18,9 @@ export const WS_DESCRIPTION =
 
 /** Last real copy change per public page (bump when the page text changes). */
 export const WS_PAGES_UPDATED = {
-  home: '2026-11-01',
-  useCases: '2026-11-01',
-  guides: '2026-11-01',          // the /guides index (each guide has its own `updated`)
+  home: '2026-11-07',
+  useCases: '2026-11-07',
+  guides: '2026-11-07',          // the /guides index (each guide has its own `updated`)
   help: '2026-10-25',
   privacy: '2026-10-25',
   terms: '2026-10-25',
@@ -181,6 +181,8 @@ export function guideLd(g: Guide) {
       author: { '@id': ORG_ID },
       publisher: { '@id': ORG_ID },
       isPartOf: { '@id': `${WS_URL}/#website` },
+      about: { '@id': APP_ID },
+      articleSection: g.sections.map(s => s.heading),
     },
     {
       '@context': 'https://schema.org',

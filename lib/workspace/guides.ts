@@ -1,5 +1,6 @@
 import type { ExampleNote } from './use-cases';
 import type { Faq } from './site';
+import { MORE_GUIDES } from './guides-more';
 
 // Public guides for Kith Workspace (/guides and /guides/<slug>): how-to
 // articles that answer what people search before they look for a tool
@@ -33,7 +34,7 @@ export interface Guide {
   sources: { label: string; url: string }[];
 }
 
-export const GUIDES: Guide[] = [
+const BASE_GUIDES: Guide[] = [
   {
     slug: 'how-to-write-ndis-progress-notes',
     useCase: 'ndis',
@@ -509,6 +510,8 @@ export const GUIDES: Guide[] = [
     ],
   },
 ];
+
+export const GUIDES: Guide[] = [...BASE_GUIDES, ...MORE_GUIDES];
 
 export const GUIDE_MAP: Record<string, Guide> = Object.fromEntries(GUIDES.map(g => [g.slug, g]));
 
