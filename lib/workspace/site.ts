@@ -22,7 +22,7 @@ export const WS_PAGES_UPDATED = {
   useCases: '2026-11-07',
   guides: '2026-11-07',          // the /guides index (each guide has its own `updated`)
   help: '2026-10-25',
-  privacy: '2026-10-25',
+  privacy: '2026-11-07',
   terms: '2026-10-25',
 };
 

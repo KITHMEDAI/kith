@@ -1,5 +1,6 @@
 import { Mic, FileText, ShieldCheck, ArrowRight, Flag } from 'lucide-react';
 import KithLockup from '@/components/brand/KithLockup';
+import SourceTag from '@/components/workspace/SourceTag';
 import { USE_CASES, type UseCase, type ExampleNote } from '@/lib/workspace/use-cases';
 import { GUIDES, guidesFor } from '@/lib/workspace/guides';
 import { HOME_FAQ, type Faq } from '@/lib/workspace/site';
@@ -17,6 +18,7 @@ export function signupHref(field?: string) {
 export function Header() {
   return (
     <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-5">
+      <SourceTag />
       <a href="/" aria-label="Kith Workspace home"><KithLockup markSize={26} className="text-[19px] text-slate-900" gradientId="ws-land-grad" /></a>
       <nav className="flex items-center gap-4 text-sm">
         <a href="/login" className="text-slate-600 hover:text-slate-900">Sign in</a>

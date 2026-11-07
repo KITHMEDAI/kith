@@ -71,9 +71,28 @@ export default function GuidePage({ params }: { params: { slug: string } }) {
           <p className="mt-2 text-sm text-slate-500">Updated {longDate(g.updated)} · Australia</p>
           <p className="mt-6 rounded-2xl border border-violet-100 bg-white p-5 text-base leading-relaxed text-slate-800">{g.summary}</p>
 
-          {g.sections.map(s => <Section key={s.heading} s={s} />)}
+          {u && (
+            <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-violet-200 bg-violet-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm leading-relaxed text-slate-800">
+                <b>Skip the typing.</b> Talk through it for two minutes on your phone and Kith writes this note for you, in this format.
+              </p>
+              <a href={signupHref(u.field)} className={`${btn} shrink-0 bg-violet-600 py-2.5 text-white hover:bg-violet-700`}>Try it free <ArrowRight className="h-4 w-4" aria-hidden /></a>
+            </div>
+          )}
 
-          <section className="mt-12">
+          {g.sections.map((s, i) => (
+            <div key={s.heading}>
+              <Section s={s} />
+              {/* Mid-article nudge: link to the worked example for readers who skim. */}
+              {i === 1 && g.sections.length > 3 && (
+                <p className="mt-6 text-sm text-slate-600">
+                  Want to see it done? <a href="#example" className="font-medium text-violet-700 underline">Jump to the worked example</a>, written by Kith from a short voice note.
+                </p>
+              )}
+            </div>
+          ))}
+
+          <section id="example" className="mt-12 scroll-mt-6">
             <h2 className="text-xl font-semibold tracking-tight">Worked example</h2>
             <p className="mt-3 leading-relaxed text-slate-700">{g.exampleIntro}</p>
             <div className="mt-4"><ExampleCard e={g.example} /></div>

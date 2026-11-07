@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { requireApiUser } from '@/lib/workspace/server';
 import { FIELD_MAP } from '@/lib/workspace/fields';
 import { NOTE_TYPE_MAP } from '@/lib/workspace/note-types';
@@ -54,5 +55,17 @@ export async function POST(req: Request) {
   };
   const { error } = await createServiceRoleClient().from('ws_profiles').upsert(row);
   if (error) return NextResponse.json({ error: 'Could not save. Try again.' }, { status: 500 });
+
+  // First profile = new account: keep where the person first arrived from
+  // (set by components/workspace/SourceTag on the public pages). app_metadata
+  // isn't user-editable. Best effort: never blocks onboarding.
+  if (!existing) {
+    const raw = cookies().get('ws_src')?.value;
+    const [landing, from] = raw ? decodeURIComponent(raw).split('|') : [];
+    const signup_source = { landing: (landing || 'unknown').slice(0, 120), from: (from || 'unknown').slice(0, 60), at: new Date().toISOString() };
+    await createServiceRoleClient().auth.admin
+      .updateUserById(user.id, { app_metadata: { ...(user.app_metadata ?? {}), signup_source } })
+      .catch(() => null);
+  }
   return NextResponse.json({ ok: true });
 }

@@ -21,16 +21,16 @@ export default function WorkspacePrivacy() {
     <div className="mx-auto max-w-2xl px-4 py-12 text-sm leading-relaxed text-slate-700">
       <Link href="/" className="text-violet-700 hover:underline">← Back</Link>
       <h1 className="mt-4 text-2xl font-semibold text-slate-900">Privacy Policy</h1>
-      <p className="mt-2 text-slate-500">Kith Workspace pilot · last updated 25 October 2026</p>
+      <p className="mt-2 text-slate-500">Kith Workspace pilot · last updated 7 November 2026</p>
 
       <p className="mt-4">This policy explains how Kith Workspace (&quot;Kith&quot;, &quot;we&quot;) handles personal information, in line with the Australian Privacy Principles. Kith is operated by KITH, Brookfield, Bengaluru, Karnataka 560037, India. Contact: <a href="/help" className="text-violet-700 underline">kithmedai@gmail.com</a>.</p>
 
       <H>What we collect</H>
       <ul className="mt-1 list-disc space-y-1 pl-5">
-        <li><b>Your account:</b> name, email, optional phone number, your field of work, note preferences, any names and terms you add to help transcription (optional), sign-in details (password stored only as a secure hash by our authentication provider, or your Google account if you use Google sign-in), and when you accepted these terms. For each recording, the time you confirmed that everyone being recorded agreed.</li>
+        <li><b>Your account:</b> name, email, optional phone number, your field of work, note preferences, any names and terms you add to help transcription (optional), sign-in details (password stored only as a secure hash by our authentication provider, or your Google account if you use Google sign-in), when you accepted these terms, and how you found Kith (the first page of this site you visited and the website that linked you there, such as google.com). For each recording, the time you confirmed that everyone being recorded agreed.</li>
         <li><b>What you give us to write notes:</b> text you type or paste, live transcripts of recordings, and the audio of recordings (kept only briefly, see below).</li>
         <li><b>What Kith produces:</b> the notes, a search index of them, and short style notes learned from your edits. Style notes are designed to hold only general formatting and wording preferences, not names or other details from your notes; card, tax file and Medicare numbers are always masked out of them, and the edited text itself is not kept.</li>
-          <li><b>Technical and security data:</b> your IP address and browser details in short-lived sign-in and request logs kept by our providers, and your IP address and email in abuse-prevention counters (for example, limits on sign-up attempts) that are deleted within about 2 days. Kith uses only the cookies needed to keep you signed in: no advertising or analytics cookies.</li>
+          <li><b>Technical and security data:</b> your IP address and browser details in short-lived sign-in and request logs kept by our providers, and your IP address and email in abuse-prevention counters (for example, limits on sign-up attempts) that are deleted within about 2 days. Kith uses the cookies needed to keep you signed in, plus one first-party cookie on the public pages that remembers for 30 days which page you arrived on and which website linked you, so we can see how people find Kith. No advertising or analytics cookies, and no third-party trackers.</li>
       </ul>
       <p className="mt-2">Notes can contain other people&apos;s personal information, including <b>sensitive information such as health or disability details</b>. You must only record or enter information you are authorised to collect and share this way, with any consent your work requires. We handle it only to provide the service to you.</p>
 
@@ -50,7 +50,7 @@ export default function WorkspacePrivacy() {
         <li><b>Resend</b> (USA): sends account emails such as your sign-up or password-reset code (your email address only). <b>Google</b>: only if you choose Continue with Google (your name and email).</li>
         <li><b>Cloudflare Turnstile</b>: when shown, checks that the sign-in, sign-up and password-reset forms are used by a person, not a bot. It sees your IP address and browser details on those pages only.</li>
       </ul>
-      <p className="mt-2">Our small team is based in India. We access account data only when needed to provide support, keep the service secure or fix a problem, and never to read your notes for any other purpose. We don&apos;t sell personal information, use it for advertising, or add analytics, tracking or third-party error reporting to the app.</p>
+      <p className="mt-2">Our small team is based in India. We access account data only when needed to provide support, keep the service secure or fix a problem, and never to read your notes for any other purpose. We don&apos;t sell personal information, use it for advertising, or add third-party analytics, tracking or error reporting to the app.</p>
 
       <H>How long we keep it</H>
       <p className="mt-1">Notes are kept until you delete them or your account. Deleting a note removes it and its search index immediately. Style notes are kept until you delete your account. Deleting your account removes your sign-in, profile, every note and any recording still waiting to be transcribed, immediately. During the pilot we don&apos;t keep separate backups of the database, so deleted data can&apos;t be recovered (and you should keep your own copy of anything critical, see the Terms). Text already sent to our AI providers may be kept by them for a limited period as described above (Anthropic up to about 30 days).</p>
